@@ -8,32 +8,25 @@ import typing
 import io
 
 
-class Copyable:
-    def __deepcopy__(self, memo):
-        cls = self.__class__
-        result = cls.__new__(cls)
-        memo[id(self)] = result
-        for k, v in self.__dict__.items():
-            setattr(result, k, cp(v, memo))
-        return result
-
-
-class Node(Copyable):
-    def __init__(self : Node) -> None:
+class Node:
+    def __init__(self: Node) -> None:
         self.next: dd[str, set[Node]] = dd(set)
         self.stop: bool = False
 
-    def __rshift__(self : Node, label : str) -> tuple[Node, str]:
+    def __rshift__(self: Node, label: str) -> tuple[Node, str]:
         return (self, label)
 
-    def __rrshift__(self : Node, left_label : tuple[Node, str]) -> None:
+    def __rrshift__(self: Node, left_label: tuple[Node, str]) -> None:
         left, label, right = left_label + (self,)
         left.next[label] |= {right}
 
-    def __hash__(self : Node) -> int:
+    def __hash__(self: Node) -> int:
         return id(self)
 
-    def bfs(self : Node, eps_only : bool = False) -> typing.Generator[Node, None, None]:
+    def bfs(self: Node,
+            eps_only: bool = False) -> typing.Generator[Node,
+                                                        None,
+                                                        None]:
         q: collections.deque[Node] = collections.deque()
         q.append(self)
         visited = set()
@@ -45,7 +38,27 @@ class Node(Copyable):
                     q.extend(n.next[l])
 
 
-class FSM(Copyable):
+class FSM:
+    def __deepcopy__(self: FSM, memo: dict[int, typing.Any]):
+        s = FSM()
+        memo[id(self)] = s
+        old_to_new: dd[Node, Node] = dd(Node)
+        new_to_old: dict[Node, Node] = {}
+        old_to_new[self.start] = s.start
+        new_to_old[s.start] = self.start
+        for new_n in s.start.bfs():
+            old_n = new_to_old[new_n]
+            new_n.stop = old_n.stop
+            if old_n == self.stop:
+                s.stop = new_n
+            memo[id(new_n)] = old_n
+            for l, nl in old_n.next.items():
+                for old_nn in nl:
+                    new_nn = old_to_new[old_nn]
+                    new_to_old[new_nn] = old_nn
+                    new_n >> l >> new_nn
+        return s
+
     def __init__(self, *value: str | None):
         self.start: Node = Node()
         self.stop: Node = Node()
@@ -69,12 +82,13 @@ class FSM(Copyable):
         return functools.reduce(operator.mul, map(
             lambda x: cp(x), [self] * other), FSM(''))
 
-    def __repr__(self: FSM) -> str:
+    def dimple(self: FSM) -> str:
         id_map: dd[Node, int] = dd(lambda: len(id_map) + 1)
         res = io.StringIO()
         print(id_map[self.start], file=res)
         print(file=res)
         for n in self.start.bfs():
+            id_map[n]
             if n.stop or n == self.stop:
                 print(id_map[n], file=res)
         print(file=res)
@@ -85,4 +99,21 @@ class FSM(Copyable):
         res.seek(0)
         return res.read()
 
-
+    @staticmethod
+    def from_dimple(text_str: str) -> FSM:
+        text = [line.split() for line in text_str.strip().splitlines()]
+        start = text[:text.index([])]
+        text = text[len(start) + 1:]
+        stop = text[:text.index([])]
+        text = text[len(stop) + 1:]
+        assert len(start) == 1
+        name_to_node: dd[str, Node] = dd(Node)
+        res = FSM()
+        res.start = name_to_node[start[0][0]]
+        for line in stop:
+            name_to_node[line[0]].stop = True
+        for line in text:
+            if len(line) == 2:
+                line.append('')
+            name_to_node[line[0]] >> line[2] >> name_to_node[line[1]]
+        return res

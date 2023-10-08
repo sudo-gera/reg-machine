@@ -1,8 +1,4 @@
 from __future__ import annotations
-import pytest
-import fsm
-import convert
-
 from copy import deepcopy as cp
 import random
 import re
@@ -10,9 +6,15 @@ from collections import defaultdict as dd
 import time
 import ast
 import sys
+import io
+import pytest
+
+import fsm
+import convert
+import command
 
 
-def fsm_eval(a: fsm.FSM, path: str):
+def fsm_eval(a: fsm.FSM, path: str, limit=64):
     ops = 0
     eps_map = {n: list(n.bfs(True)) for n in a.start.bfs()}
     current_nodes = list(a.start.bfs(True))
@@ -22,7 +24,7 @@ def fsm_eval(a: fsm.FSM, path: str):
             for nn in n.next[c]:
                 next_nodes |= dict.fromkeys(eps_map[nn])
                 ops += 1
-                if ops > 64:
+                if ops > limit:
                     raise TabError
         current_nodes = list(next_nodes)
         next_nodes = {}
@@ -32,12 +34,12 @@ def fsm_eval(a: fsm.FSM, path: str):
 
 def random_fsm(rand: random.Random,
                depth,
-               labels # allowed letters
+               labels  # allowed letters
                ) -> tuple[fsm.FSM,
-                                 str | None, # random string that matches
-                                 str | None, # regex for re.fullmatch
-                                 list[str | None], # random strings that maybe match
-                                 str | None]: # regex for converting to FSM
+                          str | None,  # random string that matches
+                          str | None,  # regex for re.fullmatch
+                          list[str | None],  # random strings that maybe match
+                          str | None]:  # regex for converting to FSM
     n = rand.randint(0, 7)
     n *= bool(depth)
     if n == 0:
@@ -128,7 +130,7 @@ def graphviz(a: fsm.FSM):
     id_map: dd[fsm.Node, int] = dd(lambda: len(id_map))
     res = 'digraph G{\n'
     for n in a.start.bfs():
-        res += f'    {id_map[n]} [ label = " {id_map[n]} {n.stop}" ]\n'
+        res += f'    {id_map[n]} [ label = "{id_map[n]} {n.stop or n == a.stop}" ]\n'
     for n in a.start.bfs():
         for label, nl in n.next.items():
             for nn in nl:
@@ -143,6 +145,8 @@ def test_fsm_simple_bfs():
     f = fsm.FSM(None)
     assert list(f.start.bfs()) == [f.start]
     f = fsm.FSM('')
+    assert list(f.start.bfs()) == [f.start, f.stop]
+    f = fsm.FSM('-')
     assert list(f.start.bfs()) == [f.start, f.stop]
 
     assert not fsm_eval(fsm.FSM(None), '')
@@ -171,8 +175,6 @@ def test_fsm_simple_bfs():
     assert not fsm_eval(fsm.FSM('-') ** None, '-+')
     assert not fsm_eval(fsm.FSM('-') ** None, '+-')
 
-def test_dimple():
-    assert repr(fsm.FSM('-') * fsm.FSM('+')) == '1\n\n2\n\n1 3 -\n3 4 \n4 2 +\n'
 
 def check_fsm_no_eps(a: fsm.FSM):
     for n in a.start.bfs():
@@ -211,97 +213,126 @@ def check_equal(a: fsm.FSM, s: fsm.FSM):
     check_a_to_s(s_to_a, a_to_s)
 
 
-seed = 881390418032792034
-# seed = random.randint(0, 1<<64-1)
+def test_io():
+    assert (fsm.FSM('-') * fsm.FSM('+')
+            ).dimple() == '1\n\n4\n\n1 2 -\n2 3 \n3 4 +\n'
+    check_equal(fsm.FSM('-') * fsm.FSM('+'),
+                fsm.FSM.from_dimple('1\n\n2\n\n1 3 -\n3 4 \n4 2 +\n'))
+
+    def test_main(argv, text_in, text_out, code):
+        stdin = io.StringIO()
+        stdin.write(text_in)
+        stdin.seek(0)
+        stdout = io.StringIO()
+        assert code == command.main(argv, stdin, stdout)
+        stdout.seek(0)
+        assert stdout.read() == text_out
+    test_main(
+        ['command.py'],
+        '',
+        'usage: command.py <input format> <output format> [<labels>]\n',
+        1)
+    test_main(['command.py', 'reg', 'reg'], '0\n', '0\n', 0)
+    test_main(
+        [
+            'command.py',
+            'reg',
+            'peg'],
+        '',
+        'unknown format: peg.\nsupported formats are:\n    reg\n    eps-non-det-fsm\n    non-det-fsm\n    det-fsm\n    full-det-fsm\n    min-full-det-fsm\n    invert-full-det-fsm\n',
+        1)
+    test_main(['command.py', 'det-fsm', 'reg'], '',
+              'this conversion order is not supported.\n', 1)
+    test_main(['command.py', 'reg', 'det-fsm'], '0', '\n1\n\n\n', 0)
+    test_main(['command.py', 'reg', 'full-det-fsm'],
+              '0', 'labels argument is undefined.\n', 1)
+    test_main(['command.py',
+               'non-det-fsm',
+               'min-full-det-fsm',
+               'ab'],
+              '0\n\n3\n\n0 3 a\n3 3 a\n3 3 b\n0 1 b\n2 3 a\n2 1 b\n1 2 b\n1 1 a\n',
+              '\n1\n\n2\n\n1 2 a\n1 3 b\n2 2 a\n2 2 b\n3 1 b\n3 3 a\n',
+              0)
+    test_main(['command.py', 'reg', 'det-fsm'],
+              '', 'Incorrect input data.\n', 1)
+
+
+seed = 3099010176601051186
+# seed = random.randint(0, 1 << 64 - 1)
 print(f'{seed = }')
 rand = random.Random(seed)
+# print(f'{seed = }', file=open('/dev/tty', 'w'))
 
-@pytest.mark.parametrize('arg', range(99))
+
+@pytest.mark.parametrize('arg', range(-99, 99))
 def test_fsm_stress(arg):
     labels = 'qwertyuiop'
-    r = random_fsm(rand, 8, labels)
-    if r[1] is not None:
-        a = s = d = f = g = h = 0
+    while True:
         try:
-            z = convert.reg_to_ast(r[4])
-            a = convert.ast_to_eps_non_det_fsm(z)
-            s = convert.eps_non_det_fsm_to_non_det_fsm(a)
-            check_fsm_no_eps(s)
-            d = convert.non_det_fsm_to_det_fsm(s)
-            check_fsm_is_det(d)
-            f = convert.det_fsm_to_full_det_fsm(d, labels)
-            check_fsm_is_full(f, labels)
-            g = convert.full_fsm_to_min_full_fsm(f)
-            check_fsm_is_full(g, labels)
-            h = convert.full_fsm_to_min_full_fsm(g)
-            check_fsm_is_full(h, labels)
-            check_equal(g, h)
-        except RecursionError:
-            for var in [a, s, d, f, g, h]:
-                if var != 0:
-                    print(graphviz(var))
-                    break
-            raise IndentationError
+            try:
+                r = random_fsm(rand, 8 if arg < 0 else 10, labels)
+            except RecursionError:
+                raise TabError
+            a = s = d = f = g = h = j = k = l = 0
+            try:
+                z = convert.reg_to_ast(r[4])
+                a = convert.ast_to_eps_non_det_fsm(z)
+                s = convert.eps_non_det_fsm_to_non_det_fsm(a)
+                check_fsm_no_eps(s)
+                d = convert.non_det_fsm_to_det_fsm(s)
+                check_fsm_is_det(d)
+                f = convert.det_fsm_to_full_det_fsm(d, labels)
+                check_fsm_is_full(f, labels)
+                g = convert.full_fsm_to_min_full_fsm(f)
+                check_fsm_is_full(g, labels)
+                h = convert.full_fsm_to_min_full_fsm(g)
+                check_fsm_is_full(h, labels)
+                check_equal(g, h)
+                j = convert.invert_full_fsm(f)
+                check_fsm_is_full(j, labels)
+                k = convert.invert_full_fsm(g)
+                check_fsm_is_full(k, labels)
+                l = convert.invert_full_fsm(h)
+                check_fsm_is_full(l, labels)
+                check_equal(k, l)
+            except RecursionError:
+                for var in [a, s, d, f, g, h, j, k, l][::-1]:
+                    if var != 0:
+                        print(graphviz(var))
+                        break
+                raise
+            if r[1] is None:
+                raise TabError
+            assert r[1] is not None
 
-        try:
-            assert fsm_eval(r[0], r[1])
-            assert fsm_eval(a, r[1])
-            assert fsm_eval(s, r[1])
-            assert fsm_eval(d, r[1])
-            assert fsm_eval(f, r[1])
-            assert fsm_eval(g, r[1])
+            if arg < 0:
+                assert fsm_eval(r[0], r[1])
+                assert fsm_eval(a, r[1])
+                assert fsm_eval(s, r[1])
+                assert fsm_eval(d, r[1])
+                assert fsm_eval(f, r[1])
+                assert fsm_eval(g, r[1])
             assert fsm_eval(h, r[1])
+            if arg < 0:
+                assert not fsm_eval(j, r[1])
+                assert not fsm_eval(k, r[1])
+                assert not fsm_eval(l, r[1])
             assert re.fullmatch(r[2], r[1])
             for t in r[3]:
                 if t is not None:
-                    u = bool(re.fullmatch(r[2], t))
-                    assert fsm_eval(r[0], t) == u
-                    assert fsm_eval(a, t) == u
-                    assert fsm_eval(s, t) == u
-                    assert fsm_eval(d, t) == u
-                    assert fsm_eval(f, t) == u
-                    assert fsm_eval(g, t) == u
-                    assert fsm_eval(h, t) == u
+                    u = fsm_eval(h, t)
+                    assert u == bool(re.fullmatch(r[2], t))
+                    if arg < 0:
+                        assert fsm_eval(r[0], t) == u
+                        assert fsm_eval(a, t) == u
+                        assert fsm_eval(s, t) == u
+                        assert fsm_eval(d, t) == u
+                        assert fsm_eval(f, t) == u
+                        assert fsm_eval(g, t) == u
+                        assert fsm_eval(h, t) == u
+                        assert fsm_eval(j, t) != u
+                        assert fsm_eval(k, t) != u
+                        assert fsm_eval(l, t) != u
+            break
         except TabError:
-            pass
-
-@pytest.mark.parametrize('arg', range(99))
-def test_fsm_speed(arg):
-    labels = 'qwertyuiop'
-    try:
-        r = random_fsm(rand, 10, labels)
-    except RecursionError:
-        return
-    if r[1] is not None:
-        a = s = d = f = g = h = 0
-        try:
-            z = convert.reg_to_ast(r[4])
-            a = convert.ast_to_eps_non_det_fsm(z)
-            s = convert.eps_non_det_fsm_to_non_det_fsm(a)
-            check_fsm_no_eps(s)
-            d = convert.non_det_fsm_to_det_fsm(s)
-            check_fsm_is_det(d)
-            f = convert.det_fsm_to_full_det_fsm(d, labels)
-            check_fsm_is_full(f, labels)
-            g = convert.full_fsm_to_min_full_fsm(f)
-            check_fsm_is_full(g, labels)
-            h = convert.full_fsm_to_min_full_fsm(g)
-            check_fsm_is_full(h, labels)
-            check_equal(g, h)
-        except RecursionError:
-            for var in [a, s, d, f, g, h]:
-                if var != 0:
-                    print(graphviz(var))
-                    break
-            raise IndentationError
-
-        try:
-            assert fsm_eval(h, r[1])
-            assert re.fullmatch(r[2], r[1])
-            for t in r[3]:
-                if t is not None:
-                    u = bool(re.fullmatch(r[2], t))
-                    assert fsm_eval(h, t) == u
-        except TabError:
-            pass
-
+            continue

@@ -1,7 +1,8 @@
-import fsm
 import ast
 from copy import deepcopy as cp
 from collections import defaultdict as dd
+
+import fsm
 
 
 def reg_to_ast(a: str) -> ast.AST:
@@ -28,6 +29,7 @@ def ast_to_eps_non_det_fsm(a: ast.AST) -> fsm.FSM:
 
 
 def eps_non_det_fsm_to_non_det_fsm(a: fsm.FSM) -> fsm.FSM:
+    a = cp(a)
     a.stop.stop = True
     for root in a.start.bfs():
         for n in root.bfs(True):
@@ -41,6 +43,7 @@ def eps_non_det_fsm_to_non_det_fsm(a: fsm.FSM) -> fsm.FSM:
 
 
 def non_det_fsm_to_det_fsm(a: fsm.FSM) -> fsm.FSM:
+    a = cp(a)
     s = fsm.FSM()
     new_to_old: dd[fsm.Node, set[fsm.Node]] = dd(set)
     old_to_new: dd[frozenset[fsm.Node], fsm.Node] = dd(fsm.Node)
@@ -58,6 +61,7 @@ def non_det_fsm_to_det_fsm(a: fsm.FSM) -> fsm.FSM:
 
 
 def det_fsm_to_full_det_fsm(a: fsm.FSM, labels: str) -> fsm.FSM:
+    a = cp(a)
     new = fsm.Node()
     for n in a.start.bfs():
         for l in labels:
@@ -66,10 +70,12 @@ def det_fsm_to_full_det_fsm(a: fsm.FSM, labels: str) -> fsm.FSM:
     return a
 
 
-def full_fsm_to_min_full_fsm(a: fsm.FSM):
+def full_fsm_to_min_full_fsm(a: fsm.FSM) -> fsm.FSM:
+    a = cp(a)
     labels: list[str] = list(a.start.next)
     old_node_to_group_save: dict[fsm.Node, int] = {}
-    old_node_to_group: dict[fsm.Node, int] = {n: int(n.stop) for n in a.start.bfs()}
+    old_node_to_group: dict[fsm.Node, int] = {
+        n: int(n.stop) for n in a.start.bfs()}
     uniq_nums: dd[tuple[int, ...], int] = dd(lambda: len(uniq_nums))
     while old_node_to_group_save != old_node_to_group:
         uniq_nums.clear()
@@ -85,7 +91,7 @@ def full_fsm_to_min_full_fsm(a: fsm.FSM):
     s = fsm.FSM()
     group_to_new_node = dd(fsm.Node)
     group_to_new_node[old_node_to_group[a.start]] = s.start
-    new_node_to_group = {s.start : old_node_to_group[a.start]}
+    new_node_to_group = {s.start: old_node_to_group[a.start]}
     for new_n in s.start.bfs():
         g = new_node_to_group[new_n]
         old_n = group_to_old_node[g]
@@ -98,3 +104,10 @@ def full_fsm_to_min_full_fsm(a: fsm.FSM):
     for n, g in old_node_to_group.items():
         group_to_new_node[g].stop |= n.stop
     return s
+
+
+def invert_full_fsm(a: fsm.FSM) -> fsm.FSM:
+    a = cp(a)
+    for n in a.start.bfs():
+        n.stop = not n.stop
+    return a
