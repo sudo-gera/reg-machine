@@ -38,8 +38,8 @@ pytest ./test_all.py
 ```
 ## Coverage:
 ```
-coverage run --include=./fsm.py,./convert.py,./command.py -m pytest ./test_all.py
+coverage run --include=./fsm.py,./convert.py,./command.py,./task6.py -m pytest ./test_all.py
 coverage html
 ```
 ## Screenshot:
-![screenshot](./ocr.jpeg)
+![screenshot](./task6.jpg)
