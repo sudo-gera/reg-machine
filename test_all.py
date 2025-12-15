@@ -219,14 +219,17 @@ def test_io():
     check_equal(fsm.FSM('-') * fsm.FSM('+'),
                 fsm.FSM.from_dimple('1\n\n2\n\n1 3 -\n3 4 \n4 2 +\n'))
 
-    def test_main(argv, text_in, text_out, code):
+    def test_main(argv, text_in, text_out, code, text_err = ''):
         stdin = io.StringIO()
         stdin.write(text_in)
         stdin.seek(0)
         stdout = io.StringIO()
-        assert code == command.main(argv, stdin, stdout)
+        stderr = io.StringIO()
+        assert code == command.old_main(argv, stdin, stdout, stderr)
         stdout.seek(0)
+        stderr.seek(0)
         assert stdout.read() == text_out
+        assert stderr.read() == text_err
     test_main(
         ['command.py'],
         '',

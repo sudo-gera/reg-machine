@@ -2,15 +2,31 @@ import convert
 import sys
 import typing
 import traceback
+import contextlib
 from collections import defaultdict as dd
 
 import fsm
 
 
-def main(
+
+def old_main(
         argv: list[str],
         stdin: typing.IO[str],
-        stdout: typing.IO[str]) -> int:
+        stdout: typing.IO[str],
+        stderr: typing.IO[str],
+    ) -> int:
+    with (
+        contextlib.redirect_stdout(stdout),
+        contextlib.redirect_stderr(stderr),
+    ):
+        return old_old_main(argv, stdin, stdout, stderr)
+
+def old_old_main(
+        argv: list[str],
+        stdin: typing.IO[str],
+        stdout: typing.IO[str],
+        stderr: typing.IO[str],
+    ) -> int:
     if len(argv) not in [3, 4]:
         print(
             f'usage: {argv[0]} <input format> <output format> [<labels>]',
@@ -65,9 +81,9 @@ def main(
         return 0
     except Exception:
         print('Incorrect input data.', file=stdout)
-        print(traceback.format_exc())
+        # print(traceback.format_exc())
         return 1
 
 
 if __name__ == '__main__':
-    exit(main(sys.argv, sys.stdin, sys.stdout))
+    exit(old_main(sys.argv, sys.stdin, sys.stdout, sys.stderr))

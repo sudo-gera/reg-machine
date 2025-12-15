@@ -40,6 +40,7 @@ pytest ./test_all.py
 ```
 coverage run --include=./fsm.py,./convert.py,./command.py -m pytest ./test_all.py
 coverage html
+coverage report
 ```
 ## Screenshot:
 ![screenshot](./ocr.jpeg)
