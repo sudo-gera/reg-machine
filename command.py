@@ -7,8 +7,6 @@ from collections import defaultdict as dd
 
 import fsm
 
-
-
 def old_main(
         argv: list[str],
         stdin: typing.IO[str],
