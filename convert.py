@@ -33,7 +33,7 @@ def ast_to_eps_nfa(a: ast.AST) -> fa.FA:
 
 def remove_eps(fa: fa.FA) -> fa.FA:
     fa = cp(fa)
-    fa.stop.is_final = True
+    fa.the_only_final_if_exists_or_unrelated_node.is_final = True
     for root in fa.start.bfs():
         for node in root.bfs(eps_only=True):
             root.is_final |= node.is_final

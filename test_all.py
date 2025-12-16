@@ -19,22 +19,20 @@ from debug import debug
 class InternalTestError(Exception):
     pass
 
-
 def can_fa_eval_string(a: fa.FA, path: str, limit: int = 64) -> bool:
     operation_count = 0
-    eps_map = {n: list(n.bfs(True)) for n in a.start.bfs()}
+    accessible_by_eps_from_this_node = {node: list(node.bfs(True)) for node in a.start.bfs()}
     current_nodes = list(a.start.bfs(True))
-    next_nodes: dict[fa.Node, None] = {}
     for c in path:
-        for n in current_nodes:
-            for nn in n.next_nodes_by_label[c]:
-                next_nodes |= dict.fromkeys(eps_map[nn])
+        next_nodes: dict[fa.Node, None] = {}
+        for current_node in current_nodes:
+            for next_nodes_from_one_current_node in current_node.next_nodes_by_label[c]:
+                next_nodes |= dict.fromkeys(accessible_by_eps_from_this_node[next_nodes_from_one_current_node])
                 operation_count += 1
                 if operation_count > limit:
                     raise InternalTestError
         current_nodes = list(next_nodes)
-        next_nodes = {}
-    res = any([n.is_final or a.stop == n for n in current_nodes])
+    res = any([a.is_final(n) for n in current_nodes])
     return res
 
 
@@ -187,7 +185,7 @@ def graphviz(a: fa.FA) -> str:
     id_map: dd[fa.Node, int] = dd(lambda: len(id_map))
     res = 'digraph G{\n'
     for n in a.start.bfs():
-        res += f'    {id_map[n]} [ label = "{id_map[n]} {n.is_final or n == a.stop}" ]\n'
+        res += f'    {id_map[n]} [ label = "{id_map[n]} {n.is_final or n == a.the_only_final_if_exists_or_unrelated_node}" ]\n'
     for n in a.start.bfs():
         for label, nl in n.next_nodes_by_label.items():
             for nn in nl:
@@ -202,9 +200,9 @@ def test_fsm_simple_bfs() -> None:
     f = fa.FA(None)
     assert list(f.start.bfs()) == [f.start]
     f = fa.FA('')
-    assert list(f.start.bfs()) == [f.start, f.stop]
+    assert list(f.start.bfs()) == [f.start, f.the_only_final_if_exists_or_unrelated_node]
     f = fa.FA('-')
-    assert list(f.start.bfs()) == [f.start, f.stop]
+    assert list(f.start.bfs()) == [f.start, f.the_only_final_if_exists_or_unrelated_node]
 
     assert not can_fa_eval_string(fa.FA(None), '')
     assert not can_fa_eval_string(fa.FA(None), '-')

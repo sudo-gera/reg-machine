@@ -49,8 +49,8 @@ class FA:
         for new_n in s.start.bfs():
             old_n = new_to_old[new_n]
             new_n.is_final = old_n.is_final
-            if old_n == self.stop:
-                s.stop = new_n
+            if old_n == self.the_only_final_if_exists_or_unrelated_node:
+                s.the_only_final_if_exists_or_unrelated_node = new_n
             memo[id(new_n)] = old_n
             for l, nl in old_n.next_nodes_by_label.items():
                 for old_nn in nl:
@@ -59,29 +59,31 @@ class FA:
                     new_n >> l >> new_nn
         return s
 
-    def __init__(self, _value: str | None | ellipsis = ...):
+    def __init__(self, value: str | None = None):
         self.start: Node = Node()
-        self.stop: Node = Node()
-        value = [_value] if _value is not ... else []
-        if value and isinstance(value[0], str):
-            self.start >> value[0] >> self.stop
+        self.the_only_final_if_exists_or_unrelated_node: Node = Node()
+        if value is not None:
+            self.start >> value >> self.the_only_final_if_exists_or_unrelated_node
 
     def __add__(self: FA, other: FA) -> FA:
         self.start >> '' >> other.start
-        other.stop >> '' >> self.stop
+        other.the_only_final_if_exists_or_unrelated_node >> '' >> self.the_only_final_if_exists_or_unrelated_node
         return self
 
     def __mul__(self: FA, other: FA) -> FA:
-        self.stop >> '' >> other.start
-        self.stop = other.stop
+        self.the_only_final_if_exists_or_unrelated_node >> '' >> other.start
+        self.the_only_final_if_exists_or_unrelated_node = other.the_only_final_if_exists_or_unrelated_node
         return self
 
     def __pow__(self: FA, other: int | None) -> FA:
         if other is None:
-            self.stop >> '' >> self.start
+            self.the_only_final_if_exists_or_unrelated_node >> '' >> self.start
             return FA('') + self
         return functools.reduce(operator.mul,
                                 map(lambda x: cp(x), [self] * other), FA(''))
+
+    def is_final(self, node: Node) -> bool:
+        return node == self.the_only_final_if_exists_or_unrelated_node or node.is_final
 
     def dimple(self: FA) -> str:
         id_map: dd[Node, int] = dd(lambda: len(id_map) + 1)
@@ -90,7 +92,7 @@ class FA:
         print(file=res)
         for n in self.start.bfs():
             id_map[n]
-            if n.is_final or n == self.stop:
+            if n.is_final or n == self.the_only_final_if_exists_or_unrelated_node:
                 print(id_map[n], file=res)
         print(file=res)
         for n in self.start.bfs():
