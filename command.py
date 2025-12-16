@@ -263,7 +263,7 @@ def old_old_main(
                 a = convert.ast_to_eps_nfa(s)
         else:
             text = stdin.read()
-            a = fa.FA.from_dimple(text)
+            a = fa.from_dimple(text)
         for num in range(*format_nums):
             func = [*all_formats.values()][num]
             if func.__closure__ is not None and not labels:
@@ -271,7 +271,7 @@ def old_old_main(
                 return 1
             a = func(a)
         print(file=stdout)
-        print(a.dimple(), end='', file=stdout)
+        print(fa.dimple(a), end='', file=stdout)
         return 0
     except Exception:
         print('Incorrect input data.', file=stdout)

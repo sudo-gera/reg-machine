@@ -15,56 +15,90 @@ class Node:
         self.is_final: bool = False
 
     def __rshift__(self: Node, label: str) -> tuple[Node, str]:
+        '''
+            Creates an edge between nodes by given label.
+        '''
         return (self, label)
 
     def __rrshift__(self: Node, left_label: tuple[Node, str]) -> None:
+        '''
+            Creates an edge between nodes by given label.
+        '''
         left, label, right = left_label + (self, )
         left.next_nodes_by_label[label] |= {right}
 
     def __hash__(self: Node) -> int:
         return id(self)
 
-    def bfs(self: Node,
-            eps_only: bool = False) -> typing.Generator[Node, None, None]:
-        q: collections.deque[Node] = collections.deque()
-        q.append(self)
+    def bfs(
+            self: Node,
+            eps_only: bool = False
+            ) -> typing.Generator[Node, None, None]:
+        '''
+            This implementation reads next nodes of current node only after it yields it.
+        '''
+
+        queue: collections.deque[Node] = collections.deque()
+        queue.append(self)
+
         visited = set()
-        while id(n := q.popleft()) if q else 0:
-            if n not in visited:
-                visited.add(n)
-                yield n
-                for l in [n.next_nodes_by_label, ['']][eps_only]:
-                    q.extend(n.next_nodes_by_label[l])
+
+        while id(node := queue.popleft()) if queue else 0:
+
+            if node not in visited:
+                visited.add(node)
+
+                yield node # Here caller may change next nodes if this node.
+
+                for label in [node.next_nodes_by_label, ['']][eps_only]:
+                    queue.extend(node.next_nodes_by_label[label])
 
 
 class FA:
 
-    def __deepcopy__(self: FA, memo: dict[int, typing.Any]) -> FA:
-        s = FA()
-        memo[id(self)] = s
+    def __deepcopy__(old_fa: FA, memo: dict[int, typing.Any]) -> FA:
+        '''
+            Copy manually via loop to avoid recursion error.
+        '''
+        new_fa = FA()
+        memo[id(old_fa)] = new_fa
+
         old_to_new: dd[Node, Node] = dd(Node)
         new_to_old: dict[Node, Node] = {}
-        old_to_new[self.start] = s.start
-        new_to_old[s.start] = self.start
-        for new_n in s.start.bfs():
-            old_n = new_to_old[new_n]
-            new_n.is_final = old_n.is_final
-            if old_n == self.the_only_final_if_exists_or_unrelated_node:
-                s.the_only_final_if_exists_or_unrelated_node = new_n
-            memo[id(new_n)] = old_n
-            for l, nl in old_n.next_nodes_by_label.items():
-                for old_nn in nl:
-                    new_nn = old_to_new[old_nn]
-                    new_to_old[new_nn] = old_nn
-                    new_n >> l >> new_nn
-        return s
+
+        old_to_new[old_fa.start] = new_fa.start
+        new_to_old[new_fa.start] = old_fa.start
+
+        for new_node in new_fa.start.bfs():
+
+            old_node = new_to_old[new_node]
+            new_node.is_final = old_node.is_final
+
+            if old_node == old_fa.the_only_final_if_exists_or_unrelated_node:
+                new_fa.the_only_final_if_exists_or_unrelated_node = new_node
+
+            memo[id(new_node)] = old_node
+
+            for label, old_nodes_next_by_label in old_node.next_nodes_by_label.items():
+
+                for next_old_node in old_nodes_next_by_label:
+
+                    next_new_node = old_to_new[next_old_node] # maybe creates new node
+
+                    new_to_old[next_new_node] = next_old_node
+
+                    new_node >> label >> next_new_node
+
+        return new_fa
 
     def __init__(self, value: str | None = None):
         '''
             new FA of two nodes, connected by value if value is not None.
         '''
+
         self.start: Node = Node()
         self.the_only_final_if_exists_or_unrelated_node: Node = Node()
+
         if value is not None:
             self.start >> value >> self.the_only_final_if_exists_or_unrelated_node
 
@@ -93,7 +127,9 @@ class FA:
 
     def __invert__(self: FA) -> FA:
         '''
-            returns new FA, self is invalidated.
+            self ** inf
+
+            Returns new FA, self is invalidated.
         '''
         self.the_only_final_if_exists_or_unrelated_node >> '' >> self.start
         return FA('') + self
@@ -101,47 +137,46 @@ class FA:
     def is_final(self, node: Node) -> bool:
         return node == self.the_only_final_if_exists_or_unrelated_node or node.is_final
 
-    def dimple(self: FA) -> str:
-        id_map: dd[Node, int] = dd(lambda: len(id_map) + 1)
-        res = io.StringIO()
-        print(id_map[self.start], file=res)
-        print(file=res)
-        for n in self.start.bfs():
-            id_map[n]
-            if n.is_final or n == self.the_only_final_if_exists_or_unrelated_node:
-                print(id_map[n], file=res)
-        print(file=res)
-        for n in self.start.bfs():
-            for label, nl in n.next_nodes_by_label.items():
-                for nn in nl:
-                    print(id_map[n], id_map[nn], label, file=res)
-        res.seek(0)
-        return res.read()
+def dimple(fa: FA) -> str:
+    id_map: dd[Node, int] = dd(lambda: len(id_map) + 1)
+    res = io.StringIO()
+    print(id_map[fa.start], file=res)
+    print(file=res)
+    for n in fa.start.bfs():
+        id_map[n]
+        if n.is_final or n == fa.the_only_final_if_exists_or_unrelated_node:
+            print(id_map[n], file=res)
+    print(file=res)
+    for n in fa.start.bfs():
+        for label, nl in n.next_nodes_by_label.items():
+            for nn in nl:
+                print(id_map[n], id_map[nn], label, file=res)
+    res.seek(0)
+    return res.read()
 
-    @staticmethod
-    def from_dimple(text_str: str) -> FA:
+def from_dimple(text_str: str) -> FA:
 
-        def index_or_len(a: list[typing.Any], v: typing.Any) -> int:
-            if v in a:
-                return a.index(v)
-            return len(a)
+    def index_or_len(a: list[typing.Any], v: typing.Any) -> int:
+        if v in a:
+            return a.index(v)
+        return len(a)
 
-        text = [line.split() for line in text_str.strip().splitlines()]
-        start = text[:index_or_len(text, [])]
-        text = text[len(start) + 1:]
-        stop = text[:index_or_len(text, [])]
-        text = text[len(stop) + 1:]
-        assert len(start) == 1
-        name_to_node: dd[str, Node] = dd(Node)
-        res = FA()
-        res.start = name_to_node[start[0][0]]
-        for line in stop:
-            name_to_node[line[0]].is_final = True
-        for line in text:
-            if len(line) == 2:
-                line.append('')
-            name_to_node[line[0]] >> line[2] >> name_to_node[line[1]]
-        return res
+    text = [line.split() for line in text_str.strip().splitlines()]
+    start = text[:index_or_len(text, [])]
+    text = text[len(start) + 1:]
+    stop = text[:index_or_len(text, [])]
+    text = text[len(stop) + 1:]
+    assert len(start) == 1
+    name_to_node: dd[str, Node] = dd(Node)
+    res = FA()
+    res.start = name_to_node[start[0][0]]
+    for line in stop:
+        name_to_node[line[0]].is_final = True
+    for line in text:
+        if len(line) == 2:
+            line.append('')
+        name_to_node[line[0]] >> line[2] >> name_to_node[line[1]]
+    return res
 
 
 def dimple_to_json(dimple_text: str, _letters: str) -> dict[str, typing.Any]:

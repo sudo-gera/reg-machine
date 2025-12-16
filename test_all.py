@@ -277,11 +277,11 @@ def check_equal(a: fa.FA, s: fa.FA) -> None:
 
 
 def test_io() -> None:
-    assert (fa.FA('-') *
-            fa.FA('+')).dimple() == '1\n\n4\n\n1 2 -\n2 3 \n3 4 +\n'
+    assert fa.dimple(fa.FA('-') *
+            fa.FA('+')) == '1\n\n4\n\n1 2 -\n2 3 \n3 4 +\n'
     check_equal(
         fa.FA('-') * fa.FA('+'),
-        fa.FA.from_dimple('1\n\n2\n\n1 3 -\n3 4 \n4 2 +\n'))
+        fa.from_dimple('1\n\n2\n\n1 3 -\n3 4 \n4 2 +\n'))
 
     def test_main(argv: list[str],
                   text_in: str,
@@ -349,7 +349,7 @@ def test_fa_stress(arg: int) -> None:
             except RecursionError:
                 raise InternalTestError
             fa_or_none: fa.FA | None = None
-            eps_nfa = nfa = dfa = full_dfa = min_full_dfa = same_min_full_dfa = inverted_full_dfa = inverted_min_full_dfa = inverted_same_min_full_dfa = fa_or_none
+            eps_nfa = nfa = dfa = full_dfa = min_full_dfa = same_min_dfa = inverted_full_dfa = inverted_min_dfa = inverted_same_min_dfa = fa_or_none
             try:
                 z = convert.regex_to_ast(r.regex_for_converting_to_fa)
                 eps_nfa = convert.ast_to_eps_nfa(z)
@@ -366,27 +366,25 @@ def test_fa_stress(arg: int) -> None:
                 min_full_dfa = convert.make_min(full_dfa)
                 assert validate.fa_is_full(min_full_dfa, labels)
 
-                same_min_full_dfa = convert.make_min(min_full_dfa)
-                assert validate.fa_is_full(same_min_full_dfa, labels)
-                check_equal(min_full_dfa, same_min_full_dfa)
+                same_min_dfa = convert.make_min(min_full_dfa)
+                assert validate.fa_is_full(same_min_dfa, labels)
+                check_equal(min_full_dfa, same_min_dfa)
 
                 inverted_full_dfa = convert.invert_full_fa(full_dfa)
                 assert validate.fa_is_full(inverted_full_dfa, labels)
 
-                inverted_min_full_dfa = convert.invert_full_fa(min_full_dfa)
-                assert validate.fa_is_full(inverted_min_full_dfa, labels)
+                inverted_min_dfa = convert.invert_full_fa(min_full_dfa)
+                assert validate.fa_is_full(inverted_min_dfa, labels)
 
-                inverted_same_min_full_dfa = convert.invert_full_fa(
-                    same_min_full_dfa
-                )
-                assert validate.fa_is_full(inverted_same_min_full_dfa, labels)
-                check_equal(inverted_min_full_dfa, inverted_same_min_full_dfa)
+                inverted_same_min_dfa = convert.invert_full_fa(same_min_dfa)
+                assert validate.fa_is_full(inverted_same_min_dfa, labels)
+                check_equal(inverted_min_dfa, inverted_same_min_dfa)
 
             except RecursionError:
                 for var in [
                         eps_nfa, nfa, dfa, full_dfa, min_full_dfa,
-                        same_min_full_dfa, inverted_full_dfa,
-                        inverted_min_full_dfa, inverted_same_min_full_dfa
+                        same_min_dfa, inverted_full_dfa,
+                        inverted_min_dfa, inverted_same_min_dfa
                 ][::-1]:
                     if var is not None:
                         print(graphviz(var), file=debug)
@@ -406,20 +404,20 @@ def test_fa_stress(arg: int) -> None:
                                           r.random_string_that_matches)
                 assert can_fa_eval_string(min_full_dfa,
                                           r.random_string_that_matches)
-            assert can_fa_eval_string(same_min_full_dfa,
+            assert can_fa_eval_string(same_min_dfa,
                                       r.random_string_that_matches)
             if arg < 0:
                 assert not can_fa_eval_string(inverted_full_dfa,
                                               r.random_string_that_matches)
-                assert not can_fa_eval_string(inverted_min_full_dfa,
+                assert not can_fa_eval_string(inverted_min_dfa,
                                               r.random_string_that_matches)
-                assert not can_fa_eval_string(inverted_same_min_full_dfa,
+                assert not can_fa_eval_string(inverted_same_min_dfa,
                                               r.random_string_that_matches)
             assert re.fullmatch(r.compiled_regex_for_fullmatch,
                                 r.random_string_that_matches)
             for t in r.random_strings_that_maybe_match:
                 if t is not None:
-                    u = can_fa_eval_string(same_min_full_dfa, t)
+                    u = can_fa_eval_string(same_min_dfa, t)
                     assert u == bool(re.fullmatch(
                         r.compiled_regex_for_fullmatch, t))
                     if arg < 0:
@@ -429,11 +427,11 @@ def test_fa_stress(arg: int) -> None:
                         assert can_fa_eval_string(dfa, t) == u
                         assert can_fa_eval_string(full_dfa, t) == u
                         assert can_fa_eval_string(min_full_dfa, t) == u
-                        assert can_fa_eval_string(same_min_full_dfa, t) == u
+                        assert can_fa_eval_string(same_min_dfa, t) == u
                         assert can_fa_eval_string(inverted_full_dfa, t) != u
-                        assert can_fa_eval_string(inverted_min_full_dfa,
+                        assert can_fa_eval_string(inverted_min_dfa,
                                                   t) != u
-                        assert can_fa_eval_string(inverted_same_min_full_dfa,
+                        assert can_fa_eval_string(inverted_same_min_dfa,
                                                   t) != u
             break
         except InternalTestError:
