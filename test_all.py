@@ -12,6 +12,7 @@ import pytest
 import fsm
 import convert
 import command
+from debug import debug
 
 
 def fsm_eval(a: fsm.FSM, path: str, limit=64):
@@ -225,11 +226,18 @@ def test_io():
         stdin.seek(0)
         stdout = io.StringIO()
         stderr = io.StringIO()
-        assert code == command.old_main(argv, stdin, stdout, stderr)
+        rc = command.old_main(argv, stdin, stdout, stderr)
         stdout.seek(0)
         stderr.seek(0)
-        assert stdout.read() == text_out
-        assert stderr.read() == text_err
+        try:
+            assert code == rc
+            assert stdout.read() == text_out
+            assert stderr.read() == text_err
+        except AssertionError:
+            print(f'{rc = }', file=debug)
+            print(f'{text_out = }', file=debug)
+            print(f'{text_err = }', file=debug)
+            raise
     test_main(
         ['command.py'],
         '',
@@ -247,6 +255,7 @@ def test_io():
     test_main(['command.py', 'det-fsm', 'reg'], '',
               'this conversion order is not supported.\n', 1)
     test_main(['command.py', 'reg', 'det-fsm'], '0', '\n1\n\n\n', 0)
+    test_main(['command.py', 'eps-non-det-fsm', 'det-fsm'], '\n1\n\n\n', '\n1\n\n\n', 0)
     test_main(['command.py', 'reg', 'full-det-fsm'],
               '0', 'labels argument is undefined.\n', 1)
     test_main(['command.py',

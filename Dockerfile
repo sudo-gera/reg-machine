@@ -30,7 +30,7 @@ RUN python3 -m pip install pytest coverage
 
 COPY . /app
 
-RUN git -C /app clean -f /app
+RUN git -C /app clean -X -f /app
 
 RUN /app/coverage.sh
 

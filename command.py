@@ -4,8 +4,184 @@ import typing
 import traceback
 import contextlib
 from collections import defaultdict as dd
+import json
+import io
 
+from debug import debug
 import fsm
+import argparse
+
+class ThrowingArgumentParser(argparse.ArgumentParser):
+    def exit(self, status = 0, message = None):
+        raise argparse.ArgumentError(None, message)
+
+possible_actions = ['reg-to-eps-nfa', 'remove-eps', 'make-deterministic', 'make-full', 'make-min', 'invert', 'nfa-to-reg']
+
+def process_args(
+        argv: list[str],
+        stdin: typing.IO[str],
+        stdout: typing.IO[str],
+        stderr: typing.IO[str],
+    ) -> int:
+    parser = ThrowingArgumentParser(exit_on_error=False)
+    parser.add_argument('--input-mode', choices=['reg', 'fa'], required=True)
+    parser.add_argument('--actions', choices=possible_actions, required=True, nargs='*')
+    parser.add_argument('--letters', required=True)
+    try:
+        args = parser.parse_args(argv[1:])
+    except Exception as e:
+        print(e, file=stderr)
+        return 1
+
+    input_mode = typing.cast(str, args.input_mode)
+    actions = typing.cast(str, args.actions)
+    letters = typing.cast(str, args.letters)
+
+    if input_mode == 'fa':
+        try:
+            value = fsm.json_to_dimple(json.loads(stdin.read()))
+        except Exception as e:
+            print(f'{e!r}', file=stderr)
+            return 1
+    else:
+        value = stdin.read()
+    
+    for action in actions:
+        if action not in possible_actions:
+            print(f'Unknown action: {action!r}')
+            return 1
+    
+    def reg_to_eps_nfa(value):
+        stdin = io.StringIO()
+        stdin.write(value)
+        stdin.seek(0)
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        rc = old_main(['-', 'reg', 'eps-non-det-fsm', letters], stdin, stdout, stderr)
+        stdout.seek(0)
+        stderr.seek(0)
+        stdout = stdout.read()
+        stderr = stderr.read()
+        if rc:
+            print(stdout)
+            print(stderr)
+        assert rc == 0
+        assert stderr == ''
+        return stdout
+
+    def remove_eps(value):
+        stdin = io.StringIO()
+        stdin.write(value)
+        stdin.seek(0)
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        rc = old_main(['-', 'eps-non-det-fsm', 'non-det-fsm', letters], stdin, stdout, stderr)
+        stdout.seek(0)
+        stderr.seek(0)
+        stdout = stdout.read()
+        stderr = stderr.read()
+        if rc:
+            print(stdout)
+            print(stderr)
+        assert rc == 0
+        assert stderr == ''
+        return stdout
+
+    def make_deterministic(value):
+        stdin = io.StringIO()
+        stdin.write(value)
+        stdin.seek(0)
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        rc = old_main(['-', 'non-det-fsm', 'det-fsm', letters], stdin, stdout, stderr)
+        stdout.seek(0)
+        stderr.seek(0)
+        stdout = stdout.read()
+        stderr = stderr.read()
+        if rc:
+            print(stdout)
+            print(stderr)
+        assert rc == 0
+        assert stderr == ''
+        return stdout
+
+    def make_full(value):
+        stdin = io.StringIO()
+        stdin.write(value)
+        stdin.seek(0)
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        rc = old_main(['-', 'det-fsm', 'full-det-fsm', letters], stdin, stdout, stderr)
+        stdout.seek(0)
+        stderr.seek(0)
+        stdout = stdout.read()
+        stderr = stderr.read()
+        if rc:
+            print(stdout)
+            print(stderr)
+        assert rc == 0
+        assert stderr == ''
+        return stdout
+
+    def make_min(value):
+        stdin = io.StringIO()
+        stdin.write(value)
+        stdin.seek(0)
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        rc = old_main(['-', 'full-det-fsm', 'min-full-det-fsm', letters], stdin, stdout, stderr)
+        stdout.seek(0)
+        stderr.seek(0)
+        stdout = stdout.read()
+        stderr = stderr.read()
+        if rc:
+            print(stdout)
+            print(stderr)
+        assert rc == 0
+        assert stderr == ''
+        return stdout
+
+    def invert(value):
+        stdin = io.StringIO()
+        stdin.write(value)
+        stdin.seek(0)
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        rc = old_main(['-', 'min-full-det-fsm', 'invert-min-full-det-fsm', letters], stdin, stdout, stderr)
+        stdout.seek(0)
+        stderr.seek(0)
+        stdout = stdout.read()
+        stderr = stderr.read()
+        if rc:
+            print(stdout)
+            print(stderr)
+        assert rc == 0
+        assert stderr == ''
+        return stdout
+
+    for action in actions:
+        # print(f'{action = !r}, {value = !r}')
+        value = eval(action.replace('-','_'))(value)
+    
+    # print(repr(value))
+
+    value=value[1:]
+
+    print(json.dumps(fsm.dimple_to_json(value, letters), indent=4))
+
+
+
+def main(
+        argv: list[str],
+        stdin: typing.IO[str],
+        stdout: typing.IO[str],
+        stderr: typing.IO[str],
+    ) -> int:
+    with (
+        contextlib.redirect_stdout(stdout),
+        contextlib.redirect_stderr(stderr),
+    ):
+        return process_args(argv, stdin, stdout, stderr)
 
 def old_main(
         argv: list[str],
@@ -79,9 +255,10 @@ def old_old_main(
         return 0
     except Exception:
         print('Incorrect input data.', file=stdout)
-        # print(traceback.format_exc())
+        # print(traceback.format_exc(), file=debug)
         return 1
 
 
 if __name__ == '__main__':
-    exit(old_main(sys.argv, sys.stdin, sys.stdout, sys.stderr))
+    # exit(old_main(sys.argv, sys.stdin, sys.stdout, sys.stderr))
+    exit(main(sys.argv, sys.stdin, sys.stdout, sys.stderr))
