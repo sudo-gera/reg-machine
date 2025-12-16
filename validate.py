@@ -6,22 +6,28 @@ from collections import defaultdict as dd
 import fa
 
 
-def check_fa_no_eps(a: fa.FA) -> None:
-    for n in a.start.bfs():
-        assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[
-            ''] == set()
+def fa_has_eps(a: fa.FA) -> bool:
+    for node in a.start.bfs():
+        if node.next_nodes_by_label.get('', set()):
+            return True
+    return False
 
 
-def check_fa_is_det(a: fa.FA) -> None:
-    for n in a.start.bfs():
-        assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[
-            ''] == set()
-        assert all([len(nl) < 2 for nl in n.next_nodes_by_label.values()])
+def fa_is_det(a: fa.FA) -> bool:
+    if fa_has_eps(a):
+        return False
+    for node in a.start.bfs():
+        for next_nodes_by_label in node.next_nodes_by_label.values():
+            if len(next_nodes_by_label) > 1:
+                return False
+    return True
 
 
-def check_fa_is_full(a: fa.FA, labels: str) -> None:
-    for n in a.start.bfs():
-        assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[
-            ''] == set()
-        assert all([len(nl) < 2 for nl in n.next_nodes_by_label.values()])
-        assert all([len(n.next_nodes_by_label[l]) == 1 for l in labels])
+def fa_is_full(a: fa.FA, labels: str) -> bool:
+    if not fa_is_det(a):
+        return False
+    for node in a.start.bfs():
+        for label in labels:
+            if len(node.next_nodes_by_label[label]) != 1:
+                return False
+    return True

@@ -355,30 +355,31 @@ def test_fa_stress(arg: int) -> None:
                 eps_nfa = convert.ast_to_eps_nfa(z)
 
                 nfa = convert.remove_eps(eps_nfa)
-                validate.check_fa_no_eps(nfa)
+                assert not validate.fa_has_eps(nfa)
 
                 dfa = convert.make_deterministic(nfa)
-                validate.check_fa_is_det(dfa)
+                assert validate.fa_is_det(dfa)
 
                 full_dfa = convert.make_full(dfa, labels)
-                validate.check_fa_is_full(full_dfa, labels)
+                assert validate.fa_is_full(full_dfa, labels)
 
                 min_full_dfa = convert.make_min(full_dfa)
-                validate.check_fa_is_full(min_full_dfa, labels)
+                assert validate.fa_is_full(min_full_dfa, labels)
 
                 same_min_full_dfa = convert.make_min(min_full_dfa)
-                validate.check_fa_is_full(same_min_full_dfa, labels)
+                assert validate.fa_is_full(same_min_full_dfa, labels)
                 check_equal(min_full_dfa, same_min_full_dfa)
 
                 inverted_full_dfa = convert.invert_full_fa(full_dfa)
-                validate.check_fa_is_full(inverted_full_dfa, labels)
+                assert validate.fa_is_full(inverted_full_dfa, labels)
 
                 inverted_min_full_dfa = convert.invert_full_fa(min_full_dfa)
-                validate.check_fa_is_full(inverted_min_full_dfa, labels)
+                assert validate.fa_is_full(inverted_min_full_dfa, labels)
 
                 inverted_same_min_full_dfa = convert.invert_full_fa(
-                    same_min_full_dfa)
-                validate.check_fa_is_full(inverted_same_min_full_dfa, labels)
+                    same_min_full_dfa
+                )
+                assert validate.fa_is_full(inverted_same_min_full_dfa, labels)
                 check_equal(inverted_min_full_dfa, inverted_same_min_full_dfa)
 
             except RecursionError:
