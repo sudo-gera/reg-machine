@@ -11,21 +11,33 @@ from debug import debug
 import fsm
 import argparse
 
+
 class ThrowingArgumentParser(argparse.ArgumentParser):
-    def exit(self, status : int = 0, message : str | None = None) -> typing.NoReturn:
+
+    def exit(self,
+             status: int = 0,
+             message: str | None = None) -> typing.NoReturn:
         raise argparse.ArgumentError(None, str(message))
 
-possible_actions = ['reg-to-eps-nfa', 'remove-eps', 'make-deterministic', 'make-full', 'make-min', 'invert', 'nfa-to-reg']
+
+possible_actions = [
+    'reg-to-eps-nfa', 'remove-eps', 'make-deterministic', 'make-full',
+    'make-min', 'invert', 'nfa-to-reg'
+]
+
 
 def process_args(
-        argv: list[str],
-        stdin: typing.IO[str],
-        stdout: typing.IO[str],
-        stderr: typing.IO[str],
-    ) -> int:
+    argv: list[str],
+    stdin: typing.IO[str],
+    stdout: typing.IO[str],
+    stderr: typing.IO[str],
+) -> int:
     parser = ThrowingArgumentParser(exit_on_error=False)
     parser.add_argument('--input-mode', choices=['reg', 'fa'], required=True)
-    parser.add_argument('--actions', choices=possible_actions, required=True, nargs='*')
+    parser.add_argument('--actions',
+                        choices=possible_actions,
+                        required=True,
+                        nargs='*')
     parser.add_argument('--letters', required=True)
     try:
         args = parser.parse_args(argv[1:])
@@ -45,19 +57,20 @@ def process_args(
             return 1
     else:
         value = stdin.read()
-    
+
     for action in actions:
         if action not in possible_actions:
             print(f'Unknown action: {action!r}')
             return 1
-    
+
     def reg_to_eps_nfa(value: str) -> str:
         stdin = io.StringIO()
         stdin.write(value)
         stdin.seek(0)
         stdout = io.StringIO()
         stderr = io.StringIO()
-        rc = old_main(['-', 'reg', 'eps-non-det-fsm', letters], stdin, stdout, stderr)
+        rc = old_main(['-', 'reg', 'eps-non-det-fsm', letters], stdin, stdout,
+                      stderr)
         stdout.seek(0)
         stderr.seek(0)
         stdout_data = stdout.read()
@@ -75,7 +88,8 @@ def process_args(
         stdin.seek(0)
         stdout = io.StringIO()
         stderr = io.StringIO()
-        rc = old_main(['-', 'eps-non-det-fsm', 'non-det-fsm', letters], stdin, stdout, stderr)
+        rc = old_main(['-', 'eps-non-det-fsm', 'non-det-fsm', letters], stdin,
+                      stdout, stderr)
         stdout.seek(0)
         stderr.seek(0)
         stdout_data = stdout.read()
@@ -93,7 +107,8 @@ def process_args(
         stdin.seek(0)
         stdout = io.StringIO()
         stderr = io.StringIO()
-        rc = old_main(['-', 'non-det-fsm', 'det-fsm', letters], stdin, stdout, stderr)
+        rc = old_main(['-', 'non-det-fsm', 'det-fsm', letters], stdin, stdout,
+                      stderr)
         stdout.seek(0)
         stderr.seek(0)
         stdout_data = stdout.read()
@@ -111,7 +126,8 @@ def process_args(
         stdin.seek(0)
         stdout = io.StringIO()
         stderr = io.StringIO()
-        rc = old_main(['-', 'det-fsm', 'full-det-fsm', letters], stdin, stdout, stderr)
+        rc = old_main(['-', 'det-fsm', 'full-det-fsm', letters], stdin, stdout,
+                      stderr)
         stdout.seek(0)
         stderr.seek(0)
         stdout_data = stdout.read()
@@ -129,7 +145,8 @@ def process_args(
         stdin.seek(0)
         stdout = io.StringIO()
         stderr = io.StringIO()
-        rc = old_main(['-', 'full-det-fsm', 'min-full-det-fsm', letters], stdin, stdout, stderr)
+        rc = old_main(['-', 'full-det-fsm', 'min-full-det-fsm', letters],
+                      stdin, stdout, stderr)
         stdout.seek(0)
         stderr.seek(0)
         stdout_data = stdout.read()
@@ -147,7 +164,9 @@ def process_args(
         stdin.seek(0)
         stdout = io.StringIO()
         stderr = io.StringIO()
-        rc = old_main(['-', 'min-full-det-fsm', 'invert-min-full-det-fsm', letters], stdin, stdout, stderr)
+        rc = old_main(
+            ['-', 'min-full-det-fsm', 'invert-min-full-det-fsm', letters],
+            stdin, stdout, stderr)
         stdout.seek(0)
         stderr.seek(0)
         stdout_data = stdout.read()
@@ -161,51 +180,51 @@ def process_args(
 
     for action in actions:
         # print(f'{action = !r}, {value = !r}')
-        value = eval(action.replace('-','_'))(value)
-    
+        value = eval(action.replace('-', '_'))(value)
+
     # print(repr(value))
 
-    value=value[1:]
+    value = value[1:]
 
     print(json.dumps(fsm.dimple_to_json(value, letters), indent=4))
     return 0
 
 
-
 def main(
-        argv: list[str],
-        stdin: typing.IO[str],
-        stdout: typing.IO[str],
-        stderr: typing.IO[str],
-    ) -> int:
+    argv: list[str],
+    stdin: typing.IO[str],
+    stdout: typing.IO[str],
+    stderr: typing.IO[str],
+) -> int:
     with (
-        contextlib.redirect_stdout(stdout),
-        contextlib.redirect_stderr(stderr),
+            contextlib.redirect_stdout(stdout),
+            contextlib.redirect_stderr(stderr),
     ):
         return process_args(argv, stdin, stdout, stderr)
 
+
 def old_main(
-        argv: list[str],
-        stdin: typing.IO[str],
-        stdout: typing.IO[str],
-        stderr: typing.IO[str],
-    ) -> int:
+    argv: list[str],
+    stdin: typing.IO[str],
+    stdout: typing.IO[str],
+    stderr: typing.IO[str],
+) -> int:
     with (
-        contextlib.redirect_stdout(stdout),
-        contextlib.redirect_stderr(stderr),
+            contextlib.redirect_stdout(stdout),
+            contextlib.redirect_stderr(stderr),
     ):
         return old_old_main(argv, stdin, stdout, stderr)
 
+
 def old_old_main(
-        argv: list[str],
-        stdin: typing.IO[str],
-        stdout: typing.IO[str],
-        stderr: typing.IO[str],
-    ) -> int:
+    argv: list[str],
+    stdin: typing.IO[str],
+    stdout: typing.IO[str],
+    stderr: typing.IO[str],
+) -> int:
     if len(argv) not in [3, 4]:
-        print(
-            f'usage: {argv[0]} <input format> <output format> [<labels>]',
-            file=stdout)
+        print(f'usage: {argv[0]} <input format> <output format> [<labels>]',
+              file=stdout)
         return 1
     if len(argv) == 3:
         [*formats, labels] = [*argv[1:], '']

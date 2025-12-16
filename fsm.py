@@ -9,6 +9,7 @@ import io
 
 
 class Node:
+
     def __init__(self: Node) -> None:
         self.next_nodes_by_label: dd[str, set[Node]] = dd(set)
         self.is_final: bool = False
@@ -17,16 +18,14 @@ class Node:
         return (self, label)
 
     def __rrshift__(self: Node, left_label: tuple[Node, str]) -> None:
-        left, label, right = left_label + (self,)
+        left, label, right = left_label + (self, )
         left.next_nodes_by_label[label] |= {right}
 
     def __hash__(self: Node) -> int:
         return id(self)
 
     def bfs(self: Node,
-            eps_only: bool = False) -> typing.Generator[Node,
-                                                        None,
-                                                        None]:
+            eps_only: bool = False) -> typing.Generator[Node, None, None]:
         q: collections.deque[Node] = collections.deque()
         q.append(self)
         visited = set()
@@ -39,6 +38,7 @@ class Node:
 
 
 class FSM:
+
     def __deepcopy__(self: FSM, memo: dict[int, typing.Any]) -> FSM:
         s = FSM()
         memo[id(self)] = s
@@ -80,8 +80,8 @@ class FSM:
         if other is None:
             self.stop >> '' >> self.start
             return FSM('') + self
-        return functools.reduce(operator.mul, map(
-            lambda x: cp(x), [self] * other), FSM(''))
+        return functools.reduce(operator.mul,
+                                map(lambda x: cp(x), [self] * other), FSM(''))
 
     def dimple(self: FSM) -> str:
         id_map: dd[Node, int] = dd(lambda: len(id_map) + 1)
@@ -102,10 +102,12 @@ class FSM:
 
     @staticmethod
     def from_dimple(text_str: str) -> FSM:
+
         def index_or_len(a: list[typing.Any], v: typing.Any) -> int:
             if v in a:
                 return a.index(v)
             return len(a)
+
         text = [line.split() for line in text_str.strip().splitlines()]
         start = text[:index_or_len(text, [])]
         text = text[len(start) + 1:]
@@ -122,6 +124,7 @@ class FSM:
                 line.append('')
             name_to_node[line[0]] >> line[2] >> name_to_node[line[1]]
         return res
+
 
 def dimple_to_json(dimple_text: str, _letters: str) -> dict[str, typing.Any]:
     lines = [line.rstrip() for line in dimple_text.splitlines()]
@@ -181,6 +184,7 @@ def dimple_to_json(dimple_text: str, _letters: str) -> dict[str, typing.Any]:
         "start_states": [start_state],
         "final_states": final_states
     }
+
 
 def json_to_dimple(automaton: dict[str, typing.Any]) -> str:
     start_states = automaton["start_states"]

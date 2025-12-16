@@ -15,6 +15,7 @@ import convert
 import command
 from debug import debug
 
+
 class InternalTestError(Exception):
     pass
 
@@ -36,6 +37,7 @@ def can_fa_eval_string(a: fsm.FSM, path: str, limit: int = 64) -> bool:
     res = any([n.is_final or a.stop == n for n in current_nodes])
     return res
 
+
 FSM = fsm.FSM
 
 
@@ -44,13 +46,15 @@ class created_random_fsm:
     fsm: fsm.FSM
     random_string_that_matches: str | None
     regex_for_fullmatch: str | None
-    random_strings_that_maybe_match: list[str|None]
-    regex_for_converting_to_fsm: str|None
+    random_strings_that_maybe_match: list[str | None]
+    regex_for_converting_to_fsm: str | None
 
-def random_fsm(rand: random.Random,
-               depth: int,
-               labels: str,  # allowed letters
-               ) -> created_random_fsm:
+
+def random_fsm(
+        rand: random.Random,
+        depth: int,
+        labels: str,  # allowed letters
+) -> created_random_fsm:
     # tuple[fsm.FSM,
     #                       str | None,  # random string that matches
     #                       str | None,  # regex for re.fullmatch
@@ -65,7 +69,12 @@ def random_fsm(rand: random.Random,
             arg,
             arg,
             [rand.choice([None, '', *list(labels)]) for q in range(9)],
-            ({arg: arg} | {None: '0', '': '1'})[arg],
+            ({
+                arg: arg
+            } | {
+                None: '0',
+                '': '1'
+            })[arg],
         )
     elif n < 3:
         left = random_fsm(rand, depth - 1, labels)
@@ -88,9 +97,17 @@ def random_fsm(rand: random.Random,
             )
         return created_random_fsm(
             left.fsm + right.fsm,
-            rand.choice([left.random_string_that_matches, right.random_string_that_matches]),
+            rand.choice([
+                left.random_string_that_matches,
+                right.random_string_that_matches
+            ]),
             f'({left.regex_for_fullmatch}|{right.regex_for_fullmatch})',
-            [rand.choice([left.random_strings_that_maybe_match[q], right.random_strings_that_maybe_match[q]]) for q in range(9)],
+            [
+                rand.choice([
+                    left.random_strings_that_maybe_match[q],
+                    right.random_strings_that_maybe_match[q]
+                ]) for q in range(9)
+            ],
             f'({left.regex_for_converting_to_fsm} + {right.regex_for_converting_to_fsm})',
         )
     elif n < 7:
@@ -101,15 +118,28 @@ def random_fsm(rand: random.Random,
                 left.fsm * right.fsm,
                 None,
                 None,
-                [rand.choice([left.random_strings_that_maybe_match[q], right.random_strings_that_maybe_match[q]]) for q in range(9)],
+                [
+                    rand.choice([
+                        left.random_strings_that_maybe_match[q],
+                        right.random_strings_that_maybe_match[q]
+                    ]) for q in range(9)
+                ],
                 f'({left.regex_for_converting_to_fsm} * {right.regex_for_converting_to_fsm})',
             )
         else:
             return created_random_fsm(
                 left.fsm * right.fsm,
-                left.random_string_that_matches + right.random_string_that_matches,
+                left.random_string_that_matches +
+                right.random_string_that_matches,
                 left.regex_for_fullmatch + right.regex_for_fullmatch,
-                [rand.choice([left.random_strings_that_maybe_match[q], right.random_strings_that_maybe_match[q], left.random_string_that_matches + right.random_string_that_matches]) for q in range(9)],
+                [
+                    rand.choice([
+                        left.random_strings_that_maybe_match[q],
+                        right.random_strings_that_maybe_match[q],
+                        left.random_string_that_matches +
+                        right.random_string_that_matches
+                    ]) for q in range(9)
+                ],
                 f'({left.regex_for_converting_to_fsm} * {right.regex_for_converting_to_fsm})',
             )
     elif n == 7:
@@ -117,26 +147,42 @@ def random_fsm(rand: random.Random,
         left = random_fsm(rand, depth - 1, labels)
         if right_n < 0:
             return created_random_fsm(
-                left.fsm ** None,
-                left.random_string_that_matches * -right_n if left.random_string_that_matches is not None else '',
-                f'({left.regex_for_fullmatch})*' if left.regex_for_fullmatch is not None else '',
-                [left.random_strings_that_maybe_match[q] * -right_n if left.random_strings_that_maybe_match[q] is not None else '' for q in range(9)],
+                left.fsm**None,
+                left.random_string_that_matches * -right_n
+                if left.random_string_that_matches is not None else '',
+                f'({left.regex_for_fullmatch})*'
+                if left.regex_for_fullmatch is not None else '',
+                [
+                    left.random_strings_that_maybe_match[q] * -right_n if
+                    left.random_strings_that_maybe_match[q] is not None else ''
+                    for q in range(9)
+                ],
                 f'({left.regex_for_converting_to_fsm}) ** None',
             )
         elif right_n > 0:
             return created_random_fsm(
-                left.fsm ** right_n,
-                left.random_string_that_matches * right_n if left.random_string_that_matches is not None else None,
-                left.regex_for_fullmatch * right_n if left.regex_for_fullmatch is not None else None,
-                [left.random_strings_that_maybe_match[q] * -right_n if left.random_strings_that_maybe_match[q] is not None else '' for q in range(9)],
+                left.fsm**right_n,
+                left.random_string_that_matches * right_n
+                if left.random_string_that_matches is not None else None,
+                left.regex_for_fullmatch *
+                right_n if left.regex_for_fullmatch is not None else None,
+                [
+                    left.random_strings_that_maybe_match[q] * -right_n if
+                    left.random_strings_that_maybe_match[q] is not None else ''
+                    for q in range(9)
+                ],
                 f'({left.regex_for_converting_to_fsm}) ** {right_n}',
             )
         else:
             return created_random_fsm(
-                left.fsm ** right_n,
+                left.fsm**right_n,
                 '',
                 '',
-                [left.random_strings_that_maybe_match[q] * abs(right_n) if left.random_strings_that_maybe_match[q] is not None else '' for q in range(9)],
+                [
+                    left.random_strings_that_maybe_match[q] * abs(right_n) if
+                    left.random_strings_that_maybe_match[q] is not None else ''
+                    for q in range(9)
+                ],
                 f'({left.regex_for_converting_to_fsm}) ** {right_n}',
             )
     assert False
@@ -184,58 +230,74 @@ def test_fsm_simple_bfs() -> None:
     assert not can_fa_eval_string(fsm.FSM('-') * fsm.FSM('+'), '+-')
     assert can_fa_eval_string(fsm.FSM('-') * fsm.FSM('+'), '-+')
 
-    assert can_fa_eval_string(fsm.FSM('-') ** None, '')
-    assert can_fa_eval_string(fsm.FSM('-') ** None, '-')
-    assert can_fa_eval_string(fsm.FSM('-') ** None, '--')
-    assert not can_fa_eval_string(fsm.FSM('-') ** None, '+')
-    assert not can_fa_eval_string(fsm.FSM('-') ** None, '-+')
-    assert not can_fa_eval_string(fsm.FSM('-') ** None, '+-')
+    assert can_fa_eval_string(fsm.FSM('-')**None, '')
+    assert can_fa_eval_string(fsm.FSM('-')**None, '-')
+    assert can_fa_eval_string(fsm.FSM('-')**None, '--')
+    assert not can_fa_eval_string(fsm.FSM('-')**None, '+')
+    assert not can_fa_eval_string(fsm.FSM('-')**None, '-+')
+    assert not can_fa_eval_string(fsm.FSM('-')**None, '+-')
 
 
 def check_fsm_no_eps(a: fsm.FSM) -> None:
     for n in a.start.bfs():
-        assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[''] == set()
+        assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[
+            ''] == set()
 
 
 def check_fsm_is_det(a: fsm.FSM) -> None:
     for n in a.start.bfs():
-        assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[''] == set()
+        assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[
+            ''] == set()
         assert all([len(nl) < 2 for nl in n.next_nodes_by_label.values()])
 
 
 def check_fsm_is_full(a: fsm.FSM, labels: str) -> None:
     for n in a.start.bfs():
-        assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[''] == set()
+        assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[
+            ''] == set()
         assert all([len(nl) < 2 for nl in n.next_nodes_by_label.values()])
         assert all([len(n.next_nodes_by_label[l]) == 1 for l in labels])
 
 
 def check_equal(a: fsm.FSM, s: fsm.FSM) -> None:
     a_to_s: dict[fsm.Node, fsm.Node] = {
-        d: f for d, f in zip(a.start.bfs(), s.start.bfs())}
+        d: f
+        for d, f in zip(a.start.bfs(), s.start.bfs())
+    }
     s_to_a: dict[fsm.Node, fsm.Node] = {
-        d: f for d, f in zip(s.start.bfs(), a.start.bfs())}
-    assert len(list(a.start.bfs())) == len(
-        list(s.start.bfs())) == len(a_to_s) == len(s_to_a)
+        d: f
+        for d, f in zip(s.start.bfs(), a.start.bfs())
+    }
+    assert len(list(a.start.bfs())) == len(list(
+        s.start.bfs())) == len(a_to_s) == len(s_to_a)
     assert [*a.start.bfs()] == [*a_to_s.keys()] == [*s_to_a.values()]
     assert [*s.start.bfs()] == [*s_to_a.keys()] == [*a_to_s.values()]
 
-    def check_a_to_s(a_to_s: dict[fsm.Node, fsm.Node], s_to_a: dict[fsm.Node, fsm.Node]) -> None:
+    def check_a_to_s(a_to_s: dict[fsm.Node, fsm.Node],
+                     s_to_a: dict[fsm.Node, fsm.Node]) -> None:
         for d, f in a_to_s.items():
             assert a_to_s[d] == f
             for l in d.next_nodes_by_label:
-                assert {a_to_s[n] for n in d.next_nodes_by_label[l]} == set(f.next_nodes_by_label[l])
+                assert {a_to_s[n]
+                        for n in d.next_nodes_by_label[l]
+                        } == set(f.next_nodes_by_label[l])
+
     check_a_to_s(a_to_s, s_to_a)
     check_a_to_s(s_to_a, a_to_s)
 
 
 def test_io() -> None:
-    assert (fsm.FSM('-') * fsm.FSM('+')
-            ).dimple() == '1\n\n4\n\n1 2 -\n2 3 \n3 4 +\n'
-    check_equal(fsm.FSM('-') * fsm.FSM('+'),
-                fsm.FSM.from_dimple('1\n\n2\n\n1 3 -\n3 4 \n4 2 +\n'))
+    assert (fsm.FSM('-') *
+            fsm.FSM('+')).dimple() == '1\n\n4\n\n1 2 -\n2 3 \n3 4 +\n'
+    check_equal(
+        fsm.FSM('-') * fsm.FSM('+'),
+        fsm.FSM.from_dimple('1\n\n2\n\n1 3 -\n3 4 \n4 2 +\n'))
 
-    def test_main(argv: list[str], text_in: str, text_out: str, code: int, text_err: str = '') -> None:
+    def test_main(argv: list[str],
+                  text_in: str,
+                  text_out: str,
+                  code: int,
+                  text_err: str = '') -> None:
         stdin = io.StringIO()
         stdin.write(text_in)
         stdin.seek(0)
@@ -253,35 +315,28 @@ def test_io() -> None:
             print(f'{text_out = }', file=debug)
             print(f'{text_err = }', file=debug)
             raise
-    test_main(
-        ['command.py'],
-        '',
-        'usage: command.py <input format> <output format> [<labels>]\n',
-        1)
+
+    test_main(['command.py'], '',
+              'usage: command.py <input format> <output format> [<labels>]\n',
+              1)
     test_main(['command.py', 'reg', 'reg'], '0\n', '0\n', 0)
     test_main(
-        [
-            'command.py',
-            'reg',
-            'peg'],
-        '',
+        ['command.py', 'reg', 'peg'], '',
         'unknown format: peg.\nsupported formats are:\n    reg\n    eps-non-det-fsm\n    non-det-fsm\n    det-fsm\n    full-det-fsm\n    min-full-det-fsm\n    invert-full-det-fsm\n',
         1)
     test_main(['command.py', 'det-fsm', 'reg'], '',
               'this conversion order is not supported.\n', 1)
     test_main(['command.py', 'reg', 'det-fsm'], '0', '\n1\n\n\n', 0)
-    test_main(['command.py', 'eps-non-det-fsm', 'det-fsm'], '\n1\n\n\n', '\n1\n\n\n', 0)
-    test_main(['command.py', 'reg', 'full-det-fsm'],
-              '0', 'labels argument is undefined.\n', 1)
-    test_main(['command.py',
-               'non-det-fsm',
-               'min-full-det-fsm',
-               'ab'],
-              '0\n\n3\n\n0 3 a\n3 3 a\n3 3 b\n0 1 b\n2 3 a\n2 1 b\n1 2 b\n1 1 a\n',
-              '\n1\n\n2\n\n1 2 a\n1 3 b\n2 2 a\n2 2 b\n3 1 b\n3 3 a\n',
-              0)
-    test_main(['command.py', 'reg', 'det-fsm'],
-              '', 'Incorrect input data.\n', 1)
+    test_main(['command.py', 'eps-non-det-fsm', 'det-fsm'], '\n1\n\n\n',
+              '\n1\n\n\n', 0)
+    test_main(['command.py', 'reg', 'full-det-fsm'], '0',
+              'labels argument is undefined.\n', 1)
+    test_main(
+        ['command.py', 'non-det-fsm', 'min-full-det-fsm', 'ab'],
+        '0\n\n3\n\n0 3 a\n3 3 a\n3 3 b\n0 1 b\n2 3 a\n2 1 b\n1 2 b\n1 1 a\n',
+        '\n1\n\n2\n\n1 2 a\n1 3 b\n2 2 a\n2 2 b\n3 1 b\n3 3 a\n', 0)
+    test_main(['command.py', 'reg', 'det-fsm'], '', 'Incorrect input data.\n',
+              1)
 
 
 # seed = 3099010176601051186
@@ -300,7 +355,7 @@ def test_fsm_stress(arg: int) -> None:
                 r = random_fsm(rand, 8 if arg < 0 else 10, labels)
             except RecursionError:
                 raise InternalTestError
-            fa_or_none : fsm.FSM | None = None
+            fa_or_none: fsm.FSM | None = None
             eps_nfa = nfa = dfa = full_dfa = min_full_dfa = same_min_full_dfa = inverted_full_dfa = inverted_min_full_dfa = inverted_same_min_full_dfa = fa_or_none
             try:
                 z = convert.regex_to_ast(r.regex_for_converting_to_fsm)
@@ -328,12 +383,17 @@ def test_fsm_stress(arg: int) -> None:
                 inverted_min_full_dfa = convert.invert_full_fsm(min_full_dfa)
                 check_fsm_is_full(inverted_min_full_dfa, labels)
 
-                inverted_same_min_full_dfa = convert.invert_full_fsm(same_min_full_dfa)
+                inverted_same_min_full_dfa = convert.invert_full_fsm(
+                    same_min_full_dfa)
                 check_fsm_is_full(inverted_same_min_full_dfa, labels)
                 check_equal(inverted_min_full_dfa, inverted_same_min_full_dfa)
 
             except RecursionError:
-                for var in [eps_nfa, nfa, dfa, full_dfa, min_full_dfa, same_min_full_dfa, inverted_full_dfa, inverted_min_full_dfa, inverted_same_min_full_dfa][::-1]:
+                for var in [
+                        eps_nfa, nfa, dfa, full_dfa, min_full_dfa,
+                        same_min_full_dfa, inverted_full_dfa,
+                        inverted_min_full_dfa, inverted_same_min_full_dfa
+                ][::-1]:
                     if var is not None:
                         print(graphviz(var), file=debug)
                         break
@@ -344,17 +404,25 @@ def test_fsm_stress(arg: int) -> None:
 
             if arg < 0:
                 assert can_fa_eval_string(r.fsm, r.random_string_that_matches)
-                assert can_fa_eval_string(eps_nfa, r.random_string_that_matches)
+                assert can_fa_eval_string(eps_nfa,
+                                          r.random_string_that_matches)
                 assert can_fa_eval_string(nfa, r.random_string_that_matches)
                 assert can_fa_eval_string(dfa, r.random_string_that_matches)
-                assert can_fa_eval_string(full_dfa, r.random_string_that_matches)
-                assert can_fa_eval_string(min_full_dfa, r.random_string_that_matches)
-            assert can_fa_eval_string(same_min_full_dfa, r.random_string_that_matches)
+                assert can_fa_eval_string(full_dfa,
+                                          r.random_string_that_matches)
+                assert can_fa_eval_string(min_full_dfa,
+                                          r.random_string_that_matches)
+            assert can_fa_eval_string(same_min_full_dfa,
+                                      r.random_string_that_matches)
             if arg < 0:
-                assert not can_fa_eval_string(inverted_full_dfa, r.random_string_that_matches)
-                assert not can_fa_eval_string(inverted_min_full_dfa, r.random_string_that_matches)
-                assert not can_fa_eval_string(inverted_same_min_full_dfa, r.random_string_that_matches)
-            assert re.fullmatch(r.regex_for_fullmatch, r.random_string_that_matches)
+                assert not can_fa_eval_string(inverted_full_dfa,
+                                              r.random_string_that_matches)
+                assert not can_fa_eval_string(inverted_min_full_dfa,
+                                              r.random_string_that_matches)
+                assert not can_fa_eval_string(inverted_same_min_full_dfa,
+                                              r.random_string_that_matches)
+            assert re.fullmatch(r.regex_for_fullmatch,
+                                r.random_string_that_matches)
             for t in r.random_strings_that_maybe_match:
                 if t is not None:
                     u = can_fa_eval_string(same_min_full_dfa, t)
@@ -368,8 +436,10 @@ def test_fsm_stress(arg: int) -> None:
                         assert can_fa_eval_string(min_full_dfa, t) == u
                         assert can_fa_eval_string(same_min_full_dfa, t) == u
                         assert can_fa_eval_string(inverted_full_dfa, t) != u
-                        assert can_fa_eval_string(inverted_min_full_dfa, t) != u
-                        assert can_fa_eval_string(inverted_same_min_full_dfa, t) != u
+                        assert can_fa_eval_string(inverted_min_full_dfa,
+                                                  t) != u
+                        assert can_fa_eval_string(inverted_same_min_full_dfa,
+                                                  t) != u
             break
         except InternalTestError:
             continue

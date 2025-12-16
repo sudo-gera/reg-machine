@@ -22,7 +22,7 @@ def ast_to_eps_nfa(a: ast.AST) -> fsm.FSM:
         if isinstance(a.op, ast.Pow):
             if isinstance(a.right, ast.Constant):
                 if isinstance(a.right.value, int | type(None)):
-                    return this(a.left) ** a.right.value
+                    return this(a.left)**a.right.value
     elif isinstance(a, ast.Name):
         return fsm.FSM(a.id)
     elif isinstance(a, ast.Constant):
@@ -78,7 +78,9 @@ def make_min(a: fsm.FSM) -> fsm.FSM:
     labels: list[str] = list(a.start.next_nodes_by_label)
     old_node_to_group_save: dict[fsm.Node, int] = {}
     old_node_to_group: dict[fsm.Node, int] = {
-        n: int(n.is_final) for n in a.start.bfs()}
+        n: int(n.is_final)
+        for n in a.start.bfs()
+    }
     uniq_nums: dd[tuple[int, ...], int] = dd(lambda: len(uniq_nums))
     while old_node_to_group_save != old_node_to_group:
         uniq_nums.clear()
