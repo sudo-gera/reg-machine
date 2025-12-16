@@ -8,7 +8,7 @@ import json
 import io
 
 from debug import debug
-import fsm
+import fa
 import argparse
 
 
@@ -51,7 +51,7 @@ def process_args(
 
     if input_mode == 'fa':
         try:
-            value = fsm.json_to_dimple(json.loads(stdin.read()))
+            value = fa.json_to_dimple(json.loads(stdin.read()))
         except Exception as e:
             print(f'{e!r}', file=stderr)
             return 1
@@ -186,7 +186,7 @@ def process_args(
 
     value = value[1:]
 
-    print(json.dumps(fsm.dimple_to_json(value, letters), indent=4))
+    print(json.dumps(fa.dimple_to_json(value, letters), indent=4))
     return 0
 
 
@@ -230,7 +230,7 @@ def old_old_main(
         [*formats, labels] = [*argv[1:], '']
     else:
         [*formats, labels] = [*argv[1:]]
-    all_formats: dict[str, typing.Callable[[fsm.FA], fsm.FA]] = {
+    all_formats: dict[str, typing.Callable[[fa.FA], fa.FA]] = {
         'reg': lambda a: a,
         'eps-non-det-fsm': convert.remove_eps,
         'non-det-fsm': convert.make_deterministic,
@@ -263,7 +263,7 @@ def old_old_main(
                 a = convert.ast_to_eps_nfa(s)
         else:
             text = stdin.read()
-            a = fsm.FA.from_dimple(text)
+            a = fa.FA.from_dimple(text)
         for num in range(*format_nums):
             func = [*all_formats.values()][num]
             if func.__closure__ is not None and not labels:
