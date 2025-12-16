@@ -207,40 +207,45 @@ def graphviz(a: fa.FA) -> str:
 def test_fsm_simple_bfs() -> None:
     f = fa.FA()
     assert list(f.start.bfs()) == [f.start]
+
     f = fa.FA(None)
     assert list(f.start.bfs()) == [f.start]
+
     f = fa.FA('')
     assert list(f.start.bfs()) == [
-        f.start, f.the_only_final_if_exists_or_unrelated_node]
-    f = fa.FA('-')
+        f.start, f.the_only_final_if_exists_or_unrelated_node
+    ]
+
+    f = fa.FA('A')
     assert list(f.start.bfs()) == [
-        f.start, f.the_only_final_if_exists_or_unrelated_node]
+        f.start, f.the_only_final_if_exists_or_unrelated_node
+    ]
 
     assert not can_fa_eval_string(fa.FA(None), '')
-    assert not can_fa_eval_string(fa.FA(None), '-')
+    assert not can_fa_eval_string(fa.FA(None), 'A')
     assert can_fa_eval_string(fa.FA(''), '')
-    assert not can_fa_eval_string(fa.FA(''), '-')
-    assert not can_fa_eval_string(fa.FA('-'), '')
-    assert can_fa_eval_string(fa.FA('-'), '-')
+    assert not can_fa_eval_string(fa.FA(''), 'A')
+    assert not can_fa_eval_string(fa.FA('A'), '')
+    assert can_fa_eval_string(fa.FA('A'), 'A')
 
-    assert can_fa_eval_string(fa.FA('-') + fa.FA('+'), '-')
-    assert can_fa_eval_string(fa.FA('-') + fa.FA('+'), '+')
-    assert not can_fa_eval_string(fa.FA('-') + fa.FA('+'), '')
-    assert not can_fa_eval_string(fa.FA('-') + fa.FA('+'), '+-')
-    assert not can_fa_eval_string(fa.FA('-') + fa.FA('+'), '-+')
+    assert can_fa_eval_string(fa.FA('A') + fa.FA('B'), 'A')
+    assert can_fa_eval_string(fa.FA('A') + fa.FA('B'), 'B')
+    assert not can_fa_eval_string(fa.FA('A') + fa.FA('B'), '')
+    assert not can_fa_eval_string(fa.FA('A') + fa.FA('B'), 'BA')
+    assert not can_fa_eval_string(fa.FA('A') + fa.FA('B'), 'AB')
 
-    assert not can_fa_eval_string(fa.FA('-') * fa.FA('+'), '-')
-    assert not can_fa_eval_string(fa.FA('-') * fa.FA('+'), '+')
-    assert not can_fa_eval_string(fa.FA('-') * fa.FA('+'), '')
-    assert not can_fa_eval_string(fa.FA('-') * fa.FA('+'), '+-')
-    assert can_fa_eval_string(fa.FA('-') * fa.FA('+'), '-+')
+    assert not can_fa_eval_string(fa.FA('A') * fa.FA('B'), 'A')
+    assert not can_fa_eval_string(fa.FA('A') * fa.FA('B'), 'B')
+    assert not can_fa_eval_string(fa.FA('A') * fa.FA('B'), '')
+    assert not can_fa_eval_string(fa.FA('A') * fa.FA('B'), 'BA')
+    assert can_fa_eval_string(fa.FA('A') * fa.FA('B'), 'AB')
 
-    assert can_fa_eval_string(~fa.FA('-'), '')
-    assert can_fa_eval_string(~fa.FA('-'), '-')
-    assert can_fa_eval_string(~fa.FA('-'), '--')
-    assert not can_fa_eval_string(~fa.FA('-'), '+')
-    assert not can_fa_eval_string(~fa.FA('-'), '-+')
-    assert not can_fa_eval_string(~fa.FA('-'), '+-')
+    assert can_fa_eval_string(~fa.FA('A'), '')
+    assert can_fa_eval_string(~fa.FA('A'), 'A')
+    assert can_fa_eval_string(~fa.FA('A'), 'AA')
+    assert not can_fa_eval_string(~fa.FA('A'), 'B')
+    assert not can_fa_eval_string(~fa.FA('A'), 'AB')
+    assert not can_fa_eval_string(~fa.FA('A'), 'BA')
 
 
 def check_fsm_no_eps(a: fa.FA) -> None:
