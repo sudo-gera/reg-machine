@@ -56,7 +56,7 @@ def process_args(
             return 1
 
     for action in actions:
-        value = eval(action.replace('-', '_'))(value)
+        value = eval(action.replace('-', '_'))(value, letters)
 
     value = value[1:]
 
@@ -80,33 +80,33 @@ def reg_to_eps_nfa(value: str, letters: str) -> str:
     return call_old_main('reg_to_eps_nfa', value, letters)
 
 def remove_eps(value: str, letters: str) -> str:
-    return call_old_main('reg_to_eps_nfa', value, letters)
+    return call_old_main('remove_eps', value, letters)
 
 def make_deterministic(value: str, letters: str) -> str:
-    return call_old_main('reg_to_eps_nfa', value, letters)
+    return call_old_main('make_deterministic', value, letters)
 
 def make_full(value: str, letters: str) -> str:
-    return call_old_main('reg_to_eps_nfa', value, letters)
+    return call_old_main('make_full', value, letters)
 
 def make_min(value: str, letters: str) -> str:
-    return call_old_main('reg_to_eps_nfa', value, letters)
+    return call_old_main('make_min', value, letters)
 
 def invert(value: str, letters: str) -> str:
-    return call_old_main('reg_to_eps_nfa', value, letters)
+    return call_old_main('invert', value, letters)
 
 
 new_commands_to_old_commands = {
-    'reg_to_eps_nfa': ('reg', 'eps-non-det-fsm'),
+    'reg_to_eps_nfa':     (            'reg',          'eps-non-det-fsm'),
 
-    'remove_eps': ('eps-non-det-fsm', 'non-det-fsm'),
+    'remove_eps':         ('eps-non-det-fsm',              'non-det-fsm'),
 
-    'make_deterministic': ('non-det-fsm', 'det-fsm'),
+    'make_deterministic': (     'non-det-fsm',                 'det-fsm'),
 
-    'make_full': ('det-fsm', 'full-det-fsm'),
+    'make_full':          (         'det-fsm',            'full-det-fsm'),
 
-    'make_min': ('full-det-fsm', 'min-full-det-fsm'),
+    'make_min':           (    'full-det-fsm',        'min-full-det-fsm'),
 
-    'invert': ('min-full-det-fsm', 'invert-min-full-det-fsm'),
+    'invert':             ('min-full-det-fsm', 'invert-min-full-det-fsm'),
 }
 
 
@@ -138,6 +138,7 @@ def old_main(
     stdout: typing.IO[str],
     stderr: typing.IO[str],
 ) -> int:
+    # print(argv, stdin.read(), stdin.seek(0))
     with (
             contextlib.redirect_stdout(stdout),
             contextlib.redirect_stderr(stderr),
