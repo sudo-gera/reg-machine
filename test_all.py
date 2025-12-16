@@ -55,11 +55,6 @@ def random_fsm(
         depth: int,
         labels: str,  # allowed letters
 ) -> created_random_fsm:
-    # tuple[fsm.FSM,
-    #                       str | None,  # random string that matches
-    #                       str | None,  # regex for re.fullmatch
-    #                       list[str | None],  # random strings that maybe match
-    #                       str | None]:  # regex for converting to FSM
     n = rand.randint(0, 7)
     n *= bool(depth)
     if n == 0:
