@@ -26,10 +26,10 @@ def process_args(
 ) -> int:
     parser = ThrowingArgumentParser(exit_on_error=False)
     parser.add_argument('--input-mode', choices=['reg', 'fa'], required=True)
-    parser.add_argument('--actions',
+    parser.add_argument('--actions', 
                         choices=possible_actions,
                         required=True,
-                        nargs='*')
+                        nargs='*') 
     parser.add_argument('--letters', required=True)
     try:
         args = parser.parse_args(argv[1:])
@@ -41,7 +41,7 @@ def process_args(
     actions = typing.cast(str, args.actions)
     letters = typing.cast(str, args.letters)
 
-    if input_mode == 'fa':
+    if input_mode == 'fa': 
         try:
             value = fa.json_to_dimple(json.loads(stdin.read()))
         except Exception as e:
@@ -55,28 +55,8 @@ def process_args(
             print(f'Unknown action: {action!r}')
             return 1
 
-    def reg_to_eps_nfa(value: str) -> str:
-        return call_old_main((            'reg',          'eps-non-det-fsm'), value, letters)
-
-    def remove_eps(value: str) -> str:
-        return call_old_main(('eps-non-det-fsm',              'non-det-fsm'), value, letters)
-
-    def make_deterministic(value: str) -> str:
-        return call_old_main((    'non-det-fsm',                  'det-fsm'), value, letters)
-
-    def make_full(value: str) -> str:
-        return call_old_main((        'det-fsm',             'full-det-fsm'), value, letters)
-
-    def make_min(value: str) -> str:
-        return call_old_main((    'full-det-fsm',        'min-full-det-fsm'), value, letters)
-
-    def invert(value: str) -> str:
-        return call_old_main(('min-full-det-fsm', 'invert-min-full-det-fsm'), value, letters)
-
     for action in actions:
         value = eval(action.replace('-', '_'))(value)
-
-    # print(repr(value))
 
     value = value[1:]
 
@@ -96,34 +76,48 @@ def main(
     ):
         return process_args(argv, stdin, stdout, stderr)
 
-    def reg_to_eps_nfa(value: str) -> str:
-        return call_old_main((            'reg',          'eps-non-det-fsm'), value, letters)
+def reg_to_eps_nfa(value: str, letters: str) -> str:
+    return call_old_main('reg_to_eps_nfa', value, letters)
 
-    def remove_eps(value: str) -> str:
-        return call_old_main(('eps-non-det-fsm',              'non-det-fsm'), value, letters)
+def remove_eps(value: str, letters: str) -> str:
+    return call_old_main('reg_to_eps_nfa', value, letters)
 
-    def make_deterministic(value: str) -> str:
-        return call_old_main((    'non-det-fsm',                  'det-fsm'), value, letters)
+def make_deterministic(value: str, letters: str) -> str:
+    return call_old_main('reg_to_eps_nfa', value, letters)
 
-    def make_full(value: str) -> str:
-        return call_old_main((        'det-fsm',             'full-det-fsm'), value, letters)
+def make_full(value: str, letters: str) -> str:
+    return call_old_main('reg_to_eps_nfa', value, letters)
 
-    def make_min(value: str) -> str:
-        return call_old_main((    'full-det-fsm',        'min-full-det-fsm'), value, letters)
+def make_min(value: str, letters: str) -> str:
+    return call_old_main('reg_to_eps_nfa', value, letters)
 
-    def invert(value: str) -> str:
-        return call_old_main(('min-full-det-fsm', 'invert-min-full-det-fsm'), value, letters)
+def invert(value: str, letters: str) -> str:
+    return call_old_main('reg_to_eps_nfa', value, letters)
 
 
+new_commands_to_old_commands = {
+    'reg_to_eps_nfa': ('reg', 'eps-non-det-fsm'),
 
-def call_old_main(action: tuple[str, str], stdin_data: str, letters: str) -> tuple[int, str]:
+    'remove_eps': ('eps-non-det-fsm', 'non-det-fsm'),
+
+    'make_deterministic': ('non-det-fsm', 'det-fsm'),
+
+    'make_full': ('det-fsm', 'full-det-fsm'),
+
+    'make_min': ('full-det-fsm', 'min-full-det-fsm'),
+
+    'invert': ('min-full-det-fsm', 'invert-min-full-det-fsm'),
+}
+
+
+def call_old_main(action: str, stdin_data: str, letters: str) -> str:
     stdin = io.StringIO()
     stdin.write(stdin_data)
     stdin.seek(0)
     stdout = io.StringIO()
     stderr = io.StringIO()
     rc = old_main(
-        ['-', *action, letters],
+        ['-', *new_commands_to_old_commands[action], letters],
         stdin, stdout, stderr)
     stdout.seek(0)
     stderr.seek(0)
@@ -134,7 +128,7 @@ def call_old_main(action: tuple[str, str], stdin_data: str, letters: str) -> tup
         print(stdout_data)
         print(stderr_data)
     assert rc == 0
-    assert stderr_data == ''
+    assert stderr_data == '' 
     return stdout_data
 
 
@@ -164,7 +158,7 @@ def old_old_main(
         return 1
 
     if len(argv) == 3:
-        [*formats, labels] = [*argv[1:], '']
+        [*formats, labels] = [*argv[1:], ''] 
     else:
         [*formats, labels] = [*argv[1:]]
 
@@ -193,11 +187,11 @@ def old_old_main(
         return 1
 
     try:
-        if formats[0] == 'reg':
+        if formats[0] == 'reg': 
             text = stdin.readline()
-            if text[-1] == '\n':
+            if text[-1] == '\n': 
                 text = text[:-1]
-            if formats[1] == 'reg':
+            if formats[1] == 'reg': 
                 print(text, file=stdout)
                 return 0
             else:
@@ -223,6 +217,6 @@ def old_old_main(
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': 
     # exit(old_main(sys.argv, sys.stdin, sys.stdout, sys.stderr))
     exit(main(sys.argv, sys.stdin, sys.stdout, sys.stderr))
