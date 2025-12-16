@@ -195,6 +195,27 @@ def main(
         return process_args(argv, stdin, stdout, stderr)
 
 
+# def call_old_main(action: tuple[str, str], stdin_data: str, letters: str) -> tuple[int, str, str]:
+#     stdin = io.StringIO()
+#     stdin.write(stdin_data)
+#     stdin.seek(0)
+#     stdout = io.StringIO()
+#     stderr = io.StringIO()
+#     rc = old_main(
+#         ['-', *action, letters],
+#         stdin, stdout, stderr)
+#     stdout.seek(0)
+#     stderr.seek(0)
+#     stdout_data = stdout.read()
+#     stderr_data = stderr.read()
+#     if rc:
+#         print(stdout_data)
+#         print(stderr_data)
+#     assert rc == 0
+#     assert stderr_data == ''
+#     return stdout_data
+
+
 def old_main(
     argv: list[str],
     stdin: typing.IO[str],

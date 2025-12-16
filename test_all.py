@@ -305,6 +305,7 @@ def run_main_and_assert(argv: list[str],
         assert stdout.read() == text_out
         assert stderr.read() == text_err
         assert bool(text_err) == bool(rc)
+        assert bool(text_out) != bool(rc)
     except AssertionError:
         stdout.seek(0)
         stderr.seek(0)
