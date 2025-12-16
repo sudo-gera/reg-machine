@@ -21,8 +21,10 @@ def ast_to_eps_nfa(a: ast.AST) -> fa.FA:
             return this(a.left) * this(a.right)
         if isinstance(a.op, ast.Pow):
             if isinstance(a.right, ast.Constant):
-                if isinstance(a.right.value, int | type(None)):
-                    return this(a.left)**a.right.value
+                if isinstance(a.right.value, int):
+                    return this(a.left) ** a.right.value
+                if a.right.value is None:
+                    return ~this(a.left)
     elif isinstance(a, ast.Name):
         return fa.FA(a.id)
     elif isinstance(a, ast.Constant):
@@ -45,22 +47,31 @@ def remove_eps(fa: fa.FA) -> fa.FA:
     return fa
 
 
-def make_deterministic(a: fa.FA) -> fa.FA:
-    a = cp(a)
-    s = fa.FA()
+def make_deterministic(old_fa: fa.FA) -> fa.FA:
+    old_fa = cp(old_fa)
+    new_fa = fa.FA()
+
     new_to_old: dd[fa.Node, set[fa.Node]] = dd(set)
     old_to_new: dd[frozenset[fa.Node], fa.Node] = dd(fa.Node)
-    new_to_old[s.start] = {a.start}
-    for nn in s.start.bfs():
-        for n in new_to_old[nn]:
-            nn.is_final |= n.is_final
-            for l, nl in n.next_nodes_by_label.items():
-                nn.next_nodes_by_label[l] |= nl
-        for l, nl in nn.next_nodes_by_label.items():
-            n = old_to_new[frozenset(nl)]
-            nn.next_nodes_by_label[l] = {n}
-            new_to_old[n] = set(nl)
-    return s
+
+    new_to_old[new_fa.start] = {old_fa.start}
+
+    for new_node in new_fa.start.bfs():
+
+        for old_node in new_to_old[new_node]:
+
+            new_node.is_final |= old_node.is_final
+
+            for label, next_nodes_by_label in old_node.next_nodes_by_label.items():
+                new_node.next_nodes_by_label[label] |= next_nodes_by_label
+
+        for label, next_nodes_by_label in new_node.next_nodes_by_label.items():
+
+            old_node = old_to_new[frozenset(next_nodes_by_label)]
+            new_node.next_nodes_by_label[label] = {old_node}
+            new_to_old[old_node] = set(next_nodes_by_label)
+
+    return new_fa
 
 
 def make_full(a: fa.FA, labels: str) -> fa.FA:

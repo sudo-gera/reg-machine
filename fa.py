@@ -60,27 +60,43 @@ class FA:
         return s
 
     def __init__(self, value: str | None = None):
+        '''
+            new FA of two nodes, connected by value if value is not None.
+        '''
         self.start: Node = Node()
         self.the_only_final_if_exists_or_unrelated_node: Node = Node()
         if value is not None:
             self.start >> value >> self.the_only_final_if_exists_or_unrelated_node
 
     def __add__(self: FA, other: FA) -> FA:
+        '''
+            self becomes self + other, other is invalidated.
+        '''
         self.start >> '' >> other.start
         other.the_only_final_if_exists_or_unrelated_node >> '' >> self.the_only_final_if_exists_or_unrelated_node
         return self
 
     def __mul__(self: FA, other: FA) -> FA:
+        '''
+            self becomes self * other, other is invalidated.
+        '''
         self.the_only_final_if_exists_or_unrelated_node >> '' >> other.start
         self.the_only_final_if_exists_or_unrelated_node = other.the_only_final_if_exists_or_unrelated_node
         return self
 
-    def __pow__(self: FA, other: int | None) -> FA:
-        if other is None:
-            self.the_only_final_if_exists_or_unrelated_node >> '' >> self.start
-            return FA('') + self
+    def __pow__(self: FA, other: int) -> FA:
+        '''
+            returns new FA, self is not invalidated.
+        '''
         return functools.reduce(operator.mul,
                                 map(lambda x: cp(x), [self] * other), FA(''))
+
+    def __invert__(self: FA) -> FA:
+        '''
+            returns new FA, self is invalidated.
+        '''
+        self.the_only_final_if_exists_or_unrelated_node >> '' >> self.start
+        return FA('') + self
 
     def is_final(self, node: Node) -> bool:
         return node == self.the_only_final_if_exists_or_unrelated_node or node.is_final

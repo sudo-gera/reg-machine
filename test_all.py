@@ -8,6 +8,7 @@ import ast
 import sys
 import io
 import pytest
+import functools
 from dataclasses import dataclass
 
 import fa
@@ -45,7 +46,11 @@ class created_random_fsm:
     random_string_that_matches: str | None
     regex_for_fullmatch: str | None
     random_strings_that_maybe_match: list[str | None]
-    regex_for_converting_to_fsm: str | None
+    regex_for_converting_to_fsm: str
+
+    @functools.cached_property
+    def compiled_regex_for_fullmatch(self) -> re.Pattern[str]:
+        return re.compile(self.regex_for_fullmatch)
 
 
 def random_fsm(
@@ -62,12 +67,13 @@ def random_fsm(
             arg,
             arg,
             [rand.choice([None, '', *list(labels)]) for q in range(9)],
-            ({
-                arg: arg
-            } | {
-                None: '0',
-                '': '1'
-            })[arg],
+            (
+                '0'
+                if arg is None else
+                '1'
+                if arg == '' else
+                arg
+            ),
         )
     elif n < 3:
         left = random_fsm(rand, depth - 1, labels)
@@ -140,7 +146,7 @@ def random_fsm(
         left = random_fsm(rand, depth - 1, labels)
         if right_n < 0:
             return created_random_fsm(
-                left.fsm**None,
+                ~left.fsm,
                 left.random_string_that_matches * -right_n
                 if left.random_string_that_matches is not None else '',
                 f'({left.regex_for_fullmatch})*'
@@ -223,12 +229,12 @@ def test_fsm_simple_bfs() -> None:
     assert not can_fa_eval_string(fa.FA('-') * fa.FA('+'), '+-')
     assert can_fa_eval_string(fa.FA('-') * fa.FA('+'), '-+')
 
-    assert can_fa_eval_string(fa.FA('-')**None, '')
-    assert can_fa_eval_string(fa.FA('-')**None, '-')
-    assert can_fa_eval_string(fa.FA('-')**None, '--')
-    assert not can_fa_eval_string(fa.FA('-')**None, '+')
-    assert not can_fa_eval_string(fa.FA('-')**None, '-+')
-    assert not can_fa_eval_string(fa.FA('-')**None, '+-')
+    assert can_fa_eval_string(~fa.FA('-'), '')
+    assert can_fa_eval_string(~fa.FA('-'), '-')
+    assert can_fa_eval_string(~fa.FA('-'), '--')
+    assert not can_fa_eval_string(~fa.FA('-'), '+')
+    assert not can_fa_eval_string(~fa.FA('-'), '-+')
+    assert not can_fa_eval_string(~fa.FA('-'), '+-')
 
 
 def check_fsm_no_eps(a: fa.FA) -> None:
@@ -417,15 +423,12 @@ def test_fsm_stress(arg: int) -> None:
                                               r.random_string_that_matches)
                 assert not can_fa_eval_string(inverted_same_min_full_dfa,
                                               r.random_string_that_matches)
-            assert re.fullmatch(r.regex_for_fullmatch,
+            assert re.fullmatch(r.compiled_regex_for_fullmatch,
                                 r.random_string_that_matches)
             for t in r.random_strings_that_maybe_match:
                 if t is not None:
                     u = can_fa_eval_string(same_min_full_dfa, t)
-                    compiled_regex_for_fullmatch = re.compile(r.regex_for_fullmatch)
-                    # import sys
-                    # print(arg, sys.getsizeof(compiled_regex_for_fullmatch), len(t), file=debug)
-                    assert u == bool(re.fullmatch(compiled_regex_for_fullmatch, t))
+                    assert u == bool(re.fullmatch(r.compiled_regex_for_fullmatch, t))
                     if arg < 0:
                         assert can_fa_eval_string(r.fsm, t) == u
                         assert can_fa_eval_string(eps_nfa, t) == u
