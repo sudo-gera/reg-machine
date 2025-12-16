@@ -340,8 +340,11 @@ print(f'{seed = }', file=debug)
 rand = random.Random(seed)
 # print(f'{seed = }', file=open('/dev/tty', 'w'))
 
+arg_values = [*range(99)]
+arg_values = [*range(-len(arg_values), len(arg_values)+1)]
+rand.shuffle(arg_values)
 
-@pytest.mark.parametrize('arg', range(-99, 99 + 800))
+@pytest.mark.parametrize('arg', arg_values)
 def test_fsm_stress(arg: int) -> None:
     labels = 'qwertyuiop'
     while True:
@@ -422,8 +425,8 @@ def test_fsm_stress(arg: int) -> None:
                 if t is not None:
                     u = can_fa_eval_string(same_min_full_dfa, t)
                     compiled_regex_for_fullmatch = re.compile(r.regex_for_fullmatch)
-                    import sys
-                    print(sys.getsizeof(compiled_regex_for_fullmatch), len(t), file=debug)
+                    # import sys
+                    # print(arg, sys.getsizeof(compiled_regex_for_fullmatch), len(t), file=debug)
                     assert u == bool(re.fullmatch(compiled_regex_for_fullmatch, t))
                     if arg < 0:
                         assert can_fa_eval_string(r.fsm, t) == u
