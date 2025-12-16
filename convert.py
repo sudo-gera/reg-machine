@@ -122,7 +122,7 @@ def make_min(a: fa.FA) -> fa.FA:
     return s
 
 
-def invert_full_fsm(a: fa.FA) -> fa.FA:
+def invert_full_fa(a: fa.FA) -> fa.FA:
     a = cp(a)
     for n in a.start.bfs():
         n.is_final = not n.is_final

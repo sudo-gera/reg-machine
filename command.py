@@ -236,7 +236,7 @@ def old_old_main(
         'non-det-fsm': convert.make_deterministic,
         'det-fsm': lambda a: convert.make_full(a, labels + labels[0][:0]),
         'full-det-fsm': convert.make_min,
-        'min-full-det-fsm': convert.invert_full_fsm,
+        'min-full-det-fsm': convert.invert_full_fa,
         'invert-full-det-fsm': lambda a: a,
     }
     for arg in formats:
