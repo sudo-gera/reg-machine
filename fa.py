@@ -33,7 +33,7 @@ class Node:
     def bfs(
             self: Node,
             eps_only: bool = False
-            ) -> typing.Generator[Node, None, None]:
+    ) -> typing.Generator[Node, None, None]:
         '''
             This implementation reads next nodes of current node only after it yields it.
         '''
@@ -48,7 +48,7 @@ class Node:
             if node not in visited:
                 visited.add(node)
 
-                yield node # Here caller may change next nodes if this node.
+                yield node  # Here caller may change next nodes if this node.
 
                 for label in [node.next_nodes_by_label, ['']][eps_only]:
                     queue.extend(node.next_nodes_by_label[label])
@@ -83,7 +83,8 @@ class FA:
 
                 for next_old_node in old_nodes_next_by_label:
 
-                    next_new_node = old_to_new[next_old_node] # maybe creates new node
+                    # maybe creates new node
+                    next_new_node = old_to_new[next_old_node]
 
                     new_to_old[next_new_node] = next_old_node
 
@@ -137,6 +138,7 @@ class FA:
     def is_final(self, node: Node) -> bool:
         return node == self.the_only_final_if_exists_or_unrelated_node or node.is_final
 
+
 def dimple(fa: FA) -> str:
     id_map: dd[Node, int] = dd(lambda: len(id_map) + 1)
     res = io.StringIO()
@@ -153,6 +155,7 @@ def dimple(fa: FA) -> str:
                 print(id_map[n], id_map[nn], label, file=res)
     res.seek(0)
     return res.read()
+
 
 def from_dimple(text_str: str) -> FA:
 

@@ -214,14 +214,17 @@ def old_old_main(
     stdout: typing.IO[str],
     stderr: typing.IO[str],
 ) -> int:
+
     if len(argv) not in [3, 4]:
         print(f'usage: {argv[0]} <input format> <output format> [<labels>]',
-              file=stdout)
+              file=stderr)
         return 1
+
     if len(argv) == 3:
         [*formats, labels] = [*argv[1:], '']
     else:
         [*formats, labels] = [*argv[1:]]
+
     all_formats: dict[str, typing.Callable[[fa.FA], fa.FA]] = {
         'reg': lambda a: a,
         'eps-non-det-fsm': convert.remove_eps,
@@ -231,17 +234,21 @@ def old_old_main(
         'min-full-det-fsm': convert.invert_full_fa,
         'invert-full-det-fsm': lambda a: a,
     }
+
     for arg in formats:
         if arg not in all_formats:
-            print(f'unknown format: {arg}.', file=stdout)
-            print('supported formats are:', file=stdout)
+            print(f'unknown format: {arg}.', file=stderr)
+            print('supported formats are:', file=stderr)
             for f in all_formats:
-                print(f'    {f}', file=stdout)
+                print(f'    {f}', file=stderr)
             return 1
-    format_nums = [[*all_formats].index(f) for f in formats]
-    if format_nums[0] > format_nums[1]:
-        print('this conversion order is not supported.', file=stdout)
+
+    format_indexes = [[*all_formats].index(f) for f in formats]
+
+    if format_indexes[0] > format_indexes[1]:
+        print('this conversion order is not supported.', file=stderr)
         return 1
+
     try:
         if formats[0] == 'reg':
             text = stdin.readline()
@@ -256,17 +263,19 @@ def old_old_main(
         else:
             text = stdin.read()
             a = fa.from_dimple(text)
-        for num in range(*format_nums):
+
+        for num in range(*format_indexes):
             func = [*all_formats.values()][num]
             if func.__closure__ is not None and not labels:
-                print('labels argument is undefined.', file=stdout)
+                print('labels argument is undefined.', file=stderr)
                 return 1
             a = func(a)
+
         print(file=stdout)
         print(fa.dimple(a), end='', file=stdout)
         return 0
     except Exception:
-        print('Incorrect input data.', file=stdout)
+        print('Incorrect input data.', file=stderr)
         # print(traceback.format_exc(), file=debug)
         return 1
 

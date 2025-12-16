@@ -14,6 +14,7 @@ import ast
 import sys
 import io
 import validate
+import typing
 pytest = __import__('pytest')
 
 
@@ -276,57 +277,123 @@ def check_equal(a: fa.FA, s: fa.FA) -> None:
     check_a_to_s(s_to_a, a_to_s)
 
 
-def test_io() -> None:
+def test_io_simple() -> None:
+
     assert fa.dimple(fa.FA('-') *
-            fa.FA('+')) == '1\n\n4\n\n1 2 -\n2 3 \n3 4 +\n'
+                     fa.FA('+')) == '1\n\n4\n\n1 2 -\n2 3 \n3 4 +\n'
+
     check_equal(
         fa.FA('-') * fa.FA('+'),
         fa.from_dimple('1\n\n2\n\n1 3 -\n3 4 \n4 2 +\n'))
 
-    def test_main(argv: list[str],
-                  text_in: str,
-                  text_out: str,
-                  code: int,
-                  text_err: str = '') -> None:
-        stdin = io.StringIO()
-        stdin.write(text_in)
-        stdin.seek(0)
-        stdout = io.StringIO()
-        stderr = io.StringIO()
-        rc = command.old_main(argv, stdin, stdout, stderr)
+
+def run_main_and_assert(argv: list[str],
+                        text_in: str,
+                        text_out: str,
+                        code: int,
+                        text_err: str = '') -> None:
+    stdin = io.StringIO()
+    stdin.write(text_in)
+    stdin.seek(0)
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+    rc = command.old_main(argv, stdin, stdout, stderr)
+    stdout.seek(0)
+    stderr.seek(0)
+    try:
+        assert code == rc
+        assert stdout.read() == text_out
+        assert stderr.read() == text_err
+    except AssertionError:
         stdout.seek(0)
         stderr.seek(0)
-        try:
-            assert code == rc
-            assert stdout.read() == text_out
-            assert stderr.read() == text_err
-        except AssertionError:
-            print(f'{rc = }', file=debug)
-            print(f'{text_out = }', file=debug)
-            print(f'{text_err = }', file=debug)
-            raise
+        print(f'{rc = }', file=debug)
+        print(f'{text_out = }', file=debug)
+        print(f'{text_err = }', file=debug)
+        print(f'{stdout.read() = }', file=debug)
+        print(f'{stderr.read() = }', file=debug)
+        raise
 
-    test_main(['command.py'], '',
-              'usage: command.py <input format> <output format> [<labels>]\n',
-              1)
-    test_main(['command.py', 'reg', 'reg'], '0\n', '0\n', 0)
-    test_main(
+
+@dataclass
+class io_test:
+    argv: list[str]
+    text_in: str
+    text_out: str
+    code: int
+    text_err: str
+
+    def __call__(self) -> None:
+        run_main_and_assert(self.argv, self.text_in,
+                            self.text_out, self.code, self.text_err)
+
+
+def get_io_tests() -> list[io_test]:
+
+    tests: list[io_test] = []
+
+    def append_to_tests(argv: list[str],
+                        text_in: str,
+                        text_out: str,
+                        code: int,
+                        text_err: str = '') -> None:
+
+        tests.append(io_test(argv=argv, text_in=text_in,
+                     text_out=text_out, code=code, text_err=text_err))
+
+    append_to_tests(
+        ['command.py'],
+        '',
+        '',
+        1,
+        'usage: command.py <input format> <output format> [<labels>]\n')
+    append_to_tests(['command.py', 'reg', 'reg'], '0\n', '0\n', 0)
+    append_to_tests(
         ['command.py', 'reg', 'peg'], '',
+        '',
+        1,
         'unknown format: peg.\nsupported formats are:\n    reg\n    eps-non-det-fsm\n    non-det-fsm\n    det-fsm\n    full-det-fsm\n    min-full-det-fsm\n    invert-full-det-fsm\n',
-        1)
-    test_main(['command.py', 'det-fsm', 'reg'], '',
-              'this conversion order is not supported.\n', 1)
-    test_main(['command.py', 'reg', 'det-fsm'], '0', '\n1\n\n\n', 0)
-    test_main(['command.py', 'eps-non-det-fsm', 'det-fsm'], '\n1\n\n\n',
-              '\n1\n\n\n', 0)
-    test_main(['command.py', 'reg', 'full-det-fsm'], '0',
-              'labels argument is undefined.\n', 1)
-    test_main(
+        )
+    append_to_tests(
+        ['command.py', 'det-fsm', 'reg'],
+        '',
+                    '',
+                    1,
+                    'this conversion order is not supported.\n',
+                )
+    append_to_tests(['command.py', 'reg', 'det-fsm'], '0', '\n1\n\n\n', 0, '')
+    append_to_tests(['command.py', 'eps-non-det-fsm', 'det-fsm'], '\n1\n\n\n',
+                    '\n1\n\n\n', 0)
+    append_to_tests(
+        ['command.py', 'reg', 'full-det-fsm'],
+        '0',
+        '',
+        1,
+        'labels argument is undefined.\n',
+        )
+    append_to_tests(
         ['command.py', 'non-det-fsm', 'min-full-det-fsm', 'ab'],
         '0\n\n3\n\n0 3 a\n3 3 a\n3 3 b\n0 1 b\n2 3 a\n2 1 b\n1 2 b\n1 1 a\n',
         '\n1\n\n2\n\n1 2 a\n1 3 b\n2 2 a\n2 2 b\n3 1 b\n3 3 a\n', 0)
-    test_main(['command.py', 'reg', 'det-fsm'], '', 'Incorrect input data.\n',
-              1)
+    append_to_tests(
+        ['command.py', 'reg', 'det-fsm'],
+        '',
+                    '',
+                    1,
+        'Incorrect input data.\n',
+                    )
+
+    return tests
+
+
+io_tests = get_io_tests()
+
+
+def test_io(arg: typing.Callable[[], None]) -> None:
+    arg()
+
+
+test_io = pytest.mark.parametrize('arg', io_tests)(test_io)
 
 
 # seed = 3099010176601051186
