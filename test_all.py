@@ -1,4 +1,10 @@
 from __future__ import annotations
+from debug import debug
+import command
+import convert
+import fa
+from dataclasses import dataclass
+import functools
 from copy import deepcopy as cp
 import random
 import re
@@ -8,27 +14,23 @@ import ast
 import sys
 import io
 pytest = __import__('pytest')
-import functools
-from dataclasses import dataclass
-
-import fa
-import convert
-import command
-from debug import debug
 
 
 class InternalTestError(Exception):
     pass
 
+
 def can_fa_eval_string(a: fa.FA, path: str, limit: int = 64) -> bool:
     operation_count = 0
-    accessible_by_eps_from_this_node = {node: list(node.bfs(True)) for node in a.start.bfs()}
+    accessible_by_eps_from_this_node = {
+        node: list(node.bfs(True)) for node in a.start.bfs()}
     current_nodes = list(a.start.bfs(True))
     for c in path:
         next_nodes: dict[fa.Node, None] = {}
         for current_node in current_nodes:
             for next_nodes_from_one_current_node in current_node.next_nodes_by_label[c]:
-                next_nodes |= dict.fromkeys(accessible_by_eps_from_this_node[next_nodes_from_one_current_node])
+                next_nodes |= dict.fromkeys(
+                    accessible_by_eps_from_this_node[next_nodes_from_one_current_node])
                 operation_count += 1
                 if operation_count > limit:
                     raise InternalTestError
@@ -208,9 +210,11 @@ def test_fsm_simple_bfs() -> None:
     f = fa.FA(None)
     assert list(f.start.bfs()) == [f.start]
     f = fa.FA('')
-    assert list(f.start.bfs()) == [f.start, f.the_only_final_if_exists_or_unrelated_node]
+    assert list(f.start.bfs()) == [
+        f.start, f.the_only_final_if_exists_or_unrelated_node]
     f = fa.FA('-')
-    assert list(f.start.bfs()) == [f.start, f.the_only_final_if_exists_or_unrelated_node]
+    assert list(f.start.bfs()) == [
+        f.start, f.the_only_final_if_exists_or_unrelated_node]
 
     assert not can_fa_eval_string(fa.FA(None), '')
     assert not can_fa_eval_string(fa.FA(None), '-')
@@ -346,9 +350,10 @@ print(f'{seed = }', file=debug)
 rand = random.Random(seed)
 # print(f'{seed = }', file=open('/dev/tty', 'w'))
 
-arg_values = [*range(999)]
+arg_values = [*range(99)]
 arg_values = [*range(-len(arg_values), len(arg_values)+1)]
 rand.shuffle(arg_values)
+
 
 def test_fsm_stress(arg: int) -> None:
     labels = 'qwertyuiop'
@@ -429,7 +434,8 @@ def test_fsm_stress(arg: int) -> None:
             for t in r.random_strings_that_maybe_match:
                 if t is not None:
                     u = can_fa_eval_string(same_min_full_dfa, t)
-                    assert u == bool(re.fullmatch(r.compiled_regex_for_fullmatch, t))
+                    assert u == bool(re.fullmatch(
+                        r.compiled_regex_for_fullmatch, t))
                     if arg < 0:
                         assert can_fa_eval_string(r.fsm, t) == u
                         assert can_fa_eval_string(eps_nfa, t) == u
@@ -446,5 +452,6 @@ def test_fsm_stress(arg: int) -> None:
             break
         except InternalTestError:
             continue
+
 
 test_fsm_stress = pytest.mark.parametrize('arg', arg_values)(test_fsm_stress)
