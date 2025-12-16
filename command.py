@@ -56,122 +56,24 @@ def process_args(
             return 1
 
     def reg_to_eps_nfa(value: str) -> str:
-        stdin = io.StringIO()
-        stdin.write(value)
-        stdin.seek(0)
-        stdout = io.StringIO()
-        stderr = io.StringIO()
-        rc = old_main(['-', 'reg', 'eps-non-det-fsm', letters], stdin, stdout,
-                      stderr)
-        stdout.seek(0)
-        stderr.seek(0)
-        stdout_data = stdout.read()
-        stderr_data = stderr.read()
-        if rc:
-            print(stdout_data)
-            print(stderr_data)
-        assert rc == 0
-        assert stderr_data == ''
-        return stdout_data
+        return call_old_main((            'reg',          'eps-non-det-fsm'), value, letters)
 
     def remove_eps(value: str) -> str:
-        stdin = io.StringIO()
-        stdin.write(value)
-        stdin.seek(0)
-        stdout = io.StringIO()
-        stderr = io.StringIO()
-        rc = old_main(['-', 'eps-non-det-fsm', 'non-det-fsm', letters], stdin,
-                      stdout, stderr)
-        stdout.seek(0)
-        stderr.seek(0)
-        stdout_data = stdout.read()
-        stderr_data = stderr.read()
-        if rc:
-            print(stdout_data)
-            print(stderr_data)
-        assert rc == 0
-        assert stderr_data == ''
-        return stdout_data
+        return call_old_main(('eps-non-det-fsm',              'non-det-fsm'), value, letters)
 
     def make_deterministic(value: str) -> str:
-        stdin = io.StringIO()
-        stdin.write(value)
-        stdin.seek(0)
-        stdout = io.StringIO()
-        stderr = io.StringIO()
-        rc = old_main(['-', 'non-det-fsm', 'det-fsm', letters], stdin, stdout,
-                      stderr)
-        stdout.seek(0)
-        stderr.seek(0)
-        stdout_data = stdout.read()
-        stderr_data = stderr.read()
-        if rc:
-            print(stdout_data)
-            print(stderr_data)
-        assert rc == 0
-        assert stderr_data == ''
-        return stdout_data
+        return call_old_main((    'non-det-fsm',                  'det-fsm'), value, letters)
 
     def make_full(value: str) -> str:
-        stdin = io.StringIO()
-        stdin.write(value)
-        stdin.seek(0)
-        stdout = io.StringIO()
-        stderr = io.StringIO()
-        rc = old_main(['-', 'det-fsm', 'full-det-fsm', letters], stdin, stdout,
-                      stderr)
-        stdout.seek(0)
-        stderr.seek(0)
-        stdout_data = stdout.read()
-        stderr_data = stderr.read()
-        if rc:
-            print(stdout_data)
-            print(stderr_data)
-        assert rc == 0
-        assert stderr_data == ''
-        return stdout_data
+        return call_old_main((        'det-fsm',             'full-det-fsm'), value, letters)
 
     def make_min(value: str) -> str:
-        stdin = io.StringIO()
-        stdin.write(value)
-        stdin.seek(0)
-        stdout = io.StringIO()
-        stderr = io.StringIO()
-        rc = old_main(['-', 'full-det-fsm', 'min-full-det-fsm', letters],
-                      stdin, stdout, stderr)
-        stdout.seek(0)
-        stderr.seek(0)
-        stdout_data = stdout.read()
-        stderr_data = stderr.read()
-        if rc:
-            print(stdout_data)
-            print(stderr_data)
-        assert rc == 0
-        assert stderr_data == ''
-        return stdout_data
+        return call_old_main((    'full-det-fsm',        'min-full-det-fsm'), value, letters)
 
     def invert(value: str) -> str:
-        stdin = io.StringIO()
-        stdin.write(value)
-        stdin.seek(0)
-        stdout = io.StringIO()
-        stderr = io.StringIO()
-        rc = old_main(
-            ['-', 'min-full-det-fsm', 'invert-min-full-det-fsm', letters],
-            stdin, stdout, stderr)
-        stdout.seek(0)
-        stderr.seek(0)
-        stdout_data = stdout.read()
-        stderr_data = stderr.read()
-        if rc:
-            print(stdout_data)
-            print(stderr_data)
-        assert rc == 0
-        assert stderr_data == ''
-        return stdout_data
+        return call_old_main(('min-full-det-fsm', 'invert-min-full-det-fsm'), value, letters)
 
     for action in actions:
-        # print(f'{action = !r}, {value = !r}')
         value = eval(action.replace('-', '_'))(value)
 
     # print(repr(value))
@@ -194,26 +96,46 @@ def main(
     ):
         return process_args(argv, stdin, stdout, stderr)
 
+    def reg_to_eps_nfa(value: str) -> str:
+        return call_old_main((            'reg',          'eps-non-det-fsm'), value, letters)
 
-# def call_old_main(action: tuple[str, str], stdin_data: str, letters: str) -> tuple[int, str, str]:
-#     stdin = io.StringIO()
-#     stdin.write(stdin_data)
-#     stdin.seek(0)
-#     stdout = io.StringIO()
-#     stderr = io.StringIO()
-#     rc = old_main(
-#         ['-', *action, letters],
-#         stdin, stdout, stderr)
-#     stdout.seek(0)
-#     stderr.seek(0)
-#     stdout_data = stdout.read()
-#     stderr_data = stderr.read()
-#     if rc:
-#         print(stdout_data)
-#         print(stderr_data)
-#     assert rc == 0
-#     assert stderr_data == ''
-#     return stdout_data
+    def remove_eps(value: str) -> str:
+        return call_old_main(('eps-non-det-fsm',              'non-det-fsm'), value, letters)
+
+    def make_deterministic(value: str) -> str:
+        return call_old_main((    'non-det-fsm',                  'det-fsm'), value, letters)
+
+    def make_full(value: str) -> str:
+        return call_old_main((        'det-fsm',             'full-det-fsm'), value, letters)
+
+    def make_min(value: str) -> str:
+        return call_old_main((    'full-det-fsm',        'min-full-det-fsm'), value, letters)
+
+    def invert(value: str) -> str:
+        return call_old_main(('min-full-det-fsm', 'invert-min-full-det-fsm'), value, letters)
+
+
+
+def call_old_main(action: tuple[str, str], stdin_data: str, letters: str) -> tuple[int, str]:
+    stdin = io.StringIO()
+    stdin.write(stdin_data)
+    stdin.seek(0)
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+    rc = old_main(
+        ['-', *action, letters],
+        stdin, stdout, stderr)
+    stdout.seek(0)
+    stderr.seek(0)
+    stdout_data = stdout.read()
+    stderr_data = stderr.read()
+    if rc:
+        print(f'{rc = }')
+        print(stdout_data)
+        print(stderr_data)
+    assert rc == 0
+    assert stderr_data == ''
+    return stdout_data
 
 
 def old_main(
