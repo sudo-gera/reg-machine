@@ -12,15 +12,6 @@ from utils import *
 import fa
 import argparse
 
-
-class ThrowingArgumentParser(argparse.ArgumentParser):
-
-    def exit(self,
-             status: int = 0,
-             message: str | None = None) -> typing.NoReturn:
-        raise argparse.ArgumentError(None, str(message))
-
-
 possible_actions = [
     'reg-to-eps-nfa', 'remove-eps', 'make-deterministic', 'make-full',
     'make-min', 'invert', 'nfa-to-reg'
