@@ -13,6 +13,7 @@ import time
 import ast
 import sys
 import io
+import validate
 pytest = __import__('pytest')
 
 
@@ -248,27 +249,6 @@ def test_fa_simple_bfs() -> None:
     assert not can_fa_eval_string(~fa.FA('A'), 'BA')
 
 
-def check_fa_no_eps(a: fa.FA) -> None:
-    for n in a.start.bfs():
-        assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[
-            ''] == set()
-
-
-def check_fa_is_det(a: fa.FA) -> None:
-    for n in a.start.bfs():
-        assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[
-            ''] == set()
-        assert all([len(nl) < 2 for nl in n.next_nodes_by_label.values()])
-
-
-def check_fa_is_full(a: fa.FA, labels: str) -> None:
-    for n in a.start.bfs():
-        assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[
-            ''] == set()
-        assert all([len(nl) < 2 for nl in n.next_nodes_by_label.values()])
-        assert all([len(n.next_nodes_by_label[l]) == 1 for l in labels])
-
-
 def check_equal(a: fa.FA, s: fa.FA) -> None:
     a_to_s: dict[fa.Node, fa.Node] = {
         d: f
@@ -375,30 +355,30 @@ def test_fa_stress(arg: int) -> None:
                 eps_nfa = convert.ast_to_eps_nfa(z)
 
                 nfa = convert.remove_eps(eps_nfa)
-                check_fa_no_eps(nfa)
+                validate.check_fa_no_eps(nfa)
 
                 dfa = convert.make_deterministic(nfa)
-                check_fa_is_det(dfa)
+                validate.check_fa_is_det(dfa)
 
                 full_dfa = convert.make_full(dfa, labels)
-                check_fa_is_full(full_dfa, labels)
+                validate.check_fa_is_full(full_dfa, labels)
 
                 min_full_dfa = convert.make_min(full_dfa)
-                check_fa_is_full(min_full_dfa, labels)
+                validate.check_fa_is_full(min_full_dfa, labels)
 
                 same_min_full_dfa = convert.make_min(min_full_dfa)
-                check_fa_is_full(same_min_full_dfa, labels)
+                validate.check_fa_is_full(same_min_full_dfa, labels)
                 check_equal(min_full_dfa, same_min_full_dfa)
 
                 inverted_full_dfa = convert.invert_full_fa(full_dfa)
-                check_fa_is_full(inverted_full_dfa, labels)
+                validate.check_fa_is_full(inverted_full_dfa, labels)
 
                 inverted_min_full_dfa = convert.invert_full_fa(min_full_dfa)
-                check_fa_is_full(inverted_min_full_dfa, labels)
+                validate.check_fa_is_full(inverted_min_full_dfa, labels)
 
                 inverted_same_min_full_dfa = convert.invert_full_fa(
                     same_min_full_dfa)
-                check_fa_is_full(inverted_same_min_full_dfa, labels)
+                validate.check_fa_is_full(inverted_same_min_full_dfa, labels)
                 check_equal(inverted_min_full_dfa, inverted_same_min_full_dfa)
 
             except RecursionError:
