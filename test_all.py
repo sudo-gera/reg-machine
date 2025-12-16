@@ -346,7 +346,7 @@ rand = random.Random(seed)
 # print(f'{seed = }', file=open('/dev/tty', 'w'))
 
 
-@pytest.mark.parametrize('arg', range(-99, 99))
+@pytest.mark.parametrize('arg', range(-99, 99 + 800))
 def test_fsm_stress(arg: int) -> None:
     labels = 'qwertyuiop'
     while True:
@@ -426,7 +426,8 @@ def test_fsm_stress(arg: int) -> None:
             for t in r.random_strings_that_maybe_match:
                 if t is not None:
                     u = can_fa_eval_string(same_min_full_dfa, t)
-                    assert u == bool(re.fullmatch(r.regex_for_fullmatch, t))
+                    compiled_regex_for_fullmatch = re.compile(r.regex_for_fullmatch)
+                    assert u == bool(re.fullmatch(compiled_regex_for_fullmatch, t))
                     if arg < 0:
                         assert can_fa_eval_string(r.fsm, t) == u
                         assert can_fa_eval_string(eps_nfa, t) == u
