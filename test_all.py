@@ -304,6 +304,7 @@ def run_main_and_assert(argv: list[str],
         assert code == rc
         assert stdout.read() == text_out
         assert stderr.read() == text_err
+        assert bool(text_err) == bool(rc)
     except AssertionError:
         stdout.seek(0)
         stderr.seek(0)
@@ -353,14 +354,14 @@ def get_io_tests() -> list[io_test]:
         '',
         1,
         'unknown format: peg.\nsupported formats are:\n    reg\n    eps-non-det-fsm\n    non-det-fsm\n    det-fsm\n    full-det-fsm\n    min-full-det-fsm\n    invert-full-det-fsm\n',
-        )
+    )
     append_to_tests(
         ['command.py', 'det-fsm', 'reg'],
         '',
-                    '',
-                    1,
-                    'this conversion order is not supported.\n',
-                )
+        '',
+        1,
+        'this conversion order is not supported.\n',
+    )
     append_to_tests(['command.py', 'reg', 'det-fsm'], '0', '\n1\n\n\n', 0, '')
     append_to_tests(['command.py', 'eps-non-det-fsm', 'det-fsm'], '\n1\n\n\n',
                     '\n1\n\n\n', 0)
@@ -370,7 +371,7 @@ def get_io_tests() -> list[io_test]:
         '',
         1,
         'labels argument is undefined.\n',
-        )
+    )
     append_to_tests(
         ['command.py', 'non-det-fsm', 'min-full-det-fsm', 'ab'],
         '0\n\n3\n\n0 3 a\n3 3 a\n3 3 b\n0 1 b\n2 3 a\n2 1 b\n1 2 b\n1 1 a\n',
@@ -378,10 +379,10 @@ def get_io_tests() -> list[io_test]:
     append_to_tests(
         ['command.py', 'reg', 'det-fsm'],
         '',
-                    '',
-                    1,
+        '',
+        1,
         'Incorrect input data.\n',
-                    )
+    )
 
     return tests
 
