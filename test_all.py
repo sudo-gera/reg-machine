@@ -20,20 +20,20 @@ class InternalTestError(Exception):
 
 
 def can_fa_eval_string(a: fsm.FSM, path: str, limit: int = 64) -> bool:
-    ops = 0
+    operation_count = 0
     eps_map = {n: list(n.bfs(True)) for n in a.start.bfs()}
     current_nodes = list(a.start.bfs(True))
     next_nodes: dict[fsm.Node, None] = {}
     for c in path:
         for n in current_nodes:
-            for nn in n.next[c]:
+            for nn in n.next_nodes_by_label[c]:
                 next_nodes |= dict.fromkeys(eps_map[nn])
-                ops += 1
-                if ops > limit:
+                operation_count += 1
+                if operation_count > limit:
                     raise InternalTestError
         current_nodes = list(next_nodes)
         next_nodes = {}
-    res = any([n.stop or a.stop == n for n in current_nodes])
+    res = any([n.is_final or a.stop == n for n in current_nodes])
     return res
 
 FSM = fsm.FSM
@@ -146,9 +146,9 @@ def graphviz(a: fsm.FSM) -> str:
     id_map: dd[fsm.Node, int] = dd(lambda: len(id_map))
     res = 'digraph G{\n'
     for n in a.start.bfs():
-        res += f'    {id_map[n]} [ label = "{id_map[n]} {n.stop or n == a.stop}" ]\n'
+        res += f'    {id_map[n]} [ label = "{id_map[n]} {n.is_final or n == a.stop}" ]\n'
     for n in a.start.bfs():
-        for label, nl in n.next.items():
+        for label, nl in n.next_nodes_by_label.items():
             for nn in nl:
                 res += f'    {id_map[n]} -> {id_map[nn]} [ label = "{label}" ]\n'
     res += '}'
@@ -194,20 +194,20 @@ def test_fsm_simple_bfs() -> None:
 
 def check_fsm_no_eps(a: fsm.FSM) -> None:
     for n in a.start.bfs():
-        assert '' not in n.next or n.next[''] == set()
+        assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[''] == set()
 
 
 def check_fsm_is_det(a: fsm.FSM) -> None:
     for n in a.start.bfs():
-        assert '' not in n.next or n.next[''] == set()
-        assert all([len(nl) < 2 for nl in n.next.values()])
+        assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[''] == set()
+        assert all([len(nl) < 2 for nl in n.next_nodes_by_label.values()])
 
 
 def check_fsm_is_full(a: fsm.FSM, labels: str) -> None:
     for n in a.start.bfs():
-        assert '' not in n.next or n.next[''] == set()
-        assert all([len(nl) < 2 for nl in n.next.values()])
-        assert all([len(n.next[l]) == 1 for l in labels])
+        assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[''] == set()
+        assert all([len(nl) < 2 for nl in n.next_nodes_by_label.values()])
+        assert all([len(n.next_nodes_by_label[l]) == 1 for l in labels])
 
 
 def check_equal(a: fsm.FSM, s: fsm.FSM) -> None:
@@ -223,8 +223,8 @@ def check_equal(a: fsm.FSM, s: fsm.FSM) -> None:
     def check_a_to_s(a_to_s: dict[fsm.Node, fsm.Node], s_to_a: dict[fsm.Node, fsm.Node]) -> None:
         for d, f in a_to_s.items():
             assert a_to_s[d] == f
-            for l in d.next:
-                assert {a_to_s[n] for n in d.next[l]} == set(f.next[l])
+            for l in d.next_nodes_by_label:
+                assert {a_to_s[n] for n in d.next_nodes_by_label[l]} == set(f.next_nodes_by_label[l])
     check_a_to_s(a_to_s, s_to_a)
     check_a_to_s(s_to_a, a_to_s)
 

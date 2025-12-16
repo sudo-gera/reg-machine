@@ -10,15 +10,15 @@ import io
 
 class Node:
     def __init__(self: Node) -> None:
-        self.next: dd[str, set[Node]] = dd(set)
-        self.stop: bool = False
+        self.next_nodes_by_label: dd[str, set[Node]] = dd(set)
+        self.is_final: bool = False
 
     def __rshift__(self: Node, label: str) -> tuple[Node, str]:
         return (self, label)
 
     def __rrshift__(self: Node, left_label: tuple[Node, str]) -> None:
         left, label, right = left_label + (self,)
-        left.next[label] |= {right}
+        left.next_nodes_by_label[label] |= {right}
 
     def __hash__(self: Node) -> int:
         return id(self)
@@ -34,8 +34,8 @@ class Node:
             if n not in visited:
                 visited.add(n)
                 yield n
-                for l in [n.next, ['']][eps_only]:
-                    q.extend(n.next[l])
+                for l in [n.next_nodes_by_label, ['']][eps_only]:
+                    q.extend(n.next_nodes_by_label[l])
 
 
 class FSM:
@@ -48,11 +48,11 @@ class FSM:
         new_to_old[s.start] = self.start
         for new_n in s.start.bfs():
             old_n = new_to_old[new_n]
-            new_n.stop = old_n.stop
+            new_n.is_final = old_n.is_final
             if old_n == self.stop:
                 s.stop = new_n
             memo[id(new_n)] = old_n
-            for l, nl in old_n.next.items():
+            for l, nl in old_n.next_nodes_by_label.items():
                 for old_nn in nl:
                     new_nn = old_to_new[old_nn]
                     new_to_old[new_nn] = old_nn
@@ -90,11 +90,11 @@ class FSM:
         print(file=res)
         for n in self.start.bfs():
             id_map[n]
-            if n.stop or n == self.stop:
+            if n.is_final or n == self.stop:
                 print(id_map[n], file=res)
         print(file=res)
         for n in self.start.bfs():
-            for label, nl in n.next.items():
+            for label, nl in n.next_nodes_by_label.items():
                 for nn in nl:
                     print(id_map[n], id_map[nn], label, file=res)
         res.seek(0)
@@ -116,7 +116,7 @@ class FSM:
         res = FSM()
         res.start = name_to_node[start[0][0]]
         for line in stop:
-            name_to_node[line[0]].stop = True
+            name_to_node[line[0]].is_final = True
         for line in text:
             if len(line) == 2:
                 line.append('')

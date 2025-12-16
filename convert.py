@@ -33,15 +33,15 @@ def ast_to_eps_nfa(a: ast.AST) -> fsm.FSM:
 
 def remove_eps(a: fsm.FSM) -> fsm.FSM:
     a = cp(a)
-    a.stop.stop = True
+    a.stop.is_final = True
     for root in a.start.bfs():
         for n in root.bfs(eps_only=True):
-            root.stop |= n.stop
-            for label, nl in n.next.items():
-                root.next[label] |= nl
+            root.is_final |= n.is_final
+            for label, nl in n.next_nodes_by_label.items():
+                root.next_nodes_by_label[label] |= nl
     for root in a.start.bfs():
-        if '' in root.next:
-            del root.next['']
+        if '' in root.next_nodes_by_label:
+            del root.next_nodes_by_label['']
     return a
 
 
@@ -53,12 +53,12 @@ def make_deterministic(a: fsm.FSM) -> fsm.FSM:
     new_to_old[s.start] = {a.start}
     for nn in s.start.bfs():
         for n in new_to_old[nn]:
-            nn.stop |= n.stop
-            for l, nl in n.next.items():
-                nn.next[l] |= nl
-        for l, nl in nn.next.items():
+            nn.is_final |= n.is_final
+            for l, nl in n.next_nodes_by_label.items():
+                nn.next_nodes_by_label[l] |= nl
+        for l, nl in nn.next_nodes_by_label.items():
             n = old_to_new[frozenset(nl)]
-            nn.next[l] = {n}
+            nn.next_nodes_by_label[l] = {n}
             new_to_old[n] = set(nl)
     return s
 
@@ -68,17 +68,17 @@ def make_full(a: fsm.FSM, labels: str) -> fsm.FSM:
     new = fsm.Node()
     for n in a.start.bfs():
         for l in labels:
-            if not n.next[l]:
+            if not n.next_nodes_by_label[l]:
                 n >> l >> new
     return a
 
 
 def make_min(a: fsm.FSM) -> fsm.FSM:
     a = cp(a)
-    labels: list[str] = list(a.start.next)
+    labels: list[str] = list(a.start.next_nodes_by_label)
     old_node_to_group_save: dict[fsm.Node, int] = {}
     old_node_to_group: dict[fsm.Node, int] = {
-        n: int(n.stop) for n in a.start.bfs()}
+        n: int(n.is_final) for n in a.start.bfs()}
     uniq_nums: dd[tuple[int, ...], int] = dd(lambda: len(uniq_nums))
     while old_node_to_group_save != old_node_to_group:
         uniq_nums.clear()
@@ -87,7 +87,7 @@ def make_min(a: fsm.FSM) -> fsm.FSM:
         for n in a.start.bfs():
             next_groups = [old_node_to_group_save[n]]
             for l in labels:
-                for nn in n.next[l]:
+                for nn in n.next_nodes_by_label[l]:
                     next_groups.append(old_node_to_group_save[nn])
             old_node_to_group[n] = uniq_nums[tuple(next_groups)]
     group_to_old_node = {g: n for n, g in old_node_to_group.items()}
@@ -98,19 +98,19 @@ def make_min(a: fsm.FSM) -> fsm.FSM:
     for new_n in s.start.bfs():
         g = new_node_to_group[new_n]
         old_n = group_to_old_node[g]
-        for l, nl in old_n.next.items():
+        for l, nl in old_n.next_nodes_by_label.items():
             for nn in nl:
                 group = old_node_to_group[nn]
                 nnn = group_to_new_node[group]
                 new_n >> l >> nnn
                 new_node_to_group[nnn] = group
     for n, g in old_node_to_group.items():
-        group_to_new_node[g].stop |= n.stop
+        group_to_new_node[g].is_final |= n.is_final
     return s
 
 
 def invert_full_fsm(a: fsm.FSM) -> fsm.FSM:
     a = cp(a)
     for n in a.start.bfs():
-        n.stop = not n.stop
+        n.is_final = not n.is_final
     return a
