@@ -213,10 +213,10 @@ def old_old_main(
         [*formats, labels] = [*argv[1:]]
     all_formats: dict[str, typing.Callable[[fsm.FSM], fsm.FSM]] = {
         'reg': lambda a: a,
-        'eps-non-det-fsm': convert.eps_non_det_fsm_to_non_det_fsm,
-        'non-det-fsm': convert.non_det_fsm_to_det_fsm,
-        'det-fsm': lambda a: convert.det_fsm_to_full_det_fsm(a, labels + labels[0][:0]),
-        'full-det-fsm': convert.full_fsm_to_min_full_fsm,
+        'eps-non-det-fsm': convert.remove_eps,
+        'non-det-fsm': convert.make_deterministic,
+        'det-fsm': lambda a: convert.make_full(a, labels + labels[0][:0]),
+        'full-det-fsm': convert.make_min,
         'min-full-det-fsm': convert.invert_full_fsm,
         'invert-full-det-fsm': lambda a: a,
     }
@@ -240,8 +240,8 @@ def old_old_main(
                 print(text, file=stdout)
                 return 0
             else:
-                s = convert.reg_to_ast(text)
-                a = convert.ast_to_eps_non_det_fsm(s)
+                s = convert.regex_to_ast(text)
+                a = convert.ast_to_eps_nfa(s)
         else:
             text = stdin.read()
             a = fsm.FSM.from_dimple(text)

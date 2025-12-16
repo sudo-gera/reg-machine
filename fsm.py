@@ -59,9 +59,10 @@ class FSM:
                     new_n >> l >> new_nn
         return s
 
-    def __init__(self, *value: str | None):
+    def __init__(self, _value: str | None | ellipsis = ...):
         self.start: Node = Node()
         self.stop: Node = Node()
+        value = [_value] if _value is not ... else []
         if value and isinstance(value[0], str):
             self.start >> value[0] >> self.stop
 

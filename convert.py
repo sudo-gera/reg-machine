@@ -6,14 +6,14 @@ from collections import defaultdict as dd
 import fsm
 
 
-def reg_to_ast(a: str) -> ast.AST:
+def regex_to_ast(a: str) -> ast.AST:
     expr = ast.parse(a).body[0]
     assert isinstance(expr, ast.Expr)
     return expr.value
 
 
-def ast_to_eps_non_det_fsm(a: ast.AST) -> fsm.FSM:
-    this = ast_to_eps_non_det_fsm
+def ast_to_eps_nfa(a: ast.AST) -> fsm.FSM:
+    this = ast_to_eps_nfa
     if isinstance(a, ast.BinOp):
         if isinstance(a.op, ast.Add):
             return this(a.left) + this(a.right)
@@ -31,11 +31,11 @@ def ast_to_eps_non_det_fsm(a: ast.AST) -> fsm.FSM:
     assert False
 
 
-def eps_non_det_fsm_to_non_det_fsm(a: fsm.FSM) -> fsm.FSM:
+def remove_eps(a: fsm.FSM) -> fsm.FSM:
     a = cp(a)
     a.stop.stop = True
     for root in a.start.bfs():
-        for n in root.bfs(True):
+        for n in root.bfs(eps_only=True):
             root.stop |= n.stop
             for label, nl in n.next.items():
                 root.next[label] |= nl
@@ -45,7 +45,7 @@ def eps_non_det_fsm_to_non_det_fsm(a: fsm.FSM) -> fsm.FSM:
     return a
 
 
-def non_det_fsm_to_det_fsm(a: fsm.FSM) -> fsm.FSM:
+def make_deterministic(a: fsm.FSM) -> fsm.FSM:
     a = cp(a)
     s = fsm.FSM()
     new_to_old: dd[fsm.Node, set[fsm.Node]] = dd(set)
@@ -63,7 +63,7 @@ def non_det_fsm_to_det_fsm(a: fsm.FSM) -> fsm.FSM:
     return s
 
 
-def det_fsm_to_full_det_fsm(a: fsm.FSM, labels: str) -> fsm.FSM:
+def make_full(a: fsm.FSM, labels: str) -> fsm.FSM:
     a = cp(a)
     new = fsm.Node()
     for n in a.start.bfs():
@@ -73,7 +73,7 @@ def det_fsm_to_full_det_fsm(a: fsm.FSM, labels: str) -> fsm.FSM:
     return a
 
 
-def full_fsm_to_min_full_fsm(a: fsm.FSM) -> fsm.FSM:
+def make_min(a: fsm.FSM) -> fsm.FSM:
     a = cp(a)
     labels: list[str] = list(a.start.next)
     old_node_to_group_save: dict[fsm.Node, int] = {}
