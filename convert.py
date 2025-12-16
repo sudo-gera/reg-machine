@@ -1,3 +1,4 @@
+import typing
 import ast
 from copy import deepcopy as cp
 from collections import defaultdict as dd
@@ -20,11 +21,13 @@ def ast_to_eps_non_det_fsm(a: ast.AST) -> fsm.FSM:
             return this(a.left) * this(a.right)
         if isinstance(a.op, ast.Pow):
             if isinstance(a.right, ast.Constant):
-                return this(a.left) ** a.right.value
+                if isinstance(a.right.value, int | type(None)):
+                    return this(a.left) ** a.right.value
     elif isinstance(a, ast.Name):
         return fsm.FSM(a.id)
     elif isinstance(a, ast.Constant):
-        return fsm.FSM([None, ''][a.value])
+        if isinstance(a.value, int):
+            return fsm.FSM([None, ''][a.value])
     assert False
 
 

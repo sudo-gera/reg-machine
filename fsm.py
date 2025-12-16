@@ -39,7 +39,7 @@ class Node:
 
 
 class FSM:
-    def __deepcopy__(self: FSM, memo: dict[int, typing.Any]):
+    def __deepcopy__(self: FSM, memo: dict[int, typing.Any]) -> FSM:
         s = FSM()
         memo[id(self)] = s
         old_to_new: dd[Node, Node] = dd(Node)
@@ -101,7 +101,7 @@ class FSM:
 
     @staticmethod
     def from_dimple(text_str: str) -> FSM:
-        def index_or_len(a, v):
+        def index_or_len(a: list[typing.Any], v: typing.Any) -> int:
             if v in a:
                 return a.index(v)
             return len(a)
@@ -122,7 +122,7 @@ class FSM:
             name_to_node[line[0]] >> line[2] >> name_to_node[line[1]]
         return res
 
-def dimple_to_json(dimple_text: str, _letters: str) -> dict:
+def dimple_to_json(dimple_text: str, _letters: str) -> dict[str, typing.Any]:
     lines = [line.rstrip() for line in dimple_text.splitlines()]
 
     i = 0
@@ -181,7 +181,7 @@ def dimple_to_json(dimple_text: str, _letters: str) -> dict:
         "final_states": final_states
     }
 
-def json_to_dimple(automaton: dict) -> str:
+def json_to_dimple(automaton: dict[str, typing.Any]) -> str:
     start_states = automaton["start_states"]
     if len(start_states) != 1:
         raise ValueError("Dimple поддерживает только одно стартовое состояние")

@@ -12,8 +12,8 @@ import fsm
 import argparse
 
 class ThrowingArgumentParser(argparse.ArgumentParser):
-    def exit(self, status = 0, message = None):
-        raise argparse.ArgumentError(None, message)
+    def exit(self, status : int = 0, message : str | None = None) -> typing.NoReturn:
+        raise argparse.ArgumentError(None, str(message))
 
 possible_actions = ['reg-to-eps-nfa', 'remove-eps', 'make-deterministic', 'make-full', 'make-min', 'invert', 'nfa-to-reg']
 
@@ -51,7 +51,7 @@ def process_args(
             print(f'Unknown action: {action!r}')
             return 1
     
-    def reg_to_eps_nfa(value):
+    def reg_to_eps_nfa(value: str) -> str:
         stdin = io.StringIO()
         stdin.write(value)
         stdin.seek(0)
@@ -60,16 +60,16 @@ def process_args(
         rc = old_main(['-', 'reg', 'eps-non-det-fsm', letters], stdin, stdout, stderr)
         stdout.seek(0)
         stderr.seek(0)
-        stdout = stdout.read()
-        stderr = stderr.read()
+        stdout_data = stdout.read()
+        stderr_data = stderr.read()
         if rc:
-            print(stdout)
-            print(stderr)
+            print(stdout_data)
+            print(stderr_data)
         assert rc == 0
-        assert stderr == ''
-        return stdout
+        assert stderr_data == ''
+        return stdout_data
 
-    def remove_eps(value):
+    def remove_eps(value: str) -> str:
         stdin = io.StringIO()
         stdin.write(value)
         stdin.seek(0)
@@ -78,16 +78,16 @@ def process_args(
         rc = old_main(['-', 'eps-non-det-fsm', 'non-det-fsm', letters], stdin, stdout, stderr)
         stdout.seek(0)
         stderr.seek(0)
-        stdout = stdout.read()
-        stderr = stderr.read()
+        stdout_data = stdout.read()
+        stderr_data = stderr.read()
         if rc:
-            print(stdout)
-            print(stderr)
+            print(stdout_data)
+            print(stderr_data)
         assert rc == 0
-        assert stderr == ''
-        return stdout
+        assert stderr_data == ''
+        return stdout_data
 
-    def make_deterministic(value):
+    def make_deterministic(value: str) -> str:
         stdin = io.StringIO()
         stdin.write(value)
         stdin.seek(0)
@@ -96,16 +96,16 @@ def process_args(
         rc = old_main(['-', 'non-det-fsm', 'det-fsm', letters], stdin, stdout, stderr)
         stdout.seek(0)
         stderr.seek(0)
-        stdout = stdout.read()
-        stderr = stderr.read()
+        stdout_data = stdout.read()
+        stderr_data = stderr.read()
         if rc:
-            print(stdout)
-            print(stderr)
+            print(stdout_data)
+            print(stderr_data)
         assert rc == 0
-        assert stderr == ''
-        return stdout
+        assert stderr_data == ''
+        return stdout_data
 
-    def make_full(value):
+    def make_full(value: str) -> str:
         stdin = io.StringIO()
         stdin.write(value)
         stdin.seek(0)
@@ -114,16 +114,16 @@ def process_args(
         rc = old_main(['-', 'det-fsm', 'full-det-fsm', letters], stdin, stdout, stderr)
         stdout.seek(0)
         stderr.seek(0)
-        stdout = stdout.read()
-        stderr = stderr.read()
+        stdout_data = stdout.read()
+        stderr_data = stderr.read()
         if rc:
-            print(stdout)
-            print(stderr)
+            print(stdout_data)
+            print(stderr_data)
         assert rc == 0
-        assert stderr == ''
-        return stdout
+        assert stderr_data == ''
+        return stdout_data
 
-    def make_min(value):
+    def make_min(value: str) -> str:
         stdin = io.StringIO()
         stdin.write(value)
         stdin.seek(0)
@@ -132,16 +132,16 @@ def process_args(
         rc = old_main(['-', 'full-det-fsm', 'min-full-det-fsm', letters], stdin, stdout, stderr)
         stdout.seek(0)
         stderr.seek(0)
-        stdout = stdout.read()
-        stderr = stderr.read()
+        stdout_data = stdout.read()
+        stderr_data = stderr.read()
         if rc:
-            print(stdout)
-            print(stderr)
+            print(stdout_data)
+            print(stderr_data)
         assert rc == 0
-        assert stderr == ''
-        return stdout
+        assert stderr_data == ''
+        return stdout_data
 
-    def invert(value):
+    def invert(value: str) -> str:
         stdin = io.StringIO()
         stdin.write(value)
         stdin.seek(0)
@@ -150,14 +150,14 @@ def process_args(
         rc = old_main(['-', 'min-full-det-fsm', 'invert-min-full-det-fsm', letters], stdin, stdout, stderr)
         stdout.seek(0)
         stderr.seek(0)
-        stdout = stdout.read()
-        stderr = stderr.read()
+        stdout_data = stdout.read()
+        stderr_data = stderr.read()
         if rc:
-            print(stdout)
-            print(stderr)
+            print(stdout_data)
+            print(stderr_data)
         assert rc == 0
-        assert stderr == ''
-        return stdout
+        assert stderr_data == ''
+        return stdout_data
 
     for action in actions:
         # print(f'{action = !r}, {value = !r}')
@@ -168,6 +168,7 @@ def process_args(
     value=value[1:]
 
     print(json.dumps(fsm.dimple_to_json(value, letters), indent=4))
+    return 0
 
 
 
