@@ -346,7 +346,7 @@ print(f'{seed = }', file=debug)
 rand = random.Random(seed)
 # print(f'{seed = }', file=open('/dev/tty', 'w'))
 
-arg_values = [*range(99)]
+arg_values = [*range(999)]
 arg_values = [*range(-len(arg_values), len(arg_values)+1)]
 rand.shuffle(arg_values)
 
