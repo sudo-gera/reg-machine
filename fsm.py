@@ -37,10 +37,10 @@ class Node:
                     q.extend(n.next_nodes_by_label[l])
 
 
-class FSM:
+class FA:
 
-    def __deepcopy__(self: FSM, memo: dict[int, typing.Any]) -> FSM:
-        s = FSM()
+    def __deepcopy__(self: FA, memo: dict[int, typing.Any]) -> FA:
+        s = FA()
         memo[id(self)] = s
         old_to_new: dd[Node, Node] = dd(Node)
         new_to_old: dict[Node, Node] = {}
@@ -66,24 +66,24 @@ class FSM:
         if value and isinstance(value[0], str):
             self.start >> value[0] >> self.stop
 
-    def __add__(self: FSM, other: FSM) -> FSM:
+    def __add__(self: FA, other: FA) -> FA:
         self.start >> '' >> other.start
         other.stop >> '' >> self.stop
         return self
 
-    def __mul__(self: FSM, other: FSM) -> FSM:
+    def __mul__(self: FA, other: FA) -> FA:
         self.stop >> '' >> other.start
         self.stop = other.stop
         return self
 
-    def __pow__(self: FSM, other: int | None) -> FSM:
+    def __pow__(self: FA, other: int | None) -> FA:
         if other is None:
             self.stop >> '' >> self.start
-            return FSM('') + self
+            return FA('') + self
         return functools.reduce(operator.mul,
-                                map(lambda x: cp(x), [self] * other), FSM(''))
+                                map(lambda x: cp(x), [self] * other), FA(''))
 
-    def dimple(self: FSM) -> str:
+    def dimple(self: FA) -> str:
         id_map: dd[Node, int] = dd(lambda: len(id_map) + 1)
         res = io.StringIO()
         print(id_map[self.start], file=res)
@@ -101,7 +101,7 @@ class FSM:
         return res.read()
 
     @staticmethod
-    def from_dimple(text_str: str) -> FSM:
+    def from_dimple(text_str: str) -> FA:
 
         def index_or_len(a: list[typing.Any], v: typing.Any) -> int:
             if v in a:
@@ -115,7 +115,7 @@ class FSM:
         text = text[len(stop) + 1:]
         assert len(start) == 1
         name_to_node: dd[str, Node] = dd(Node)
-        res = FSM()
+        res = FA()
         res.start = name_to_node[start[0][0]]
         for line in stop:
             name_to_node[line[0]].is_final = True

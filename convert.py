@@ -12,7 +12,7 @@ def regex_to_ast(a: str) -> ast.AST:
     return expr.value
 
 
-def ast_to_eps_nfa(a: ast.AST) -> fsm.FSM:
+def ast_to_eps_nfa(a: ast.AST) -> fsm.FA:
     this = ast_to_eps_nfa
     if isinstance(a, ast.BinOp):
         if isinstance(a.op, ast.Add):
@@ -24,30 +24,30 @@ def ast_to_eps_nfa(a: ast.AST) -> fsm.FSM:
                 if isinstance(a.right.value, int | type(None)):
                     return this(a.left)**a.right.value
     elif isinstance(a, ast.Name):
-        return fsm.FSM(a.id)
+        return fsm.FA(a.id)
     elif isinstance(a, ast.Constant):
         if isinstance(a.value, int):
-            return fsm.FSM([None, ''][a.value])
+            return fsm.FA([None, ''][a.value])
     assert False
 
 
-def remove_eps(a: fsm.FSM) -> fsm.FSM:
-    a = cp(a)
-    a.stop.is_final = True
-    for root in a.start.bfs():
-        for n in root.bfs(eps_only=True):
-            root.is_final |= n.is_final
-            for label, nl in n.next_nodes_by_label.items():
-                root.next_nodes_by_label[label] |= nl
-    for root in a.start.bfs():
+def remove_eps(fa: fsm.FA) -> fsm.FA:
+    fa = cp(fa)
+    fa.stop.is_final = True
+    for root in fa.start.bfs():
+        for node in root.bfs(eps_only=True):
+            root.is_final |= node.is_final
+            for label, next_nodes in node.next_nodes_by_label.items():
+                root.next_nodes_by_label[label] |= next_nodes
+    for root in fa.start.bfs():
         if '' in root.next_nodes_by_label:
             del root.next_nodes_by_label['']
-    return a
+    return fa
 
 
-def make_deterministic(a: fsm.FSM) -> fsm.FSM:
+def make_deterministic(a: fsm.FA) -> fsm.FA:
     a = cp(a)
-    s = fsm.FSM()
+    s = fsm.FA()
     new_to_old: dd[fsm.Node, set[fsm.Node]] = dd(set)
     old_to_new: dd[frozenset[fsm.Node], fsm.Node] = dd(fsm.Node)
     new_to_old[s.start] = {a.start}
@@ -63,7 +63,7 @@ def make_deterministic(a: fsm.FSM) -> fsm.FSM:
     return s
 
 
-def make_full(a: fsm.FSM, labels: str) -> fsm.FSM:
+def make_full(a: fsm.FA, labels: str) -> fsm.FA:
     a = cp(a)
     new = fsm.Node()
     for n in a.start.bfs():
@@ -73,7 +73,7 @@ def make_full(a: fsm.FSM, labels: str) -> fsm.FSM:
     return a
 
 
-def make_min(a: fsm.FSM) -> fsm.FSM:
+def make_min(a: fsm.FA) -> fsm.FA:
     a = cp(a)
     labels: list[str] = list(a.start.next_nodes_by_label)
     old_node_to_group_save: dict[fsm.Node, int] = {}
@@ -93,7 +93,7 @@ def make_min(a: fsm.FSM) -> fsm.FSM:
                     next_groups.append(old_node_to_group_save[nn])
             old_node_to_group[n] = uniq_nums[tuple(next_groups)]
     group_to_old_node = {g: n for n, g in old_node_to_group.items()}
-    s = fsm.FSM()
+    s = fsm.FA()
     group_to_new_node = dd(fsm.Node)
     group_to_new_node[old_node_to_group[a.start]] = s.start
     new_node_to_group = {s.start: old_node_to_group[a.start]}
@@ -111,7 +111,7 @@ def make_min(a: fsm.FSM) -> fsm.FSM:
     return s
 
 
-def invert_full_fsm(a: fsm.FSM) -> fsm.FSM:
+def invert_full_fsm(a: fsm.FA) -> fsm.FA:
     a = cp(a)
     for n in a.start.bfs():
         n.is_final = not n.is_final

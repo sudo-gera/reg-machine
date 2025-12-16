@@ -20,7 +20,7 @@ class InternalTestError(Exception):
     pass
 
 
-def can_fa_eval_string(a: fsm.FSM, path: str, limit: int = 64) -> bool:
+def can_fa_eval_string(a: fsm.FA, path: str, limit: int = 64) -> bool:
     operation_count = 0
     eps_map = {n: list(n.bfs(True)) for n in a.start.bfs()}
     current_nodes = list(a.start.bfs(True))
@@ -38,12 +38,12 @@ def can_fa_eval_string(a: fsm.FSM, path: str, limit: int = 64) -> bool:
     return res
 
 
-FSM = fsm.FSM
+FSM = fsm.FA
 
 
 @dataclass(frozen=True)
 class created_random_fsm:
-    fsm: fsm.FSM
+    fsm: fsm.FA
     random_string_that_matches: str | None
     regex_for_fullmatch: str | None
     random_strings_that_maybe_match: list[str | None]
@@ -60,7 +60,7 @@ def random_fsm(
     if n == 0:
         arg = rand.choice([None, '', *list(labels)])
         return created_random_fsm(
-            fsm.FSM(arg),
+            fsm.FA(arg),
             arg,
             arg,
             [rand.choice([None, '', *list(labels)]) for q in range(9)],
@@ -183,7 +183,7 @@ def random_fsm(
     assert False
 
 
-def graphviz(a: fsm.FSM) -> str:
+def graphviz(a: fsm.FA) -> str:
     id_map: dd[fsm.Node, int] = dd(lambda: len(id_map))
     res = 'digraph G{\n'
     for n in a.start.bfs():
@@ -197,56 +197,56 @@ def graphviz(a: fsm.FSM) -> str:
 
 
 def test_fsm_simple_bfs() -> None:
-    f = fsm.FSM()
+    f = fsm.FA()
     assert list(f.start.bfs()) == [f.start]
-    f = fsm.FSM(None)
+    f = fsm.FA(None)
     assert list(f.start.bfs()) == [f.start]
-    f = fsm.FSM('')
+    f = fsm.FA('')
     assert list(f.start.bfs()) == [f.start, f.stop]
-    f = fsm.FSM('-')
+    f = fsm.FA('-')
     assert list(f.start.bfs()) == [f.start, f.stop]
 
-    assert not can_fa_eval_string(fsm.FSM(None), '')
-    assert not can_fa_eval_string(fsm.FSM(None), '-')
-    assert can_fa_eval_string(fsm.FSM(''), '')
-    assert not can_fa_eval_string(fsm.FSM(''), '-')
-    assert not can_fa_eval_string(fsm.FSM('-'), '')
-    assert can_fa_eval_string(fsm.FSM('-'), '-')
+    assert not can_fa_eval_string(fsm.FA(None), '')
+    assert not can_fa_eval_string(fsm.FA(None), '-')
+    assert can_fa_eval_string(fsm.FA(''), '')
+    assert not can_fa_eval_string(fsm.FA(''), '-')
+    assert not can_fa_eval_string(fsm.FA('-'), '')
+    assert can_fa_eval_string(fsm.FA('-'), '-')
 
-    assert can_fa_eval_string(fsm.FSM('-') + fsm.FSM('+'), '-')
-    assert can_fa_eval_string(fsm.FSM('-') + fsm.FSM('+'), '+')
-    assert not can_fa_eval_string(fsm.FSM('-') + fsm.FSM('+'), '')
-    assert not can_fa_eval_string(fsm.FSM('-') + fsm.FSM('+'), '+-')
-    assert not can_fa_eval_string(fsm.FSM('-') + fsm.FSM('+'), '-+')
+    assert can_fa_eval_string(fsm.FA('-') + fsm.FA('+'), '-')
+    assert can_fa_eval_string(fsm.FA('-') + fsm.FA('+'), '+')
+    assert not can_fa_eval_string(fsm.FA('-') + fsm.FA('+'), '')
+    assert not can_fa_eval_string(fsm.FA('-') + fsm.FA('+'), '+-')
+    assert not can_fa_eval_string(fsm.FA('-') + fsm.FA('+'), '-+')
 
-    assert not can_fa_eval_string(fsm.FSM('-') * fsm.FSM('+'), '-')
-    assert not can_fa_eval_string(fsm.FSM('-') * fsm.FSM('+'), '+')
-    assert not can_fa_eval_string(fsm.FSM('-') * fsm.FSM('+'), '')
-    assert not can_fa_eval_string(fsm.FSM('-') * fsm.FSM('+'), '+-')
-    assert can_fa_eval_string(fsm.FSM('-') * fsm.FSM('+'), '-+')
+    assert not can_fa_eval_string(fsm.FA('-') * fsm.FA('+'), '-')
+    assert not can_fa_eval_string(fsm.FA('-') * fsm.FA('+'), '+')
+    assert not can_fa_eval_string(fsm.FA('-') * fsm.FA('+'), '')
+    assert not can_fa_eval_string(fsm.FA('-') * fsm.FA('+'), '+-')
+    assert can_fa_eval_string(fsm.FA('-') * fsm.FA('+'), '-+')
 
-    assert can_fa_eval_string(fsm.FSM('-')**None, '')
-    assert can_fa_eval_string(fsm.FSM('-')**None, '-')
-    assert can_fa_eval_string(fsm.FSM('-')**None, '--')
-    assert not can_fa_eval_string(fsm.FSM('-')**None, '+')
-    assert not can_fa_eval_string(fsm.FSM('-')**None, '-+')
-    assert not can_fa_eval_string(fsm.FSM('-')**None, '+-')
+    assert can_fa_eval_string(fsm.FA('-')**None, '')
+    assert can_fa_eval_string(fsm.FA('-')**None, '-')
+    assert can_fa_eval_string(fsm.FA('-')**None, '--')
+    assert not can_fa_eval_string(fsm.FA('-')**None, '+')
+    assert not can_fa_eval_string(fsm.FA('-')**None, '-+')
+    assert not can_fa_eval_string(fsm.FA('-')**None, '+-')
 
 
-def check_fsm_no_eps(a: fsm.FSM) -> None:
+def check_fsm_no_eps(a: fsm.FA) -> None:
     for n in a.start.bfs():
         assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[
             ''] == set()
 
 
-def check_fsm_is_det(a: fsm.FSM) -> None:
+def check_fsm_is_det(a: fsm.FA) -> None:
     for n in a.start.bfs():
         assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[
             ''] == set()
         assert all([len(nl) < 2 for nl in n.next_nodes_by_label.values()])
 
 
-def check_fsm_is_full(a: fsm.FSM, labels: str) -> None:
+def check_fsm_is_full(a: fsm.FA, labels: str) -> None:
     for n in a.start.bfs():
         assert '' not in n.next_nodes_by_label or n.next_nodes_by_label[
             ''] == set()
@@ -254,7 +254,7 @@ def check_fsm_is_full(a: fsm.FSM, labels: str) -> None:
         assert all([len(n.next_nodes_by_label[l]) == 1 for l in labels])
 
 
-def check_equal(a: fsm.FSM, s: fsm.FSM) -> None:
+def check_equal(a: fsm.FA, s: fsm.FA) -> None:
     a_to_s: dict[fsm.Node, fsm.Node] = {
         d: f
         for d, f in zip(a.start.bfs(), s.start.bfs())
@@ -282,11 +282,11 @@ def check_equal(a: fsm.FSM, s: fsm.FSM) -> None:
 
 
 def test_io() -> None:
-    assert (fsm.FSM('-') *
-            fsm.FSM('+')).dimple() == '1\n\n4\n\n1 2 -\n2 3 \n3 4 +\n'
+    assert (fsm.FA('-') *
+            fsm.FA('+')).dimple() == '1\n\n4\n\n1 2 -\n2 3 \n3 4 +\n'
     check_equal(
-        fsm.FSM('-') * fsm.FSM('+'),
-        fsm.FSM.from_dimple('1\n\n2\n\n1 3 -\n3 4 \n4 2 +\n'))
+        fsm.FA('-') * fsm.FA('+'),
+        fsm.FA.from_dimple('1\n\n2\n\n1 3 -\n3 4 \n4 2 +\n'))
 
     def test_main(argv: list[str],
                   text_in: str,
@@ -350,7 +350,7 @@ def test_fsm_stress(arg: int) -> None:
                 r = random_fsm(rand, 8 if arg < 0 else 10, labels)
             except RecursionError:
                 raise InternalTestError
-            fa_or_none: fsm.FSM | None = None
+            fa_or_none: fsm.FA | None = None
             eps_nfa = nfa = dfa = full_dfa = min_full_dfa = same_min_full_dfa = inverted_full_dfa = inverted_min_full_dfa = inverted_same_min_full_dfa = fa_or_none
             try:
                 z = convert.regex_to_ast(r.regex_for_converting_to_fsm)
@@ -422,6 +422,8 @@ def test_fsm_stress(arg: int) -> None:
                 if t is not None:
                     u = can_fa_eval_string(same_min_full_dfa, t)
                     compiled_regex_for_fullmatch = re.compile(r.regex_for_fullmatch)
+                    import sys
+                    print(sys.getsizeof(compiled_regex_for_fullmatch), len(t), file=debug)
                     assert u == bool(re.fullmatch(compiled_regex_for_fullmatch, t))
                     if arg < 0:
                         assert can_fa_eval_string(r.fsm, t) == u
