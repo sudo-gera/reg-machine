@@ -7,7 +7,7 @@ import time
 import ast
 import sys
 import io
-import pytest
+pytest = __import__('pytest')
 import functools
 from dataclasses import dataclass
 
@@ -50,7 +50,9 @@ class created_random_fsm:
 
     @functools.cached_property
     def compiled_regex_for_fullmatch(self) -> re.Pattern[str]:
-        return re.compile(self.regex_for_fullmatch)
+        if self.regex_for_fullmatch is not None:
+            return re.compile(self.regex_for_fullmatch)
+        raise InternalTestError
 
 
 def random_fsm(
@@ -348,7 +350,6 @@ arg_values = [*range(99)]
 arg_values = [*range(-len(arg_values), len(arg_values)+1)]
 rand.shuffle(arg_values)
 
-@pytest.mark.parametrize('arg', arg_values)
 def test_fsm_stress(arg: int) -> None:
     labels = 'qwertyuiop'
     while True:
@@ -445,3 +446,5 @@ def test_fsm_stress(arg: int) -> None:
             break
         except InternalTestError:
             continue
+
+test_fsm_stress = pytest.mark.parametrize('arg', arg_values)(test_fsm_stress)
