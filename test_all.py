@@ -1,5 +1,5 @@
 from __future__ import annotations
-from debug import debug
+from utils import debug
 import command
 import convert
 import fa
