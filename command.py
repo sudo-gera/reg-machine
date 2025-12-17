@@ -16,6 +16,9 @@ import argparse
 import validate
 
 
+private_to_public : dict[str, str] = {}
+public_to_private : dict[str, str] = {}
+
 @dataclass(frozen=True)
 class frozen_fa:
     states: tuple[str]
@@ -28,11 +31,14 @@ class frozen_fa:
     def from_json_str(data: str) -> frozen_fa:
         value = json.loads(data)
         assert isinstance(value, dict)
+        private = fa.json_to_dimple(value)
+        public = data
+        private_to_public[public] = private
+        private_to_public[private] = public
         return frozen_fa(**value)
 
     def to_json_str(self) -> str:
         return json.dumps(vars(self), indent=4)
-
 
 @dataclass(frozen=True)
 class fa_or_re:
@@ -88,17 +94,17 @@ class IsFA(Condition):
 
 class HasNoEps(IsFA):
     def __call__(self, value: fa_or_re) -> bool:
-        return super().__call__(value) and validate.fa_has_no_eps(fa.from_dimple(value.as_private_str()))
+        return super().__call__(value) and validate.fa_has_no_eps(fa.dimple_to_fsm(value.as_private_str()))
 
 
 class IsDeterministic(HasNoEps):
     def __call__(self, value: fa_or_re) -> bool:
-        return super().__call__(value) and validate.fa_is_det(fa.from_dimple(value.as_private_str()))
+        return super().__call__(value) and validate.fa_is_det(fa.dimple_to_fsm(value.as_private_str()))
 
 
 class IsFull(HasNoEps):
     def __call__(self, value: fa_or_re) -> bool:
-        return super().__call__(value) and validate.fa_is_full(fa.from_dimple(value.as_private_str()), value.letters())
+        return super().__call__(value) and validate.fa_is_full(fa.dimple_to_fsm(value.as_private_str()), value.letters())
 
 
 @dataclass(frozen=True)
@@ -191,6 +197,16 @@ def process_args(
         print(f'{e!r}', file=stderr)
         return 1
 
+    if value.is_fa():
+        missing_letters = ''.join([
+            letter
+            for letter in value.letters()
+                if letter not in letters
+        ])
+        if missing_letters:
+            print(f'FA has letters {missing_letters!r} missing in command line arguments.', file=stderr)
+            return 1
+
     if operations:
         operation = operations[0]
         for precondition in operation.preconditions:
@@ -201,12 +217,14 @@ def process_args(
 
     for operation in operations:
         for precondition in operation.preconditions:
+            # print(f'{precondition = }', value, file=debug)
             assert precondition(value)
         func = typing.cast(typing.Callable[[str, str], str], eval(
             operation.name.replace('-', '_')))
         value = fa_or_re.from_private_str(
             func(value.as_private_str(), letters)[1:], letters)
         for postcondition in operation.postconditions:
+            # print(f'{postcondition = }', value, file=debug)
             assert postcondition(value)
 
     print(value.as_public_str())
@@ -364,7 +382,7 @@ def old_old_main(
                 a = convert.ast_to_eps_nfa(s)
         else:
             text = stdin.read()
-            a = fa.from_dimple(text)
+            a = fa.dimple_to_fsm(text)
 
         for num in range(*format_indexes):
             func = [*all_formats.values()][num]
@@ -374,11 +392,11 @@ def old_old_main(
             a = func(a)
 
         print(file=stdout)
-        print(fa.dimple(a), end='', file=stdout)
+        print(fa.fsm_to_dimple(a), end='', file=stdout)
         return 0
     except Exception:
         print('Incorrect input data.', file=stderr)
-        # print(traceback.format_exc(), file=debug)
+        print(traceback.format_exc(), file=debug)
         return 1
 
 

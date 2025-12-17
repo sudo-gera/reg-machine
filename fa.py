@@ -6,13 +6,17 @@ import collections
 from collections import defaultdict as dd
 import typing
 import io
-
+from dataclasses import dataclass
 
 class Node:
 
     def __init__(self: Node) -> None:
         self.next_nodes_by_label: dd[str, set[Node]] = dd(set)
         self.is_final: bool = False
+        self.name: str | None = None
+
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}(name={self.name!r}, is_final={self.is_final!r})'
 
     def __rshift__(self: Node, label: str) -> tuple[Node, str]:
         '''
@@ -73,6 +77,7 @@ class FA:
 
             old_node = new_to_old[new_node]
             new_node.is_final = old_node.is_final
+            new_node.name = old_node.name
 
             if old_node == old_fa.the_only_final_if_exists_or_unrelated_node:
                 new_fa.the_only_final_if_exists_or_unrelated_node = new_node
@@ -139,7 +144,7 @@ class FA:
         return node == self.the_only_final_if_exists_or_unrelated_node or node.is_final
 
 
-def dimple(fa: FA) -> str:
+def fsm_to_dimple(fa: FA) -> str:
     id_map: dd[Node, int] = dd(lambda: len(id_map) + 1)
     res = io.StringIO()
     print(id_map[fa.start], file=res)
@@ -157,7 +162,7 @@ def dimple(fa: FA) -> str:
     return res.read()
 
 
-def from_dimple(text_str: str) -> FA:
+def dimple_to_fsm(text_str: str) -> FA:
 
     def index_or_len(a: list[typing.Any], v: typing.Any) -> int:
         if v in a:
@@ -179,6 +184,10 @@ def from_dimple(text_str: str) -> FA:
         if len(line) == 2:
             line.append('')
         name_to_node[line[0]] >> line[2] >> name_to_node[line[1]]
+    for name, node in name_to_node.items():
+        node.name = name
+    for node in res.start.bfs():
+        assert node.name is not None
     return res
 
 

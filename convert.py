@@ -3,6 +3,7 @@ import ast
 from copy import deepcopy as cp
 from collections import defaultdict as dd
 
+from utils import debug
 import fa
 
 
@@ -80,6 +81,7 @@ def make_full(a: fa.FA, labels: str) -> fa.FA:
     for n in a.start.bfs():
         for l in labels:
             if not n.next_nodes_by_label[l]:
+                # print(f'adding edge {n} {l} {new}', file=debug)
                 n >> l >> new
     return a
 
