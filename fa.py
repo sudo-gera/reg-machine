@@ -146,8 +146,6 @@ class FA:
 
 
 
-import typing
-from collections import defaultdict as dd
 
 
 def json_to_fa(automaton: dict[str, typing.Any]) -> FA:
@@ -197,20 +195,20 @@ def fa_to_json(fa: FA, letters: str) -> dict[str, typing.Any]:
     letter_set = set(letters)
 
     # assign ids and collect states / finals
-    for n in fa.start.bfs():
-        nid = str(id_map[n])
-        states.add(nid)
+    for node in fa.start.bfs():
+        node_id = str(id_map[node])
+        states.add(node_id)
 
-        if n.is_final or n == fa.the_only_final_if_exists_or_unrelated_node:
-            final_states.append(nid)
+        if fa.is_final(node):
+            final_states.append(node_id)
 
     # collect transitions
-    for n in fa.start.bfs():
-        frm = str(id_map[n])
-        for label, next_nodes in n.next_nodes_by_label.items():
-            for nn in next_nodes:
-                to = str(id_map[nn])
-                transitions.append([frm, label, to])
+    for node in fa.start.bfs():
+        node_id = str(id_map[node])
+        for label, next_nodes in node.next_nodes_by_label.items():
+            for next_node in next_nodes:
+                next_node_id = str(id_map[next_node])
+                transitions.append([node_id, label, next_node_id])
                 if label != "":
                     letter_set.add(label)
 
