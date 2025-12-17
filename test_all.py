@@ -292,13 +292,13 @@ def run_main_and_assert(
     text_in: str,
     text_out: str,
     code: int,
-    text_err: str = '',
+    text_err: str,
     main: typing.Callable[[
         list[str],
         typing.IO[str],
         typing.IO[str],
         typing.IO[str],
-    ], int] = command.old_main
+    ], int],
 ) -> None:
     stdin = io.StringIO()
     stdin.write(text_in)
@@ -332,24 +332,46 @@ class io_test:
     text_out: str
     code: int
     text_err: str
+    main: typing.Callable[[
+        list[str],
+        typing.IO[str],
+        typing.IO[str],
+        typing.IO[str],
+    ], int]
 
     def __call__(self) -> None:
         run_main_and_assert(self.argv, self.text_in,
-                            self.text_out, self.code, self.text_err)
+                            self.text_out, self.code, self.text_err, self.main)
 
 
 def get_io_tests() -> list[io_test]:
 
     tests: list[io_test] = []
 
-    def append_to_tests(argv: list[str],
-                        text_in: str,
-                        text_out: str,
-                        code: int,
-                        text_err: str = '') -> None:
+    def append_to_tests(
+        argv: list[str],
+        text_in: str,
+        text_out: str,
+        code: int,
+        text_err: str = '',
+        main: typing.Callable[[
+            list[str],
+            typing.IO[str],
+            typing.IO[str],
+            typing.IO[str],
+        ], int] = command.old_main,
+    ) -> None:
 
-        tests.append(io_test(argv=argv, text_in=text_in,
-                     text_out=text_out, code=code, text_err=text_err))
+        tests.append(
+            io_test(
+                argv=argv,
+                text_in=text_in,
+                text_out=text_out,
+                code=code,
+                text_err=text_err,
+                main=main
+            )
+        )
 
     append_to_tests(
         ['command.py'],
