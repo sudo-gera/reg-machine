@@ -65,6 +65,9 @@ class fa_or_re:
         else:
             return self.value_
 
+    def as_private_str_new(self) -> fa.FA:
+        return fa.dimple_to_fsm(self.as_private_str())
+
     def letters(self) -> str:
         if isinstance(self.value_, frozen_fa):
             return ''.join(self.value_.letters)
@@ -269,8 +272,7 @@ def re_to_eps_nfa(value: fa_or_re, letters: str) -> fa_or_re:
 
 def remove_eps(value: fa_or_re, letters: str) -> fa_or_re:
 
-    text = value.as_private_str()
-    a = fa.dimple_to_fsm(text)
+    a = value.as_private_str_new()
 
     a = convert.remove_eps(a)
 
@@ -279,8 +281,7 @@ def remove_eps(value: fa_or_re, letters: str) -> fa_or_re:
 
 def make_deterministic(value: fa_or_re, letters: str) -> fa_or_re:
 
-    text = value.as_private_str()
-    a = fa.dimple_to_fsm(text)
+    a = value.as_private_str_new()
 
     a = convert.make_deterministic(a)
 
@@ -289,8 +290,7 @@ def make_deterministic(value: fa_or_re, letters: str) -> fa_or_re:
 
 def make_full(value: fa_or_re, letters: str) -> fa_or_re:
 
-    text = value.as_private_str()
-    a = fa.dimple_to_fsm(text)
+    a = value.as_private_str_new()
 
     a = convert.make_full(a, letters + letters[0][:0])
 
@@ -299,8 +299,7 @@ def make_full(value: fa_or_re, letters: str) -> fa_or_re:
 
 def minimize(value: fa_or_re, letters: str) -> fa_or_re:
 
-    text = value.as_private_str()
-    a = fa.dimple_to_fsm(text)
+    a = value.as_private_str_new()
 
     a = convert.make_min(a)
 
@@ -309,8 +308,7 @@ def minimize(value: fa_or_re, letters: str) -> fa_or_re:
 
 def invert(value: fa_or_re, letters: str) -> fa_or_re:
 
-    text = value.as_private_str()
-    a = fa.dimple_to_fsm(text)
+    a = value.as_private_str_new()
 
     a = convert.invert_full_fa(a)
 
