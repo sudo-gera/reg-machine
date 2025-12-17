@@ -16,7 +16,6 @@ import argparse
 import validate
 
 
-
 @dataclass(frozen=True)
 class frozen_fa:
     states: tuple[str]
@@ -52,13 +51,13 @@ class fa_or_re:
         else:
             return self.value_
 
-    def as_private_str(self) -> str:
+    def as_private_re(self) -> str:
         if isinstance(self.value_, frozen_fa):
             assert False
         else:
             return self.value_
 
-    def as_private_str_new(self) -> fa.FA:
+    def as_private_fa(self) -> fa.FA:
         if isinstance(self.value_, frozen_fa):
             return fa.json_to_fa(json.loads(self.value_.to_json_str()))
         assert False
@@ -69,15 +68,14 @@ class fa_or_re:
         assert False
 
     @staticmethod
-    def from_private_str_new(a: fa.FA, letters: str) -> fa_or_re:
+    def from_private_fa(a: fa.FA, letters: str) -> fa_or_re:
         return fa_or_re(
             frozen_fa.from_json_str(
                 json.dumps(
-                    fa.fa_to_json(a,letters)
+                    fa.fa_to_json(a, letters)
                 )
             )
         )
-        
 
     def is_fa(self) -> bool:
         return isinstance(self.value_, frozen_fa)
@@ -101,17 +99,17 @@ class IsFA(Condition):
 
 class HasNoEps(IsFA):
     def __call__(self, value: fa_or_re) -> bool:
-        return super().__call__(value) and validate.fa_has_no_eps(value.as_private_str_new())
+        return super().__call__(value) and validate.fa_has_no_eps(value.as_private_fa())
 
 
 class IsDeterministic(HasNoEps):
     def __call__(self, value: fa_or_re) -> bool:
-        return super().__call__(value) and validate.fa_is_det(value.as_private_str_new())
+        return super().__call__(value) and validate.fa_is_det(value.as_private_fa())
 
 
 class IsFull(IsDeterministic):
     def __call__(self, value: fa_or_re) -> bool:
-        return super().__call__(value) and validate.fa_is_full(value.as_private_str_new(), value.letters())
+        return super().__call__(value) and validate.fa_is_full(value.as_private_fa(), value.letters())
 
 
 @dataclass(frozen=True)
@@ -146,13 +144,13 @@ class command_line_operation(command_line_operation_base):
 
 
 command_line_operations = {
-    're-to-eps-nfa':        command_line_operation(name='re-to-eps-nfa',       preconditions=(IsRE(),),      postconditions=(IsFA(),)),
-    'remove-eps':           command_line_operation(name='remove-eps',          preconditions=(IsFA(),),       postconditions=(HasNoEps(),)),
-    'make-deterministic':   command_line_operation(name='make-deterministic',  preconditions=(HasNoEps(),),   postconditions=(IsDeterministic(),)),
-    'make-full':            command_line_operation(name='make-full',           preconditions=(IsDeterministic(),),      postconditions=(IsFull(),)),
-    'minimize':             command_line_operation(name='minimize',            preconditions=(IsFull(),),     postconditions=(IsFull(),)),
-    'invert':               command_line_operation(name='invert',              preconditions=(IsFull(),),     postconditions=(IsFull(),)),
-    'full-dfa-to-re':       command_line_operation(name='full-dfa-to-re',      preconditions=(IsFull(),),     postconditions=(IsRE(),)),
+    're-to-eps-nfa':        command_line_operation(name='re-to-eps-nfa',       preconditions=(IsRE(),),            postconditions=(IsFA(),)),
+    'remove-eps':           command_line_operation(name='remove-eps',          preconditions=(IsFA(),),            postconditions=(HasNoEps(),)),
+    'make-deterministic':   command_line_operation(name='make-deterministic',  preconditions=(HasNoEps(),),        postconditions=(IsDeterministic(),)),
+    'make-full':            command_line_operation(name='make-full',           preconditions=(IsDeterministic(),), postconditions=(IsFull(),)),
+    'minimize':             command_line_operation(name='minimize',            preconditions=(IsFull(),),          postconditions=(IsFull(),)),
+    'invert':               command_line_operation(name='invert',              preconditions=(IsFull(),),          postconditions=(IsFull(),)),
+    'full-dfa-to-re':       command_line_operation(name='full-dfa-to-re',      preconditions=(IsFull(),),          postconditions=(IsRE(),)),
 }
 
 
@@ -265,56 +263,56 @@ def main(
 
 def re_to_eps_nfa(value: fa_or_re, letters: str) -> fa_or_re:
 
-    text = value.as_private_str()
+    text = value.as_private_re()
     s = convert.regex_to_ast(text)
     a = convert.ast_to_eps_nfa(s)
 
-    return fa_or_re.from_private_str_new(a, letters)
+    return fa_or_re.from_private_fa(a, letters)
 
 
 def remove_eps(value: fa_or_re, letters: str) -> fa_or_re:
 
-    a = value.as_private_str_new()
+    a = value.as_private_fa()
 
     a = convert.remove_eps(a)
 
-    return fa_or_re.from_private_str_new(a, letters)
+    return fa_or_re.from_private_fa(a, letters)
 
 
 def make_deterministic(value: fa_or_re, letters: str) -> fa_or_re:
 
-    a = value.as_private_str_new()
+    a = value.as_private_fa()
 
     a = convert.make_deterministic(a)
 
-    return fa_or_re.from_private_str_new(a, letters)
+    return fa_or_re.from_private_fa(a, letters)
 
 
 def make_full(value: fa_or_re, letters: str) -> fa_or_re:
 
-    a = value.as_private_str_new()
+    a = value.as_private_fa()
 
     a = convert.make_full(a, letters + letters[0][:0])
 
-    return fa_or_re.from_private_str_new(a, letters)
+    return fa_or_re.from_private_fa(a, letters)
 
 
 def minimize(value: fa_or_re, letters: str) -> fa_or_re:
 
-    a = value.as_private_str_new()
+    a = value.as_private_fa()
 
     a = convert.make_min(a)
 
-    return fa_or_re.from_private_str_new(a, letters)
+    return fa_or_re.from_private_fa(a, letters)
 
 
 def invert(value: fa_or_re, letters: str) -> fa_or_re:
 
-    a = value.as_private_str_new()
+    a = value.as_private_fa()
 
     a = convert.invert_full_fa(a)
 
-    return fa_or_re.from_private_str_new(a, letters)
+    return fa_or_re.from_private_fa(a, letters)
 
 
 # def full_dfa_to_re(value: fa_or_re, letters: str) -> fa_or_re:

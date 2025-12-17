@@ -81,7 +81,6 @@ def make_full(a: fa.FA, labels: str) -> fa.FA:
     for n in a.start.bfs():
         for l in labels:
             if not n.next_nodes_by_label[l]:
-                # print(f'adding edge {n} {l} {new}', file=debug)
                 n >> l >> new
     return a
 
@@ -127,5 +126,81 @@ def make_min(a: fa.FA) -> fa.FA:
 def invert_full_fa(a: fa.FA) -> fa.FA:
     a = cp(a)
     for n in a.start.bfs():
-        n.is_final = not n.is_final
+        n.is_final = not a.is_final(n)
+    a.the_only_final_if_exists_or_unrelated_node = fa.Node()
     return a
+
+def fa_to_re(a: fa.FA) -> str:
+    a = cp(a)
+
+    a.the_only_final_if_exists_or_unrelated_node.is_final = True
+
+    a.the_only_final_if_exists_or_unrelated_node = fa.Node()
+
+    a.the_only_final_if_exists_or_unrelated_node.is_final = True
+
+    for node in a.start.bfs():
+        if node.is_final:
+            node.is_final = False
+            node.next_nodes_by_label[''] |= {a.the_only_final_if_exists_or_unrelated_node}
+    
+    nodes = {*a.start.bfs()}
+
+    if a.the_only_final_if_exists_or_unrelated_node not in nodes:
+        return '0'
+
+    # now a.the_only_final... is indeed the only final and not unrelated
+
+    for node in a.start.bfs():
+        for label, next_nodes in node.next_nodes_by_label.items():
+            ltext = '1' if label == '' else label
+            for next_node in next_nodes:
+                if node.regex_by_next_node[next_node] != '0':
+                    node.regex_by_next_node[next_node] = f'({node.regex_by_next_node[next_node]}+{ltext})'
+                else:
+                    node.regex_by_next_node[next_node] = ltext
+
+    while 1:
+        nodes = {*a.start.bfs()}
+        
+        assert a.start in nodes
+        assert a.the_only_final_if_exists_or_unrelated_node in nodes
+        assert a.the_only_final_if_exists_or_unrelated_node is not a.start
+
+        assert len(nodes) >= 2
+
+        if len(nodes) == 2:
+            break
+
+        for q in nodes - {a.start, a.the_only_final_if_exists_or_unrelated_node}:
+
+            if q.regex_by_next_node[q] == '0':
+                loop = '1'
+            else:
+                loop = f'({q.regex_by_next_node[q]} ** None)'
+
+            for i in nodes - {q}:
+                for j in nodes - {q}:
+                    i.regex_by_next_node[j] = f'({i.regex_by_next_node[j]}+{i.regex_by_next_node[q]}*{loop}*{q.regex_by_next_node[j]})'
+
+            for node in nodes - {q}:
+
+                for label, next_nodes in node.next_nodes_by_label.items():
+                    next_nodes.discard(q)
+
+                node.regex_by_next_node[q] = '0'
+
+    nodes = {*a.start.bfs()}
+    
+    assert a.start in nodes
+    assert a.the_only_final_if_exists_or_unrelated_node in nodes
+    assert a.the_only_final_if_exists_or_unrelated_node is not a.start
+
+    assert len(nodes) == 2
+
+    return a.start.regex_by_next_node[a.the_only_final_if_exists_or_unrelated_node]
+
+
+
+
+

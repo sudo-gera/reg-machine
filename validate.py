@@ -33,7 +33,6 @@ def fa_is_full(a: fa.FA, labels: str) -> bool:
         return False
     for node in a.start.bfs():
         for label in labels:
-            # print(node, node.next_nodes_by_label[label], label, file=debug)
             if not node.next_nodes_by_label[label]:
                 return False
     return True

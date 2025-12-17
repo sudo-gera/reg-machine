@@ -717,3 +717,17 @@ def test_fa_stress(arg: int) -> None:
 
 
 test_fa_stress = pytest.mark.parametrize('arg', arg_values)(test_fa_stress)
+
+def test_fa_to_re_simple() -> None:
+    old_re = '0'
+
+    fa = convert.ast_to_eps_nfa(convert.regex_to_ast(old_re))
+
+    print(command.fa_or_re.from_private_fa(fa, 'q').as_public_str(), file=debug)
+
+    new_re = convert.fa_to_re(fa)
+
+    print(new_re, file=debug)
+
+
+

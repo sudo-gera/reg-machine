@@ -15,6 +15,7 @@ class Node:
         self.next_nodes_by_label: dd[str, set[Node]] = dd(set)
         self.is_final: bool = False
         self.name: str | None = None
+        self.regex_by_next_node: dd[Node, str] = dd(lambda: '0')
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}(name={self.name!r}, is_final={self.is_final!r})'
@@ -145,9 +146,6 @@ class FA:
         return node == self.the_only_final_if_exists_or_unrelated_node or node.is_final
 
 
-
-
-
 def json_to_fa(automaton: dict[str, typing.Any]) -> FA:
     start_states = automaton["start_states"]
     assert len(start_states) == 1
@@ -179,9 +177,6 @@ def json_to_fa(automaton: dict[str, typing.Any]) -> FA:
         assert node.name is not None
 
     return res
-
-import typing
-from collections import defaultdict as dd
 
 
 def fa_to_json(fa: FA, letters: str) -> dict[str, typing.Any]:
