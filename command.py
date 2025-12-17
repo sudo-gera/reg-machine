@@ -66,7 +66,9 @@ class fa_or_re:
             return self.value_
 
     def as_private_str_new(self) -> fa.FA:
-        return fa.dimple_to_fsm(self.as_private_str())
+        if isinstance(self.value_, frozen_fa):
+            return fa.json_to_fa(json.loads(self.value_.to_json_str()))
+        assert False
 
     def letters(self) -> str:
         if isinstance(self.value_, frozen_fa):
@@ -78,10 +80,7 @@ class fa_or_re:
         return fa_or_re(
             frozen_fa.from_json_str(
                 json.dumps(
-                    fa.dimple_to_json(
-                        fa.fsm_to_dimple(a),
-                        letters
-                    )
+                    fa.fa_to_json(a,letters)
                 )
             )
         )

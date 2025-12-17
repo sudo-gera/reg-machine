@@ -311,12 +311,12 @@ def check_equal(a: fa.FA, s: fa.FA) -> None:
 
 def test_io_simple() -> None:
 
-    assert fa.fsm_to_dimple(fa.FA('-') *
+    assert fa.fa_to_dimple(fa.FA('-') *
                             fa.FA('+')) == '1\n\n4\n\n1 2 -\n2 3 \n3 4 +\n'
 
     check_equal(
         fa.FA('-') * fa.FA('+'),
-        fa.dimple_to_fsm('1\n\n2\n\n1 3 -\n3 4 \n4 2 +\n'))
+        fa.dimple_to_fa('1\n\n2\n\n1 3 -\n3 4 \n4 2 +\n'))
 
 
 def run_main_and_assert(

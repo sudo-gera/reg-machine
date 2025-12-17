@@ -145,7 +145,7 @@ class FA:
         return node == self.the_only_final_if_exists_or_unrelated_node or node.is_final
 
 
-def fsm_to_dimple(fa: FA) -> str:
+def fa_to_dimple(fa: FA) -> str:
     id_map: dd[Node, int] = dd(lambda: len(id_map) + 1)
     res = io.StringIO()
     print(id_map[fa.start], file=res)
@@ -163,7 +163,7 @@ def fsm_to_dimple(fa: FA) -> str:
     return res.read()
 
 
-def dimple_to_fsm(text_str: str) -> FA:
+def dimple_to_fa(text_str: str) -> FA:
 
     def index_or_len(a: list[typing.Any], v: typing.Any) -> int:
         if v in a:
@@ -280,3 +280,10 @@ def json_to_dimple(automaton: dict[str, typing.Any]) -> str:
             lines.append(f"{frm} {to} {letter}")
 
     return "\n".join(lines)
+
+def json_to_fa(automaton: dict[str, typing.Any]) -> FA:
+    return dimple_to_fa(json_to_dimple(automaton))
+
+
+def fa_to_json(fa: FA, letters: str) -> dict[str, typing.Any]:
+    return dimple_to_json(fa_to_dimple(fa), letters)
