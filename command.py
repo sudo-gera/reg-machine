@@ -304,7 +304,7 @@ def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
     ):
         rc = old_main(
             ['-', *new_commands_to_old_commands[operation], letters],
-            stdin, stdout)
+            stdin.read(), stdout)
     null.seek(0)
     assert not null.read()
     stdout.seek(0)
@@ -315,10 +315,10 @@ def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
 
 def old_main(
     argv: list[str],
-    stdin: typing.IO[str],
+    stdin: str,
     stdout: typing.IO[str],
 ) -> int:
-    stdout.write(old_old_main(argv, stdin.read()))
+    stdout.write(old_old_main(argv, stdin))
     return 0
 
 
