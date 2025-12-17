@@ -353,13 +353,13 @@ def get_io_tests() -> list[io_test]:
         text_in: str,
         text_out: str,
         code: int,
-        text_err: str = '',
+        text_err: str,
         main: typing.Callable[[
             list[str],
             typing.IO[str],
             typing.IO[str],
             typing.IO[str],
-        ], int] = command.old_main,
+        ], int],
     ) -> None:
 
         tests.append(
@@ -378,13 +378,23 @@ def get_io_tests() -> list[io_test]:
         '',
         '',
         1,
-        'usage: command.py <input format> <output format> [<labels>]\n')
-    append_to_tests(['command.py', 'reg', 'reg'], '0\n', '0\n', 0)
+        'usage: command.py <input format> <output format> [<labels>]\n',
+        command.old_main,
+    )
+    append_to_tests(
+        ['command.py', 'reg', 'reg'],
+        '0\n',
+        '0\n',
+        0,
+        '',
+        command.old_main,
+    )
     append_to_tests(
         ['command.py', 'reg', 'peg'], '',
         '',
         1,
         'unknown format: peg.\nsupported formats are:\n    reg\n    eps-non-det-fsm\n    non-det-fsm\n    det-fsm\n    full-det-fsm\n    min-full-det-fsm\n    invert-full-det-fsm\n',
+        command.old_main,
     )
     append_to_tests(
         ['command.py', 'det-fsm', 'reg'],
@@ -392,27 +402,47 @@ def get_io_tests() -> list[io_test]:
         '',
         1,
         'this conversion order is not supported.\n',
+        command.old_main,
     )
-    append_to_tests(['command.py', 'reg', 'det-fsm'], '0', '\n1\n\n\n', 0, '')
-    append_to_tests(['command.py', 'eps-non-det-fsm', 'det-fsm'], '\n1\n\n\n',
-                    '\n1\n\n\n', 0)
+    append_to_tests(
+        ['command.py', 'reg', 'det-fsm'],
+        '0',
+        '\n1\n\n\n',
+        0,
+        '',
+        command.old_main,
+    )
+    append_to_tests(
+        ['command.py', 'eps-non-det-fsm', 'det-fsm'],
+        '\n1\n\n\n',
+        '\n1\n\n\n',
+        0,
+        '',
+        command.old_main,
+    )
     append_to_tests(
         ['command.py', 'reg', 'full-det-fsm'],
         '0',
         '',
         1,
         'labels argument is undefined.\n',
+        command.old_main,
     )
     append_to_tests(
         ['command.py', 'non-det-fsm', 'min-full-det-fsm', 'ab'],
         '0\n\n3\n\n0 3 a\n3 3 a\n3 3 b\n0 1 b\n2 3 a\n2 1 b\n1 2 b\n1 1 a\n',
-        '\n1\n\n2\n\n1 2 a\n1 3 b\n2 2 a\n2 2 b\n3 1 b\n3 3 a\n', 0)
+        '\n1\n\n2\n\n1 2 a\n1 3 b\n2 2 a\n2 2 b\n3 1 b\n3 3 a\n',
+        0,
+        '',
+        command.old_main,
+    )
     append_to_tests(
         ['command.py', 'reg', 'det-fsm'],
         '',
         '',
         1,
         'Incorrect input data.\n',
+        command.old_main,
     )
 
     append_to_tests(
