@@ -216,15 +216,26 @@ def process_args(
                 return 1
 
     for operation in operations:
+
         for precondition in operation.preconditions:
-            # print(f'{precondition = }', value, file=debug)
             assert precondition(value)
-        func = typing.cast(typing.Callable[[str, str], str], eval(
-            operation.name.replace('-', '_')))
+
+        func = typing.cast(
+            typing.Callable[[str, str], str],
+            eval(
+                operation.name.replace('-', '_')
+            )
+        )
+
         value = fa_or_re.from_private_str(
-            func(value.as_private_str(), letters)[1:], letters)
+            func(
+                value.as_private_str(),
+                letters
+            )[1:],
+            letters
+        )
+
         for postcondition in operation.postconditions:
-            # print(f'{postcondition = }', value, file=debug)
             assert postcondition(value)
 
     print(value.as_public_str())
@@ -238,8 +249,6 @@ def main(
     stdout: typing.IO[str],
     stderr: typing.IO[str],
 ) -> int:
-    # print(f'{argv = }', f'{stdin.read() = }', file=debug)
-    # stdin.seek(0)
     with (
             contextlib.redirect_stdout(stdout),
             contextlib.redirect_stderr(stderr),
@@ -248,13 +257,10 @@ def main(
 
 
 def re_to_eps_nfa(value: str, letters: str) -> str:
-    f0='re_to_eps_nfa'
 
     text = value
     s = convert.regex_to_ast(text)
     a = convert.ast_to_eps_nfa(s)
-
-    a = (lambda a: a)(a)
 
     return '\n' + fa.fsm_to_dimple(a)
 
@@ -264,13 +270,12 @@ def remove_eps(value: str, letters: str) -> str:
     text = value
     a = fa.dimple_to_fsm(text)
 
-    a=convert.remove_eps(a)
+    a = convert.remove_eps(a)
 
     return '\n' + fa.fsm_to_dimple(a)
 
 
 def make_deterministic(value: str, letters: str) -> str:
-    f0='make_deterministic'
 
     text = value
     a = fa.dimple_to_fsm(text)
@@ -281,18 +286,16 @@ def make_deterministic(value: str, letters: str) -> str:
 
 
 def make_full(value: str, letters: str) -> str:
-    f0='make_full'
 
     text = value
     a = fa.dimple_to_fsm(text)
 
-    a = (lambda a: convert.make_full(a, letters + letters[0][:0]))(a)
+    a = convert.make_full(a, letters + letters[0][:0])
 
     return '\n' + fa.fsm_to_dimple(a)
 
 
 def minimize(value: str, letters: str) -> str:
-    f0='minimize'
 
     text = value
     a = fa.dimple_to_fsm(text)
@@ -303,7 +306,6 @@ def minimize(value: str, letters: str) -> str:
 
 
 def invert(value: str, letters: str) -> str:
-    f0='invert'
 
     text = value
     a = fa.dimple_to_fsm(text)
@@ -320,5 +322,4 @@ def full_dfa_to_re(value: str, letters: str) -> str:
 
 
 if __name__ == '__main__':
-    # exit(old_main(sys.argv, sys.stdin, sys.stdout, sys.stderr))
     exit(main(sys.argv, sys.stdin, sys.stdout, sys.stderr))
