@@ -302,24 +302,21 @@ def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
             contextlib.redirect_stdout(null),
             contextlib.redirect_stderr(null),
     ):
-        rc = old_main(
+        stdout.write(old_main(
             ['-', *new_commands_to_old_commands[operation], letters],
-            stdin.read(), stdout)
+            stdin.read()))
     null.seek(0)
     assert not null.read()
     stdout.seek(0)
     stdout_data = stdout.read()
-    assert rc == 0
     return stdout_data
 
 
 def old_main(
     argv: list[str],
     stdin: str,
-    stdout: typing.IO[str],
-) -> int:
-    stdout.write(old_old_main(argv, stdin))
-    return 0
+) -> str:
+    return old_old_main(argv, stdin)
 
 
 def old_old_main(
