@@ -28,6 +28,12 @@ class frozen_fa:
     def from_json_str(data: str) -> frozen_fa:
         value = json.loads(data)
         assert isinstance(value, dict)
+        value['states'].sort()
+        value['letters'].sort()
+        value['transition_function'].sort()
+        value['start_states'].sort()
+        value['final_states'].sort()
+        value = {k:v for (k,v) in sorted(value.items())}
         return frozen_fa(**value)
 
     def to_json_str(self) -> str:

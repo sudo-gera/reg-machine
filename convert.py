@@ -139,7 +139,7 @@ def fa_to_re(a: fa.FA) -> str:
 
     a.the_only_final_if_exists_or_unrelated_node.is_final = True
 
-    print(f'{a.the_only_final_if_exists_or_unrelated_node = }', file=debug)
+    # print(f'{a.the_only_final_if_exists_or_unrelated_node = }', file=debug)
 
     for node in a.start.bfs():
         if node.is_final and node is not a.the_only_final_if_exists_or_unrelated_node:
@@ -167,14 +167,14 @@ def fa_to_re(a: fa.FA) -> str:
                 else:
                     node.regex_by_next_node[next_node] = ltext
 
-    print(f'{a.the_only_final_if_exists_or_unrelated_node = }', file=debug)
+    # print(f'{a.the_only_final_if_exists_or_unrelated_node = }', file=debug)
 
     while 1:
         nodes = {*a.start.bfs()}
-        print(nodes, file=debug)
-        for node in nodes:
-            for next_node, re in node.regex_by_next_node.items():
-                print(f'{node} -> {re} -> {next_node}', file=debug)
+        # print(nodes, file=debug)
+        # for node in nodes:
+            # for next_node, re in node.regex_by_next_node.items():
+                # print(f'{node} -> {re} -> {next_node}', file=debug)
         
         assert a.start in nodes
         assert a.the_only_final_if_exists_or_unrelated_node in nodes
@@ -229,7 +229,7 @@ def fa_to_re(a: fa.FA) -> str:
                             res = f'({ij}+{iq}*{loop})'
                         else:
                             res = f'({ij}+{iq}*{loop}*{qj})'
-                    print(f'{ij = !r} + {iq = !r} * {loop = !r} * {qj = !r} -> {res = !r}', file=debug)
+                    # print(f'{ij = !r} + {iq = !r} * {loop = !r} * {qj = !r} -> {res = !r}', file=debug)
                     i.regex_by_next_node[j] = res
                     # f'({i.regex_by_next_node[j]}+{i.regex_by_next_node[q]}*{loop}*{q.regex_by_next_node[j]})'
                     i.next_nodes_by_label['--'] |= {j}

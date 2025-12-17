@@ -402,11 +402,11 @@ def get_io_tests() -> list[io_test]:
         command.main,
     )
 
-    eps_nfa = '{\n    "states": [\n        "1",\n        "10",\n        "11",\n        "12",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6",\n        "7",\n        "8",\n        "9"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "",\n            "3"\n        ],\n        [\n            "1",\n            "",\n            "4"\n        ],\n        [\n            "2",\n            "",\n            "5"\n        ],\n        [\n            "3",\n            "e",\n            "6"\n        ],\n        [\n            "4",\n            "q",\n            "7"\n        ],\n        [\n            "5",\n            "w",\n            "8"\n        ],\n        [\n            "6",\n            "",\n            "9"\n        ],\n        [\n            "7",\n            "",\n            "10"\n        ],\n        [\n            "9",\n            "r",\n            "11"\n        ],\n        [\n            "10",\n            "w",\n            "12"\n        ],\n        [\n            "11",\n            "",\n            "8"\n        ],\n        [\n            "12",\n            "",\n            "8"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "8"\n    ]\n}\n'
-    nfa = '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6",\n        "7"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "q",\n            "3"\n        ],\n        [\n            "1",\n            "e",\n            "4"\n        ],\n        [\n            "2",\n            "w",\n            "5"\n        ],\n        [\n            "3",\n            "w",\n            "6"\n        ],\n        [\n            "4",\n            "r",\n            "7"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "5",\n        "6",\n        "7"\n    ]\n}\n'
-    dfa = '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "5"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "4",\n        "5"\n    ]\n}\n'
-    full_dfa = '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "1",\n            "w",\n            "4"\n        ],\n        [\n            "1",\n            "r",\n            "4"\n        ],\n        [\n            "2",\n            "w",\n            "5"\n        ],\n        [\n            "2",\n            "q",\n            "4"\n        ],\n        [\n            "2",\n            "e",\n            "4"\n        ],\n        [\n            "2",\n            "r",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "6"\n        ],\n        [\n            "3",\n            "q",\n            "4"\n        ],\n        [\n            "3",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "e",\n            "4"\n        ],\n        [\n            "4",\n            "q",\n            "4"\n        ],\n        [\n            "4",\n            "w",\n            "4"\n        ],\n        [\n            "4",\n            "e",\n            "4"\n        ],\n        [\n            "4",\n            "r",\n            "4"\n        ],\n        [\n            "5",\n            "q",\n            "4"\n        ],\n        [\n            "5",\n            "w",\n            "4"\n        ],\n        [\n            "5",\n            "e",\n            "4"\n        ],\n        [\n            "5",\n            "r",\n            "4"\n        ],\n        [\n            "6",\n            "q",\n            "4"\n        ],\n        [\n            "6",\n            "w",\n            "4"\n        ],\n        [\n            "6",\n            "e",\n            "4"\n        ],\n        [\n            "6",\n            "r",\n            "4"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "5",\n        "6"\n    ]\n}\n'
-    min_full_dfa = '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "1",\n            "w",\n            "4"\n        ],\n        [\n            "1",\n            "r",\n            "4"\n        ],\n        [\n            "2",\n            "w",\n            "5"\n        ],\n        [\n            "2",\n            "q",\n            "4"\n        ],\n        [\n            "2",\n            "e",\n            "4"\n        ],\n        [\n            "2",\n            "r",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "5"\n        ],\n        [\n            "3",\n            "q",\n            "4"\n        ],\n        [\n            "3",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "e",\n            "4"\n        ],\n        [\n            "4",\n            "q",\n            "4"\n        ],\n        [\n            "4",\n            "w",\n            "4"\n        ],\n        [\n            "4",\n            "e",\n            "4"\n        ],\n        [\n            "4",\n            "r",\n            "4"\n        ],\n        [\n            "5",\n            "q",\n            "4"\n        ],\n        [\n            "5",\n            "w",\n            "4"\n        ],\n        [\n            "5",\n            "e",\n            "4"\n        ],\n        [\n            "5",\n            "r",\n            "4"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "5"\n    ]\n}\n'
+    eps_nfa = '{\n    "states": [\n        "1",\n        "10",\n        "11",\n        "12",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6",\n        "7",\n        "8",\n        "9"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "",\n            "3"\n        ],\n        [\n            "1",\n            "",\n            "4"\n        ],\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "10",\n            "w",\n            "12"\n        ],\n        [\n            "11",\n            "",\n            "8"\n        ],\n        [\n            "12",\n            "",\n            "8"\n        ],\n        [\n            "2",\n            "",\n            "5"\n        ],\n        [\n            "3",\n            "e",\n            "6"\n        ],\n        [\n            "4",\n            "q",\n            "7"\n        ],\n        [\n            "5",\n            "w",\n            "8"\n        ],\n        [\n            "6",\n            "",\n            "9"\n        ],\n        [\n            "7",\n            "",\n            "10"\n        ],\n        [\n            "9",\n            "r",\n            "11"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "8"\n    ]\n}\n'
+    nfa = '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6",\n        "7"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "e",\n            "4"\n        ],\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "q",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "5"\n        ],\n        [\n            "3",\n            "w",\n            "6"\n        ],\n        [\n            "4",\n            "r",\n            "7"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "5",\n        "6",\n        "7"\n    ]\n}\n'
+    dfa = '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "e",\n            "2"\n        ],\n        [\n            "1",\n            "q",\n            "3"\n        ],\n        [\n            "2",\n            "r",\n            "4"\n        ],\n        [\n            "3",\n            "w",\n            "5"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "4",\n        "5"\n    ]\n}\n'
+    full_dfa = '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "e",\n            "2"\n        ],\n        [\n            "1",\n            "q",\n            "3"\n        ],\n        [\n            "1",\n            "r",\n            "4"\n        ],\n        [\n            "1",\n            "w",\n            "4"\n        ],\n        [\n            "2",\n            "e",\n            "4"\n        ],\n        [\n            "2",\n            "q",\n            "4"\n        ],\n        [\n            "2",\n            "r",\n            "5"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "e",\n            "4"\n        ],\n        [\n            "3",\n            "q",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "4"\n        ],\n        [\n            "3",\n            "w",\n            "6"\n        ],\n        [\n            "4",\n            "e",\n            "4"\n        ],\n        [\n            "4",\n            "q",\n            "4"\n        ],\n        [\n            "4",\n            "r",\n            "4"\n        ],\n        [\n            "4",\n            "w",\n            "4"\n        ],\n        [\n            "5",\n            "e",\n            "4"\n        ],\n        [\n            "5",\n            "q",\n            "4"\n        ],\n        [\n            "5",\n            "r",\n            "4"\n        ],\n        [\n            "5",\n            "w",\n            "4"\n        ],\n        [\n            "6",\n            "e",\n            "4"\n        ],\n        [\n            "6",\n            "q",\n            "4"\n        ],\n        [\n            "6",\n            "r",\n            "4"\n        ],\n        [\n            "6",\n            "w",\n            "4"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "5",\n        "6"\n    ]\n}\n'
+    min_full_dfa = '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "e",\n            "2"\n        ],\n        [\n            "1",\n            "q",\n            "3"\n        ],\n        [\n            "1",\n            "r",\n            "4"\n        ],\n        [\n            "1",\n            "w",\n            "4"\n        ],\n        [\n            "2",\n            "e",\n            "4"\n        ],\n        [\n            "2",\n            "q",\n            "4"\n        ],\n        [\n            "2",\n            "r",\n            "5"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "e",\n            "4"\n        ],\n        [\n            "3",\n            "q",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "4"\n        ],\n        [\n            "3",\n            "w",\n            "5"\n        ],\n        [\n            "4",\n            "e",\n            "4"\n        ],\n        [\n            "4",\n            "q",\n            "4"\n        ],\n        [\n            "4",\n            "r",\n            "4"\n        ],\n        [\n            "4",\n            "w",\n            "4"\n        ],\n        [\n            "5",\n            "e",\n            "4"\n        ],\n        [\n            "5",\n            "q",\n            "4"\n        ],\n        [\n            "5",\n            "r",\n            "4"\n        ],\n        [\n            "5",\n            "w",\n            "4"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "5"\n    ]\n}\n'
 
     append_to_tests(
         ['command.py', '--letters', 'qwer', '--operations', 're-to-eps-nfa'],
@@ -458,7 +458,7 @@ def get_io_tests() -> list[io_test]:
         eps_nfa,
         '',
         1,
-        "Input fa_or_re(value_=frozen_fa(states=['1', '10', '11', '12', '2', '3', '4', '5', '6', '7', '8', '9'], letters=['e', 'q', 'r', 'w'], transition_function=[['1', 'q', '2'], ['1', '', '3'], ['1', '', '4'], ['2', '', '5'], ['3', 'e', '6'], ['4', 'q', '7'], ['5', 'w', '8'], ['6', '', '9'], ['7', '', '10'], ['9', 'r', '11'], ['10', 'w', '12'], ['11', '', '8'], ['12', '', '8']], start_states=['1'], final_states=['8'])) dit not pass precondition = HasNoEps() of the operation = command_line_operation(name='make-deterministic', preconditions=(HasNoEps(),), postconditions=(IsDeterministic(),)).\n",
+        "Input fa_or_re(value_=frozen_fa(states=['1', '10', '11', '12', '2', '3', '4', '5', '6', '7', '8', '9'], letters=['e', 'q', 'r', 'w'], transition_function=[['1', '', '3'], ['1', '', '4'], ['1', 'q', '2'], ['10', 'w', '12'], ['11', '', '8'], ['12', '', '8'], ['2', '', '5'], ['3', 'e', '6'], ['4', 'q', '7'], ['5', 'w', '8'], ['6', '', '9'], ['7', '', '10'], ['9', 'r', '11']], start_states=['1'], final_states=['8'])) dit not pass precondition = HasNoEps() of the operation = command_line_operation(name='make-deterministic', preconditions=(HasNoEps(),), postconditions=(IsDeterministic(),)).\n",
         command.main,
     )
 
@@ -467,7 +467,7 @@ def get_io_tests() -> list[io_test]:
         eps_nfa,
         '',
         1,
-        "Input fa_or_re(value_=frozen_fa(states=['1', '10', '11', '12', '2', '3', '4', '5', '6', '7', '8', '9'], letters=['e', 'q', 'r', 'w'], transition_function=[['1', 'q', '2'], ['1', '', '3'], ['1', '', '4'], ['2', '', '5'], ['3', 'e', '6'], ['4', 'q', '7'], ['5', 'w', '8'], ['6', '', '9'], ['7', '', '10'], ['9', 'r', '11'], ['10', 'w', '12'], ['11', '', '8'], ['12', '', '8']], start_states=['1'], final_states=['8'])) dit not pass precondition = IsDeterministic() of the operation = command_line_operation(name='make-full', preconditions=(IsDeterministic(),), postconditions=(IsFull(),)).\n",
+        "Input fa_or_re(value_=frozen_fa(states=['1', '10', '11', '12', '2', '3', '4', '5', '6', '7', '8', '9'], letters=['e', 'q', 'r', 'w'], transition_function=[['1', '', '3'], ['1', '', '4'], ['1', 'q', '2'], ['10', 'w', '12'], ['11', '', '8'], ['12', '', '8'], ['2', '', '5'], ['3', 'e', '6'], ['4', 'q', '7'], ['5', 'w', '8'], ['6', '', '9'], ['7', '', '10'], ['9', 'r', '11']], start_states=['1'], final_states=['8'])) dit not pass precondition = IsDeterministic() of the operation = command_line_operation(name='make-full', preconditions=(IsDeterministic(),), postconditions=(IsFull(),)).\n",
         command.main,
     )
 
@@ -476,7 +476,7 @@ def get_io_tests() -> list[io_test]:
         nfa,
         '',
         1,
-        "Input fa_or_re(value_=frozen_fa(states=['1', '2', '3', '4', '5', '6', '7'], letters=['e', 'q', 'r', 'w'], transition_function=[['1', 'q', '2'], ['1', 'q', '3'], ['1', 'e', '4'], ['2', 'w', '5'], ['3', 'w', '6'], ['4', 'r', '7']], start_states=['1'], final_states=['5', '6', '7'])) dit not pass precondition = IsDeterministic() of the operation = command_line_operation(name='make-full', preconditions=(IsDeterministic(),), postconditions=(IsFull(),)).\n",
+        "Input fa_or_re(value_=frozen_fa(states=['1', '2', '3', '4', '5', '6', '7'], letters=['e', 'q', 'r', 'w'], transition_function=[['1', 'e', '4'], ['1', 'q', '2'], ['1', 'q', '3'], ['2', 'w', '5'], ['3', 'w', '6'], ['4', 'r', '7']], start_states=['1'], final_states=['5', '6', '7'])) dit not pass precondition = IsDeterministic() of the operation = command_line_operation(name='make-full', preconditions=(IsDeterministic(),), postconditions=(IsFull(),)).\n",
         command.main,
     )
 
@@ -485,7 +485,7 @@ def get_io_tests() -> list[io_test]:
         eps_nfa,
         '',
         1,
-        "Input fa_or_re(value_=frozen_fa(states=['1', '10', '11', '12', '2', '3', '4', '5', '6', '7', '8', '9'], letters=['e', 'q', 'r', 'w'], transition_function=[['1', 'q', '2'], ['1', '', '3'], ['1', '', '4'], ['2', '', '5'], ['3', 'e', '6'], ['4', 'q', '7'], ['5', 'w', '8'], ['6', '', '9'], ['7', '', '10'], ['9', 'r', '11'], ['10', 'w', '12'], ['11', '', '8'], ['12', '', '8']], start_states=['1'], final_states=['8'])) dit not pass precondition = IsFull() of the operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)).\n",
+        "Input fa_or_re(value_=frozen_fa(states=['1', '10', '11', '12', '2', '3', '4', '5', '6', '7', '8', '9'], letters=['e', 'q', 'r', 'w'], transition_function=[['1', '', '3'], ['1', '', '4'], ['1', 'q', '2'], ['10', 'w', '12'], ['11', '', '8'], ['12', '', '8'], ['2', '', '5'], ['3', 'e', '6'], ['4', 'q', '7'], ['5', 'w', '8'], ['6', '', '9'], ['7', '', '10'], ['9', 'r', '11']], start_states=['1'], final_states=['8'])) dit not pass precondition = IsFull() of the operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)).\n",
         command.main,
     )
 
@@ -494,7 +494,7 @@ def get_io_tests() -> list[io_test]:
         nfa,
         '',
         1,
-        "Input fa_or_re(value_=frozen_fa(states=['1', '2', '3', '4', '5', '6', '7'], letters=['e', 'q', 'r', 'w'], transition_function=[['1', 'q', '2'], ['1', 'q', '3'], ['1', 'e', '4'], ['2', 'w', '5'], ['3', 'w', '6'], ['4', 'r', '7']], start_states=['1'], final_states=['5', '6', '7'])) dit not pass precondition = IsFull() of the operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)).\n",
+        "Input fa_or_re(value_=frozen_fa(states=['1', '2', '3', '4', '5', '6', '7'], letters=['e', 'q', 'r', 'w'], transition_function=[['1', 'e', '4'], ['1', 'q', '2'], ['1', 'q', '3'], ['2', 'w', '5'], ['3', 'w', '6'], ['4', 'r', '7']], start_states=['1'], final_states=['5', '6', '7'])) dit not pass precondition = IsFull() of the operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)).\n",
         command.main,
     )
 
@@ -503,7 +503,7 @@ def get_io_tests() -> list[io_test]:
         dfa,
         '',
         1,
-        "Input fa_or_re(value_=frozen_fa(states=['1', '2', '3', '4', '5'], letters=['e', 'q', 'r', 'w'], transition_function=[['1', 'q', '2'], ['1', 'e', '3'], ['2', 'w', '4'], ['3', 'r', '5']], start_states=['1'], final_states=['4', '5'])) dit not pass precondition = IsFull() of the operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)).\n",
+        "Input fa_or_re(value_=frozen_fa(states=['1', '2', '3', '4', '5'], letters=['e', 'q', 'r', 'w'], transition_function=[['1', 'e', '2'], ['1', 'q', '3'], ['2', 'r', '4'], ['3', 'w', '5']], start_states=['1'], final_states=['4', '5'])) dit not pass precondition = IsFull() of the operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)).\n",
         command.main,
     )
 
@@ -511,7 +511,7 @@ def get_io_tests() -> list[io_test]:
         ['command.py', '--letters', 'qwer',
             '--operations', 're-to-eps-nfa', 'remove-eps'],
         'q*w+e*r',
-        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "5"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "4",\n        "5"\n    ]\n}\n',
+        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "5"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "4",\n        "5"\n    ]\n}\n',
         0,
         '',
         command.main,
@@ -521,7 +521,7 @@ def get_io_tests() -> list[io_test]:
         ['command.py', '--letters', 'qwer', '--operations', 're-to-eps-nfa',
             'remove-eps', 'make-deterministic', 'make-full', 'minimize', 'invert'],
         'q*w+e*r',
-        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "1",\n            "w",\n            "4"\n        ],\n        [\n            "1",\n            "r",\n            "4"\n        ],\n        [\n            "2",\n            "w",\n            "5"\n        ],\n        [\n            "2",\n            "q",\n            "4"\n        ],\n        [\n            "2",\n            "e",\n            "4"\n        ],\n        [\n            "2",\n            "r",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "5"\n        ],\n        [\n            "3",\n            "q",\n            "4"\n        ],\n        [\n            "3",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "e",\n            "4"\n        ],\n        [\n            "4",\n            "q",\n            "4"\n        ],\n        [\n            "4",\n            "w",\n            "4"\n        ],\n        [\n            "4",\n            "e",\n            "4"\n        ],\n        [\n            "4",\n            "r",\n            "4"\n        ],\n        [\n            "5",\n            "q",\n            "4"\n        ],\n        [\n            "5",\n            "w",\n            "4"\n        ],\n        [\n            "5",\n            "e",\n            "4"\n        ],\n        [\n            "5",\n            "r",\n            "4"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "1",\n        "2",\n        "3",\n        "4"\n    ]\n}\n',
+        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "e",\n            "2"\n        ],\n        [\n            "1",\n            "q",\n            "3"\n        ],\n        [\n            "1",\n            "r",\n            "4"\n        ],\n        [\n            "1",\n            "w",\n            "4"\n        ],\n        [\n            "2",\n            "e",\n            "4"\n        ],\n        [\n            "2",\n            "q",\n            "4"\n        ],\n        [\n            "2",\n            "r",\n            "5"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "e",\n            "4"\n        ],\n        [\n            "3",\n            "q",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "4"\n        ],\n        [\n            "3",\n            "w",\n            "5"\n        ],\n        [\n            "4",\n            "e",\n            "4"\n        ],\n        [\n            "4",\n            "q",\n            "4"\n        ],\n        [\n            "4",\n            "r",\n            "4"\n        ],\n        [\n            "4",\n            "w",\n            "4"\n        ],\n        [\n            "5",\n            "e",\n            "4"\n        ],\n        [\n            "5",\n            "q",\n            "4"\n        ],\n        [\n            "5",\n            "r",\n            "4"\n        ],\n        [\n            "5",\n            "w",\n            "4"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "1",\n        "2",\n        "3",\n        "4"\n    ]\n}\n',
         0,
         '',
         command.main,
@@ -658,6 +658,17 @@ def test_fa_stress(arg: int) -> None:
                 assert validate.fa_is_full(inverted_same_min_dfa, labels)
                 check_equal(inverted_min_dfa, inverted_same_min_dfa)
 
+                # for old_fa in [
+                #         eps_nfa, nfa, dfa, full_dfa, min_full_dfa,
+                #         same_min_dfa, inverted_full_dfa,
+                #         inverted_min_dfa, inverted_same_min_dfa
+                #     ]:
+                    # created_re = convert.fa_to_re(old_fa)
+                    # new_fa = convert.ast_to_eps_nfa(convert.regex_to_ast(created_re))
+                    # print(command.fa_or_re.from_private_fa(old_fa, labels).as_public_str(), file=debug)
+                    # print(command.fa_or_re.from_private_fa(new_fa, labels).as_public_str(), file=debug)
+                    # assert command.fa_or_re.from_private_fa(old_fa, labels).as_public_str() == command.fa_or_re.from_private_fa(new_fa, labels).as_public_str()
+
             except RecursionError:
                 for var in [
                         eps_nfa, nfa, dfa, full_dfa, min_full_dfa,
@@ -745,4 +756,113 @@ def test_fa_to_re_1() -> None:
     assert new_re == '1'
 
 
+# def test_fa_stress_fa_to_re(arg: int) -> None:
+#     labels = 'qw'
+#     while True:
+#         try:
+#             try:
+#                 r = random_fa(rand, 2, labels)
+#             except RecursionError:
+#                 raise InternalTestError
+#             fa_or_none: fa.FA | None = None
+#             eps_nfa = nfa = dfa = full_dfa = min_full_dfa = same_min_dfa = inverted_full_dfa = inverted_min_dfa = inverted_same_min_dfa = fa_or_none
+#             try:
+#                 z = convert.regex_to_ast(r.regex_for_converting_to_fa)
+#                 eps_nfa = convert.ast_to_eps_nfa(z)
+
+#                 nfa = convert.remove_eps(eps_nfa)
+#                 assert not validate.fa_has_eps(nfa)
+
+#                 dfa = convert.make_deterministic(nfa)
+#                 assert validate.fa_is_det(dfa)
+
+#                 full_dfa = convert.make_full(dfa, labels)
+#                 assert validate.fa_is_full(full_dfa, labels)
+
+#                 min_full_dfa = convert.make_min(full_dfa)
+#                 assert validate.fa_is_full(min_full_dfa, labels)
+
+#                 same_min_dfa = convert.make_min(min_full_dfa)
+#                 assert validate.fa_is_full(same_min_dfa, labels)
+#                 check_equal(min_full_dfa, same_min_dfa)
+
+#                 inverted_full_dfa = convert.invert_full_fa(full_dfa)
+#                 assert validate.fa_is_full(inverted_full_dfa, labels)
+
+#                 inverted_min_dfa = convert.invert_full_fa(min_full_dfa)
+#                 assert validate.fa_is_full(inverted_min_dfa, labels)
+
+#                 inverted_same_min_dfa = convert.invert_full_fa(same_min_dfa)
+#                 assert validate.fa_is_full(inverted_same_min_dfa, labels)
+#                 check_equal(inverted_min_dfa, inverted_same_min_dfa)
+
+#                 for old_fa in [
+#                         eps_nfa, nfa, dfa, full_dfa, min_full_dfa,
+#                         same_min_dfa, inverted_full_dfa,
+#                         inverted_min_dfa, inverted_same_min_dfa
+#                     ]:
+#                     print(command.fa_or_re.from_private_fa(old_fa, labels).as_public_str(), file=debug)
+#                     created_re = convert.fa_to_re(old_fa)
+#                     new_fa = convert.ast_to_eps_nfa(convert.regex_to_ast(created_re))
+#                     print(command.fa_or_re.from_private_fa(new_fa, labels).as_public_str(), file=debug)
+#                     assert command.fa_or_re.from_private_fa(old_fa, labels).as_public_str() == command.fa_or_re.from_private_fa(new_fa, labels).as_public_str()
+
+#             except RecursionError:
+#                 for var in [
+#                         eps_nfa, nfa, dfa, full_dfa, min_full_dfa,
+#                         same_min_dfa, inverted_full_dfa,
+#                         inverted_min_dfa, inverted_same_min_dfa
+#                 ][::-1]:
+#                     if var is not None:
+#                         print(graphviz(var), file=debug)
+#                         break
+#                 raise
+#             if r.random_string_that_matches is None:
+#                 raise InternalTestError
+#             assert r.random_string_that_matches is not None
+
+#             if arg < 0:
+#                 assert can_fa_eval_string(r.fa, r.random_string_that_matches)
+#                 assert can_fa_eval_string(eps_nfa,
+#                                           r.random_string_that_matches)
+#                 assert can_fa_eval_string(nfa, r.random_string_that_matches)
+#                 assert can_fa_eval_string(dfa, r.random_string_that_matches)
+#                 assert can_fa_eval_string(full_dfa,
+#                                           r.random_string_that_matches)
+#                 assert can_fa_eval_string(min_full_dfa,
+#                                           r.random_string_that_matches)
+#             assert can_fa_eval_string(same_min_dfa,
+#                                       r.random_string_that_matches)
+#             if arg < 0:
+#                 assert not can_fa_eval_string(inverted_full_dfa,
+#                                               r.random_string_that_matches)
+#                 assert not can_fa_eval_string(inverted_min_dfa,
+#                                               r.random_string_that_matches)
+#                 assert not can_fa_eval_string(inverted_same_min_dfa,
+#                                               r.random_string_that_matches)
+#             assert re.fullmatch(r.compiled_regex_for_fullmatch,
+#                                 r.random_string_that_matches)
+#             for t in r.random_strings_that_maybe_match:
+#                 if t is not None:
+#                     u = can_fa_eval_string(same_min_dfa, t)
+#                     assert u == bool(re.fullmatch(
+#                         r.compiled_regex_for_fullmatch, t))
+#                     if arg < 0:
+#                         assert can_fa_eval_string(r.fa, t) == u
+#                         assert can_fa_eval_string(eps_nfa, t) == u
+#                         assert can_fa_eval_string(nfa, t) == u
+#                         assert can_fa_eval_string(dfa, t) == u
+#                         assert can_fa_eval_string(full_dfa, t) == u
+#                         assert can_fa_eval_string(min_full_dfa, t) == u
+#                         assert can_fa_eval_string(same_min_dfa, t) == u
+#                         assert can_fa_eval_string(inverted_full_dfa, t) != u
+#                         assert can_fa_eval_string(inverted_min_dfa,
+#                                                   t) != u
+#                         assert can_fa_eval_string(inverted_same_min_dfa,
+#                                                   t) != u
+#             break
+#         except InternalTestError:
+#             continue
+
+# test_fa_stress_fa_to_re = pytest.mark.parametrize('arg', arg_values)(test_fa_stress_fa_to_re)
 
