@@ -249,45 +249,6 @@ def main(
 
 def re_to_eps_nfa(value: str, letters: str) -> str:
     f0='re_to_eps_nfa'
-    return old_main(f0, value, letters)
-
-
-def remove_eps(value: str, letters: str) -> str:
-    f0='remove_eps'
-    return old_main(f0, value, letters)
-
-
-def make_deterministic(value: str, letters: str) -> str:
-    f0='make_deterministic'
-    return old_main(f0, value, letters)
-
-
-def make_full(value: str, letters: str) -> str:
-    f0='make_full'
-    return old_main(f0, value, letters)
-
-
-def minimize(value: str, letters: str) -> str:
-    f0='minimize'
-    return old_main(f0, value, letters)
-
-
-def invert(value: str, letters: str) -> str:
-    f0='invert'
-    return old_main(f0, value, letters)
-
-
-def full_dfa_to_re(value: str, letters: str) -> str:
-    f0='full_dfa_to_re'
-    return old_main(f0, value, letters)
-
-
-def old_main(
-    f0: str,
-    value: str,
-    letters: str,
-) -> str:
-
     if f0 == 're_to_eps_nfa':
         text = value
         s = convert.regex_to_ast(text)
@@ -307,6 +268,145 @@ def old_main(
     }[f0](a)
 
     return '\n' + fa.fsm_to_dimple(a)
+
+
+def remove_eps(value: str, letters: str) -> str:
+    f0='remove_eps'
+    if f0 == 're_to_eps_nfa':
+        text = value
+        s = convert.regex_to_ast(text)
+        a = convert.ast_to_eps_nfa(s)
+    else:
+        text = value
+        a = fa.dimple_to_fsm(text)
+
+    a = {
+        're_to_eps_nfa': lambda a: a,
+        'remove_eps': convert.remove_eps,
+        'make_deterministic': convert.make_deterministic,
+        'make_full': lambda a: convert.make_full(a, letters + letters[0][:0]),
+        'minimize': convert.make_min,
+        'invert': convert.invert_full_fa,
+        'invert-full-det-fsm': lambda a: a,
+    }[f0](a)
+
+    return '\n' + fa.fsm_to_dimple(a)
+
+
+def make_deterministic(value: str, letters: str) -> str:
+    f0='make_deterministic'
+    if f0 == 're_to_eps_nfa':
+        text = value
+        s = convert.regex_to_ast(text)
+        a = convert.ast_to_eps_nfa(s)
+    else:
+        text = value
+        a = fa.dimple_to_fsm(text)
+
+    a = {
+        're_to_eps_nfa': lambda a: a,
+        'remove_eps': convert.remove_eps,
+        'make_deterministic': convert.make_deterministic,
+        'make_full': lambda a: convert.make_full(a, letters + letters[0][:0]),
+        'minimize': convert.make_min,
+        'invert': convert.invert_full_fa,
+        'invert-full-det-fsm': lambda a: a,
+    }[f0](a)
+
+    return '\n' + fa.fsm_to_dimple(a)
+
+
+def make_full(value: str, letters: str) -> str:
+    f0='make_full'
+    if f0 == 're_to_eps_nfa':
+        text = value
+        s = convert.regex_to_ast(text)
+        a = convert.ast_to_eps_nfa(s)
+    else:
+        text = value
+        a = fa.dimple_to_fsm(text)
+
+    a = {
+        're_to_eps_nfa': lambda a: a,
+        'remove_eps': convert.remove_eps,
+        'make_deterministic': convert.make_deterministic,
+        'make_full': lambda a: convert.make_full(a, letters + letters[0][:0]),
+        'minimize': convert.make_min,
+        'invert': convert.invert_full_fa,
+        'invert-full-det-fsm': lambda a: a,
+    }[f0](a)
+
+    return '\n' + fa.fsm_to_dimple(a)
+
+
+def minimize(value: str, letters: str) -> str:
+    f0='minimize'
+    if f0 == 're_to_eps_nfa':
+        text = value
+        s = convert.regex_to_ast(text)
+        a = convert.ast_to_eps_nfa(s)
+    else:
+        text = value
+        a = fa.dimple_to_fsm(text)
+
+    a = {
+        're_to_eps_nfa': lambda a: a,
+        'remove_eps': convert.remove_eps,
+        'make_deterministic': convert.make_deterministic,
+        'make_full': lambda a: convert.make_full(a, letters + letters[0][:0]),
+        'minimize': convert.make_min,
+        'invert': convert.invert_full_fa,
+        'invert-full-det-fsm': lambda a: a,
+    }[f0](a)
+
+    return '\n' + fa.fsm_to_dimple(a)
+
+
+def invert(value: str, letters: str) -> str:
+    f0='invert'
+    if f0 == 're_to_eps_nfa':
+        text = value
+        s = convert.regex_to_ast(text)
+        a = convert.ast_to_eps_nfa(s)
+    else:
+        text = value
+        a = fa.dimple_to_fsm(text)
+
+    a = {
+        're_to_eps_nfa': lambda a: a,
+        'remove_eps': convert.remove_eps,
+        'make_deterministic': convert.make_deterministic,
+        'make_full': lambda a: convert.make_full(a, letters + letters[0][:0]),
+        'minimize': convert.make_min,
+        'invert': convert.invert_full_fa,
+        'invert-full-det-fsm': lambda a: a,
+    }[f0](a)
+
+    return '\n' + fa.fsm_to_dimple(a)
+
+
+def full_dfa_to_re(value: str, letters: str) -> str:
+    f0='full_dfa_to_re'
+    if f0 == 're_to_eps_nfa':
+        text = value
+        s = convert.regex_to_ast(text)
+        a = convert.ast_to_eps_nfa(s)
+    else:
+        text = value
+        a = fa.dimple_to_fsm(text)
+
+    a = {
+        're_to_eps_nfa': lambda a: a,
+        'remove_eps': convert.remove_eps,
+        'make_deterministic': convert.make_deterministic,
+        'make_full': lambda a: convert.make_full(a, letters + letters[0][:0]),
+        'minimize': convert.make_min,
+        'invert': convert.invert_full_fa,
+        'invert-full-det-fsm': lambda a: a,
+    }[f0](a)
+
+    return '\n' + fa.fsm_to_dimple(a)
+
 
 
 if __name__ == '__main__':
