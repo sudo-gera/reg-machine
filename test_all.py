@@ -796,10 +796,10 @@ def test_fa_stress_fa_to_re(arg: int) -> None:
                 assert validate.fa_is_full(inverted_same_min_dfa, labels)
                 check_equal(inverted_min_dfa, inverted_same_min_dfa)
 
-                print(file=debug)
-                print(file=debug)
-                print(file=debug)
-                print(file=debug)
+                # print(file=debug)
+                # print(file=debug)
+                # print(file=debug)
+                # print(file=debug)
                 fa = min_full_dfa
                 res : set[str] = set()
                 for q in range(16):
