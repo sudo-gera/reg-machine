@@ -301,7 +301,6 @@ def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
         stdout_data = (
             old_main(
                 stdin_data,
-                operation,
                 letters,
                 new_commands_to_old_commands[operation][0]
             )
@@ -313,13 +312,11 @@ def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
 
 def old_main(
     stdin: str,
-    operation: str,
     letters: str,
     formats_0: str,
 ) -> str:
 
     labels = letters
-    formats = list(new_commands_to_old_commands[operation])
 
     all_formats: dict[str, typing.Callable[[fa.FA], fa.FA]] = {
         'reg': lambda a: a,
@@ -331,7 +328,7 @@ def old_main(
         'invert-full-det-fsm': lambda a: a,
     }
 
-    if formats[0] == 'reg':
+    if formats_0 == 'reg':
         text = stdin
         s = convert.regex_to_ast(text)
         a = convert.ast_to_eps_nfa(s)
@@ -340,7 +337,7 @@ def old_main(
         a = fa.dimple_to_fsm(text)
 
 
-    func = all_formats[new_commands_to_old_commands[operation][0]]
+    func = all_formats[formats_0]
     a = func(a)
 
     return '\n' + fa.fsm_to_dimple(a)
