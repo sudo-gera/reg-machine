@@ -276,17 +276,17 @@ def full_dfa_to_re(value: str, letters: str) -> str:
 
 
 new_commands_to_old_commands = {
-    're_to_eps_nfa':      ('reg',             'eps-non-det-fsm'),
+    're_to_eps_nfa':      ('re_to_eps_nfa',             'remove_eps'),
 
-    'remove_eps':         ('eps-non-det-fsm',     'non-det-fsm'),
+    'remove_eps':         ('remove_eps',     'make_deterministic'),
 
-    'make_deterministic': ('non-det-fsm',             'det-fsm'),
+    'make_deterministic': ('make_deterministic',             'make_full'),
 
-    'make_full':          ('det-fsm',            'full-det-fsm'),
+    'make_full':          ('make_full',            'minimize'),
 
-    'minimize':           ('full-det-fsm',        'min-full-det-fsm'),
+    'minimize':           ('minimize',        'invert'),
 
-    'invert':             ('min-full-det-fsm', 'invert-full-det-fsm'),
+    'invert':             ('invert', 'invert-full-det-fsm'),
 
     'full_dfa_to_re':     ('todo', 'todo'),
 }
@@ -302,7 +302,7 @@ def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
             old_main(
                 stdin_data,
                 letters,
-                new_commands_to_old_commands[operation][0]
+                operation
             )
         )
     null.seek(0)
@@ -319,16 +319,16 @@ def old_main(
     labels = letters
 
     all_formats: dict[str, typing.Callable[[fa.FA], fa.FA]] = {
-        'reg': lambda a: a,
-        'eps-non-det-fsm': convert.remove_eps,
-        'non-det-fsm': convert.make_deterministic,
-        'det-fsm': lambda a: convert.make_full(a, labels + labels[0][:0]),
-        'full-det-fsm': convert.make_min,
-        'min-full-det-fsm': convert.invert_full_fa,
+        're_to_eps_nfa': lambda a: a,
+        'remove_eps': convert.remove_eps,
+        'make_deterministic': convert.make_deterministic,
+        'make_full': lambda a: convert.make_full(a, labels + labels[0][:0]),
+        'minimize': convert.make_min,
+        'invert': convert.invert_full_fa,
         'invert-full-det-fsm': lambda a: a,
     }
 
-    if formats_0 == 'reg':
+    if formats_0 == 're_to_eps_nfa':
         text = stdin
         s = convert.regex_to_ast(text)
         a = convert.ast_to_eps_nfa(s)
