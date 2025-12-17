@@ -130,6 +130,57 @@ def invert_full_fa(a: fa.FA) -> fa.FA:
     a.the_only_final_if_exists_or_unrelated_node = fa.Node()
     return a
 
+def merge(lopl: int, left: str, midop: str, midopl: int, ropl: int, right: str) -> tuple[int, str]:
+    if midop == '+':
+
+        if left == '0':
+            return ropl, right
+        if right == '0':
+            return lopl, left
+
+        if left == right:
+            return lopl, left
+
+        if lopl < midopl:
+            left = '(' + left + ')'
+        if ropl < midopl:
+            right = '(' + right + ')'
+
+        if left < right:
+            return midopl, left + midop + right
+        if left > right:
+            return midopl, right + midop + left
+
+    elif midop == '*':
+
+        if left == '1':
+            return ropl, right
+        if right == '1':
+            return lopl, left
+
+        if left == '0':
+            return fa.operator_level[''], '0'
+        if right == '0':
+            return fa.operator_level[''], '0'
+
+        if lopl < midopl:
+            left = '(' + left + ')'
+        if ropl < midopl:
+            right = '(' + right + ')'
+
+        return midopl, left + midop + right
+
+    assert False
+
+def inf_pow(lopl: int, left: str) -> tuple[int, str]:
+    if left in '01':
+        return fa.operator_level[''], '1'
+    midopl = fa.operator_level['**']
+    if lopl == midopl:
+        return lopl, left
+    return midopl, '(' + left + ')**None'
+
+
 def fa_to_re(a: fa.FA) -> str:
     a = cp(a)
 
@@ -164,10 +215,12 @@ def fa_to_re(a: fa.FA) -> str:
         for label, next_nodes in node.next_nodes_by_label.items():
             ltext = '1' if label == '' else label
             for next_node in next_nodes:
-                if node.regex_by_next_node[next_node] != '0':
-                    node.regex_by_next_node[next_node] = f'({node.regex_by_next_node[next_node]}+{ltext})'
-                else:
-                    node.regex_by_next_node[next_node] = ltext
+                node.regex_by_next_node[next_node] = merge(
+                    *node.regex_by_next_node[next_node],
+                    '+', fa.operator_level['+'],
+                    fa.constant_op_level,
+                    ltext,
+                )
 
     # print(f'{a.the_only_final_if_exists_or_unrelated_node = }', file=debug)
 
@@ -189,76 +242,97 @@ def fa_to_re(a: fa.FA) -> str:
 
         for q in nodes - {a.start, a.the_only_final_if_exists_or_unrelated_node}:
 
-            if q.regex_by_next_node[q] == '0':
-                loop = '1'
-            elif q.regex_by_next_node[q] == '1':
-                loop = '1'
-            else:
-                loop = f'({q.regex_by_next_node[q]}**None)'
+
+            loop = inf_pow(*q.regex_by_next_node[q])
+            # if q.regex_by_next_node[q] == '0':
+            #     loop = '1'
+            # elif q.regex_by_next_node[q] == '1':
+            #     loop = '1'
+            # else:
+            #     loop = f'({q.regex_by_next_node[q]}**None)'
 
             for i in nodes - {q}:
                 for j in nodes - {q}:
                     ij = i.regex_by_next_node[j]
                     iq = i.regex_by_next_node[q]
                     qj = q.regex_by_next_node[j]
-                    if '0' in [iq, loop, qj]:
-                        res = ij
-                    elif ij == '0':
-                        if iq == loop == '1':
-                            res = qj
-                        elif iq == qj == '1':
-                            res = loop
-                        elif loop == qj == '1':
-                            res = iq
-                        elif iq == '1':
-                            res = f'({loop}*{qj})'
-                        elif loop == '1':
-                            res = f'({iq}*{qj})'
-                        elif qj == '1':
-                            res = f'({iq}*{loop})'
-                        else:
-                            res = f'({iq}*{loop}*{qj})'
-                    else:
-                        if iq == loop == '1':
-                            if ij < qj:
-                                res = f'({ij}+{qj})'
-                            elif ij > qj:
-                                res = f'({qj}+{ij})'
-                            else:
-                                res = f'{qj}'
-                        elif iq == qj == '1':
-                            if ij < loop:
-                                res = f'({ij}+{loop})'
-                            elif ij > loop:
-                                res = f'({loop}+{ij})'
-                            else:
-                                res = f'{loop}'
-                        elif loop == qj == '1':
-                            if ij < iq:
-                                res = f'({ij}+{iq})'
-                            elif ij > iq:
-                                res = f'({iq}+{ij})'
-                            else:
-                                res = f'{iq}'
-                        elif iq == '1':
-                            res = f'({ij}+{loop}*{qj})'
-                        elif loop == '1':
-                            res = f'({ij}+{iq}*{qj})'
-                        elif qj == '1':
-                            res = f'({ij}+{iq}*{loop})'
-                        else:
-                            res = f'({ij}+{iq}*{loop}*{qj})'
-                    # print(f'{ij = !r} + {iq = !r} * {loop = !r} * {qj = !r} -> {res = !r}', file=debug)
-                    i.regex_by_next_node[j] = res
-                    # f'({i.regex_by_next_node[j]}+{i.regex_by_next_node[q]}*{loop}*{q.regex_by_next_node[j]})'
+                    i.regex_by_next_node[j] = merge(
+                        *merge(
+                            *merge(
+                                *iq,
+                                '*',
+                                fa.operator_level['*'],
+                                *loop,
+                            ),
+                            '*',
+                            fa.operator_level['*'],
+                            *qj,
+                        ),
+                        '+',
+                        fa.operator_level['+'],
+                        *ij,
+                    )
                     i.next_nodes_by_label['--'] |= {j}
+
+
+                    # if '0' in [iq, loop, qj]:
+                    #     res = ij
+                    # elif ij == '0':
+                    #     if iq == loop == '1':
+                    #         res = qj
+                    #     elif iq == qj == '1':
+                    #         res = loop
+                    #     elif loop == qj == '1':
+                    #         res = iq
+                    #     elif iq == '1':
+                    #         res = f'({loop}*{qj})'
+                    #     elif loop == '1':
+                    #         res = f'({iq}*{qj})'
+                    #     elif qj == '1':
+                    #         res = f'({iq}*{loop})'
+                    #     else:
+                    #         res = f'({iq}*{loop}*{qj})'
+                    # else:
+                    #     if iq == loop == '1':
+                    #         if ij < qj:
+                    #             res = f'({ij}+{qj})'
+                    #         elif ij > qj:
+                    #             res = f'({qj}+{ij})'
+                    #         else:
+                    #             res = f'{qj}'
+                    #     elif iq == qj == '1':
+                    #         if ij < loop:
+                    #             res = f'({ij}+{loop})'
+                    #         elif ij > loop:
+                    #             res = f'({loop}+{ij})'
+                    #         else:
+                    #             res = f'{loop}'
+                    #     elif loop == qj == '1':
+                    #         if ij < iq:
+                    #             res = f'({ij}+{iq})'
+                    #         elif ij > iq:
+                    #             res = f'({iq}+{ij})'
+                    #         else:
+                    #             res = f'{iq}'
+                    #     elif iq == '1':
+                    #         res = f'({ij}+{loop}*{qj})'
+                    #     elif loop == '1':
+                    #         res = f'({ij}+{iq}*{qj})'
+                    #     elif qj == '1':
+                    #         res = f'({ij}+{iq}*{loop})'
+                    #     else:
+                    #         res = f'({ij}+{iq}*{loop}*{qj})'
+                    # # print(f'{ij = !r} + {iq = !r} * {loop = !r} * {qj = !r} -> {res = !r}', file=debug)
+                    # i.regex_by_next_node[j] = res
+                    # # f'({i.regex_by_next_node[j]}+{i.regex_by_next_node[q]}*{loop}*{q.regex_by_next_node[j]})'
+                    # i.next_nodes_by_label['--'] |= {j}
 
             for node in nodes - {q}:
 
                 for label, next_nodes in node.next_nodes_by_label.items():
                     next_nodes.discard(q)
 
-                node.regex_by_next_node[q] = '0'
+                node.regex_by_next_node[q] = fa.operator_level[''], '0'
 
     nodes = {*a.start.bfs()}
     
@@ -268,7 +342,7 @@ def fa_to_re(a: fa.FA) -> str:
 
     assert len(nodes) == 2
 
-    return a.start.regex_by_next_node[a.the_only_final_if_exists_or_unrelated_node]
+    return a.start.regex_by_next_node[a.the_only_final_if_exists_or_unrelated_node][1]
 
 
 

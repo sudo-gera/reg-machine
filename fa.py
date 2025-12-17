@@ -8,12 +8,23 @@ import typing
 import io
 from dataclasses import dataclass
 
-# operators = [
-#     '',
-#     '+',
-#     '*',
-#     '**',
-# ]
+constant_op_level = 3
+pow_op_level = 2
+mul_op_level = 1
+add_op_level = 0
+
+operator_level = {
+    '+': add_op_level,
+    '*': mul_op_level,
+    '**': pow_op_level,
+    '': constant_op_level,
+}
+
+operator_commut = {
+    '+': True,
+    '*': False,
+    '**': False,
+}
 
 class Node:
 
@@ -21,7 +32,7 @@ class Node:
         self.next_nodes_by_label: dd[str, set[Node]] = dd(set)
         self.is_final: bool = False
         self.name: str | None = None
-        self.regex_by_next_node: dd[Node, str] = dd(lambda: '0')
+        self.regex_by_next_node: dd[Node, tuple[int, str]] = dd(lambda: (constant_op_level, '0'))
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}(name={self.name!r}, is_final={self.is_final!r}, id={id(self)})'

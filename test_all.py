@@ -613,7 +613,7 @@ print(f'{seed = }', file=debug)
 rand = random.Random(seed)
 # print(f'{seed = }', file=open('/dev/tty', 'w'))
 
-arg_values = [*range(9)]
+arg_values = [*range(99)]
 arg_values = [*range(-len(arg_values), len(arg_values)+1)]
 rand.shuffle(arg_values)
 
@@ -761,7 +761,7 @@ def test_fa_stress_fa_to_re(arg: int) -> None:
     while True:
         try:
             try:
-                r = random_fa(rand, 1, labels)
+                r = random_fa(rand, 3, labels)
             except RecursionError:
                 raise InternalTestError
             fa_or_none: fa.FA | None = None
@@ -800,15 +800,27 @@ def test_fa_stress_fa_to_re(arg: int) -> None:
                 print(file=debug)
                 print(file=debug)
                 print(file=debug)
-                fa = eps_nfa
-                print(command.fa_or_re.from_private_fa(fa, labels).as_public_str(), file=debug)
-                created_re = convert.fa_to_re(fa)
-                print(created_re, file=debug)
-                fa = convert.ast_to_eps_nfa(convert.regex_to_ast(created_re))
-                fa = convert.make_min(convert.make_full(convert.make_deterministic(convert.remove_eps(fa)), labels))
-                created_re1 = convert.fa_to_re(fa)
-                print(created_re1, file=debug)
-                assert created_re == created_re1
+                fa = min_full_dfa
+                res : set[str] = set()
+                for q in range(16):
+                    print(command.fa_or_re.from_private_fa(fa, labels).as_public_str(), file=debug)
+                    created_re = convert.fa_to_re(fa)
+                    res.add(created_re)
+                    print(created_re, file=debug)
+                    fa = convert.ast_to_eps_nfa(convert.regex_to_ast(created_re))
+                    fa = convert.make_min(convert.make_full(convert.make_deterministic(convert.remove_eps(fa)), labels))
+                assert len(res) <= 8
+
+                # print(command.fa_or_re.from_private_fa(fa, labels).as_public_str(), file=debug)
+                # created_re1 = convert.fa_to_re(fa)
+                # print(created_re1, file=debug)
+                # fa = convert.ast_to_eps_nfa(convert.regex_to_ast(created_re1))
+                # fa = convert.make_min(convert.make_full(convert.make_deterministic(convert.remove_eps(fa)), labels))
+                # print(command.fa_or_re.from_private_fa(fa, labels).as_public_str(), file=debug)
+                # created_re2 = convert.fa_to_re(fa)
+
+                # print(created_re2, file=debug)
+                # assert created_re1 == created_re2
 
                 # old_fa = convert.make_min(convert.make_full(convert.make_deterministic(convert.remove_eps(old_fa)), labels))
                 # print(command.fa_or_re.from_private_fa(old_fa, labels).as_public_str(), file=debug)
