@@ -287,11 +287,19 @@ def test_io_simple() -> None:
         fa.from_dimple('1\n\n2\n\n1 3 -\n3 4 \n4 2 +\n'))
 
 
-def run_main_and_assert(argv: list[str],
-                        text_in: str,
-                        text_out: str,
-                        code: int,
-                        text_err: str = '') -> None:
+def run_main_and_assert(
+    argv: list[str],
+    text_in: str,
+    text_out: str,
+    code: int,
+    text_err: str = '',
+    main: typing.Callable[[
+        list[str],
+        typing.IO[str],
+        typing.IO[str],
+        typing.IO[str],
+    ], int] = command.old_main
+) -> None:
     stdin = io.StringIO()
     stdin.write(text_in)
     stdin.seek(0)

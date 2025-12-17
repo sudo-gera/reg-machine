@@ -111,7 +111,7 @@ class command_line_operation_base:
 class command_line_operation(command_line_operation_base):
 
     @staticmethod
-    def name_or_none(*args: typing.Any, **kwargs: typing.Any) -> str|None:
+    def name_or_none(*args: typing.Any, **kwargs: typing.Any) -> str | None:
         if len(args) == 1 and len(kwargs) == 0:
             name = args[0]
             if isinstance(name, str):
@@ -141,6 +141,7 @@ command_line_operations = {
     'invert':               command_line_operation(name='invert',              preconditions=(IsFull(),),     postconditions=(IsFull(),)),
     'full-dfa-to-re':       command_line_operation(name='full-dfa-to-re',      preconditions=(IsFull(),),     postconditions=(IsRE(),)),
 }
+
 
 def process_args(
     argv: list[str],
@@ -194,14 +195,17 @@ def process_args(
         operation = operations[0]
         for precondition in operation.preconditions:
             if not precondition(value):
-                print(f'Input {value!r} dit not pass {precondition = !r} of the {operation = !r}.', file=stderr)
+                print(
+                    f'Input {value!r} dit not pass {precondition = !r} of the {operation = !r}.', file=stderr)
                 return 1
 
     for operation in operations:
         for precondition in operation.preconditions:
             assert precondition(value)
-        func = typing.cast(typing.Callable[[str, str], str], eval(operation.name.replace('-', '_')))
-        value = fa_or_re.from_private_str(func(value.as_private_str(), letters)[1:], letters)
+        func = typing.cast(typing.Callable[[str, str], str], eval(
+            operation.name.replace('-', '_')))
+        value = fa_or_re.from_private_str(
+            func(value.as_private_str(), letters)[1:], letters)
         for postcondition in operation.postconditions:
             # print(postcondition, value)
             assert postcondition(value)
@@ -246,6 +250,7 @@ def minimize(value: str, letters: str) -> str:
 
 def invert(value: str, letters: str) -> str:
     return call_old_main('invert', value, letters)
+
 
 def full_dfa_to_re(value: str, letters: str) -> str:
     return call_old_main('full_dfa_to_re', value, letters)

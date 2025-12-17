@@ -12,6 +12,7 @@ def fa_has_eps(a: fa.FA) -> bool:
             return True
     return False
 
+
 def fa_has_no_eps(a: fa.FA) -> bool:
     return not fa_has_eps(a)
 
