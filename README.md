@@ -8,25 +8,22 @@
 * `1` means eps
 ### regex example:
 `(a + 1) * (b + 1)` means `eps` or `a` or `b` or `ab`
-### FSM format:
-[Described here](https://github.com/dmitrygulevich2000/formal-docs/blob/main/format/dimple.md). Hit ctrl+D (EOF) when done.
 ## Usage:
-`python command.py <input format> <output format> [<labels>]`    
+`python command.py --operations [OPERATIONS...] --letters LETTERS `
 where:    
-`<input format>` and `<output format>` should be one of these:
-* reg
-* eps-non-det-fsm
-* non-det-fsm
-* det-fsm
-* full-det-fsm
-* min-full-det-fsm
-* invert-full-det-fsm
+OPERATIONS is a sequence of operations from this list:
+* re-to-eps-nfa
+* remove-eps
+* make-deterministic
+* make-full
+* minimize
+* invert
+* eps-nfa-to-re
 
-`<labels>`  - All labels to be used (alphabet). It is mandatory only for making `full-det-fsm`
+`<labels>`  - All labels to be used (alphabet).
 
-##### note: if you want just to invert full-det-fsm which is not minimal, you can input it as "min-full-det-fsm" even if it is not minimal. If you input it as full-det-fsm, it would be minimized and then inverted.
+##### Note: commands are executed in a given order from left to right. Each of them has preconditions that must be met for it to work, which can be seen by calling --help. Script will refuse to work without them.
 
-### supports conversions only in up-to-down order.
 # Tests and coverage:
 ## Preparation:
 ```
@@ -38,9 +35,17 @@ pytest ./test_all.py
 ```
 ## Coverage:
 ```
-coverage run --include=./fsm.py,./convert.py,./command.py -m pytest ./test_all.py
-coverage html
-coverage report
+./coverage.sh
 ```
-## Screenshot:
-![screenshot](./ocr.jpeg)
+## Result:
+
+    Name          Stmts   Miss  Cover
+    ---------------------------------
+    command.py      199     16    92%
+    convert.py      190      6    97%
+    fa.py           120      1    99%
+    utils.py         12      3    75%
+    validate.py      29      2    93%
+    ---------------------------------
+    TOTAL           550     28    95%
+

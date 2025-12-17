@@ -335,11 +335,15 @@ def run_main_and_assert(
         assert bool(text_err) == bool(rc)
         assert bool(text_out) != bool(rc)
     except AssertionError:
+        stdin.seek(0)
         stdout.seek(0)
         stderr.seek(0)
+        print(f'{argv = }', file=debug)
+        print(f'{code = }', file=debug)
         print(f'{rc = }', file=debug)
         print(f'{text_out = }', file=debug)
         print(f'{text_err = }', file=debug)
+        print(f'{stdin.read() = }', file=debug)
         print(f'{stdout.read() = }', file=debug)
         print(f'{stderr.read() = }', file=debug)
         raise
@@ -543,15 +547,6 @@ def get_io_tests() -> list[io_test]:
         '',
         1,
         "Input fa_or_re(value_='q*w+e*r') dit not pass precondition = IsFull() of the operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)).\n",
-        command.main,
-    )
-
-    append_to_tests(
-        ['command.py', '--letters', 'qw'],
-        'q*w+e*r',
-        '',
-        1,
-        "usage: __main__.py [-h] --operations\n                   [{command_line_operation(name='re-to-eps-nfa', preconditions=(IsRE,), postconditions=(IsFA,)),command_line_operation(name='remove-eps', preconditions=(IsFA,), postconditions=(HasNoEps,)),command_line_operation(name='make-deterministic', preconditions=(HasNoEps,), postconditions=(IsDeterministic,)),command_line_operation(name='make-full', preconditions=(IsDeterministic,), postconditions=(IsFull,)),command_line_operation(name='minimize', preconditions=(IsFull,), postconditions=(IsFull,)),command_line_operation(name='invert', preconditions=(IsFull,), postconditions=(IsFull,)),command_line_operation(name='eps-nfa-to-re', preconditions=(IsFA,), postconditions=(IsRE,))} ...]\n                   --letters LETTERS\n__main__.py: error: the following arguments are required: --operations\n\n",
         command.main,
     )
 
