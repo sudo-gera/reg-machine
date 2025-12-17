@@ -67,20 +67,22 @@ def random_fa(
         labels: str,  # allowed letters
 ) -> created_random_fa:
     def constant() -> created_random_fa:
-            arg = rand.choice([None, '', *list(labels)])
-            return created_random_fa(
-                fa=fa.FA(arg),
-                random_string_that_matches=arg,
-                regex_for_fullmatch=arg,
-                random_strings_that_maybe_match=[rand.choice([None, '', *list(labels)]) for q in range(9)],
-                regex_for_converting_to_fa=(
-                    '0'
-                    if arg is None else
-                    '1'
-                    if arg == '' else
-                    arg
-                ),
-            )
+        arg = rand.choice([None, '', *list(labels)])
+        return created_random_fa(
+            fa=fa.FA(arg),
+            random_string_that_matches=arg,
+            regex_for_fullmatch=arg,
+            random_strings_that_maybe_match=[rand.choice(
+                [None, '', *list(labels)]) for q in range(9)],
+            regex_for_converting_to_fa=(
+                '0'
+                if arg is None else
+                '1'
+                if arg == '' else
+                arg
+            ),
+        )
+
     def add() -> created_random_fa:
         left = random_fa(rand, depth - 1, labels)
         right = random_fa(rand, depth - 1, labels)
@@ -116,6 +118,7 @@ def random_fa(
                 ],
                 regex_for_converting_to_fa=f'({left.regex_for_converting_to_fa} + {right.regex_for_converting_to_fa})',
             )
+
     def mul() -> created_random_fa:
         left = random_fa(rand, depth - 1, labels)
         right = random_fa(rand, depth - 1, labels)
@@ -153,6 +156,7 @@ def random_fa(
                 ],
                 regex_for_converting_to_fa=f'({left.regex_for_converting_to_fa} * {right.regex_for_converting_to_fa})',
             )
+
     def pow() -> created_random_fa:
         right_n = rand.choice([*range(-2, 3)])
         left = random_fa(rand, depth - 1, labels)
@@ -308,7 +312,7 @@ def check_equal(a: fa.FA, s: fa.FA) -> None:
 def test_io_simple() -> None:
 
     assert fa.fsm_to_dimple(fa.FA('-') *
-                     fa.FA('+')) == '1\n\n4\n\n1 2 -\n2 3 \n3 4 +\n'
+                            fa.FA('+')) == '1\n\n4\n\n1 2 -\n2 3 \n3 4 +\n'
 
     check_equal(
         fa.FA('-') * fa.FA('+'),
@@ -516,7 +520,8 @@ def get_io_tests() -> list[io_test]:
     )
 
     append_to_tests(
-        ['command.py', '--letters', 'qwer', '--operations', 're-to-eps-nfa', 'remove-eps'],
+        ['command.py', '--letters', 'qwer',
+            '--operations', 're-to-eps-nfa', 'remove-eps'],
         'q*w+e*r',
         '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "5"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "4",\n        "5"\n    ]\n}\n',
         0,
@@ -525,7 +530,8 @@ def get_io_tests() -> list[io_test]:
     )
 
     append_to_tests(
-        ['command.py', '--letters', 'qwer', '--operations', 're-to-eps-nfa', 'remove-eps', 'make-deterministic', 'make-full', 'minimize', 'invert'],
+        ['command.py', '--letters', 'qwer', '--operations', 're-to-eps-nfa',
+            'remove-eps', 'make-deterministic', 'make-full', 'minimize', 'invert'],
         'q*w+e*r',
         '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "1",\n            "w",\n            "4"\n        ],\n        [\n            "1",\n            "r",\n            "4"\n        ],\n        [\n            "2",\n            "w",\n            "5"\n        ],\n        [\n            "2",\n            "q",\n            "4"\n        ],\n        [\n            "2",\n            "e",\n            "4"\n        ],\n        [\n            "2",\n            "r",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "5"\n        ],\n        [\n            "3",\n            "q",\n            "4"\n        ],\n        [\n            "3",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "e",\n            "4"\n        ],\n        [\n            "4",\n            "q",\n            "4"\n        ],\n        [\n            "4",\n            "w",\n            "4"\n        ],\n        [\n            "4",\n            "e",\n            "4"\n        ],\n        [\n            "4",\n            "r",\n            "4"\n        ],\n        [\n            "5",\n            "q",\n            "4"\n        ],\n        [\n            "5",\n            "w",\n            "4"\n        ],\n        [\n            "5",\n            "e",\n            "4"\n        ],\n        [\n            "5",\n            "r",\n            "4"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "1",\n        "2",\n        "3",\n        "4"\n    ]\n}\n',
         0,
@@ -534,7 +540,8 @@ def get_io_tests() -> list[io_test]:
     )
 
     append_to_tests(
-        ['command.py', '--letters', 'qwer', '--operations', 're-to-eps-nfa', 'minimize'],
+        ['command.py', '--letters', 'qwer',
+            '--operations', 're-to-eps-nfa', 'minimize'],
         'q*w+e*r',
         '',
         1,
@@ -579,7 +586,8 @@ def get_io_tests() -> list[io_test]:
     )
 
     append_to_tests(
-        ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'remove-eps'],
+        ['command.py', '--letters', 'qw', '--operations',
+            're-to-eps-nfa', 'remove-eps'],
         '0',
         '{\n    "states": [\n        "1"\n    ],\n    "letters": [\n        "q",\n        "w"\n    ],\n    "transition_function": [],\n    "start_states": [\n        "1"\n    ],\n    "final_states": []\n}\n',
         0,
@@ -588,7 +596,8 @@ def get_io_tests() -> list[io_test]:
     )
 
     append_to_tests(
-        ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'remove-eps'],
+        ['command.py', '--letters', 'qw', '--operations',
+            're-to-eps-nfa', 'remove-eps'],
         '1',
         '{\n    "states": [\n        "1"\n    ],\n    "letters": [\n        "q",\n        "w"\n    ],\n    "transition_function": [],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "1"\n    ]\n}\n',
         0,

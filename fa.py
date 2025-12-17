@@ -8,6 +8,7 @@ import typing
 import io
 from dataclasses import dataclass
 
+
 class Node:
 
     def __init__(self: Node) -> None:

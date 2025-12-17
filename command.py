@@ -16,8 +16,9 @@ import argparse
 import validate
 
 
-private_to_public : dict[str, str] = {}
-public_to_private : dict[str, str] = {}
+private_to_public: dict[str, str] = {}
+public_to_private: dict[str, str] = {}
+
 
 @dataclass(frozen=True)
 class frozen_fa:
@@ -39,6 +40,7 @@ class frozen_fa:
 
     def to_json_str(self) -> str:
         return json.dumps(vars(self), indent=4)
+
 
 @dataclass(frozen=True)
 class fa_or_re:
@@ -201,10 +203,11 @@ def process_args(
         missing_letters = ''.join([
             letter
             for letter in value.letters()
-                if letter not in letters
+            if letter not in letters
         ])
         if missing_letters:
-            print(f'FA has letters {missing_letters!r} missing in command line arguments.', file=stderr)
+            print(
+                f'FA has letters {missing_letters!r} missing in command line arguments.', file=stderr)
             return 1
 
     if operations:
@@ -318,7 +321,6 @@ def invert(value: str, letters: str) -> str:
 def full_dfa_to_re(value: str, letters: str) -> str:
     ...
     return ''
-
 
 
 if __name__ == '__main__':
