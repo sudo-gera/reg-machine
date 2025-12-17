@@ -248,31 +248,31 @@ def main(
 
 
 def re_to_eps_nfa(value: str, letters: str) -> str:
-    return call_old_main('re_to_eps_nfa', value, letters)
+    return old_main('re_to_eps_nfa', value, letters)
 
 
 def remove_eps(value: str, letters: str) -> str:
-    return call_old_main('remove_eps', value, letters)
+    return old_main('remove_eps', value, letters)
 
 
 def make_deterministic(value: str, letters: str) -> str:
-    return call_old_main('make_deterministic', value, letters)
+    return old_main('make_deterministic', value, letters)
 
 
 def make_full(value: str, letters: str) -> str:
-    return call_old_main('make_full', value, letters)
+    return old_main('make_full', value, letters)
 
 
 def minimize(value: str, letters: str) -> str:
-    return call_old_main('minimize', value, letters)
+    return old_main('minimize', value, letters)
 
 
 def invert(value: str, letters: str) -> str:
-    return call_old_main('invert', value, letters)
+    return old_main('invert', value, letters)
 
 
 def full_dfa_to_re(value: str, letters: str) -> str:
-    return call_old_main('full_dfa_to_re', value, letters)
+    return old_main('full_dfa_to_re', value, letters)
 
 
 new_commands_to_old_commands = {
@@ -292,28 +292,10 @@ new_commands_to_old_commands = {
 }
 
 
-def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
-    null = io.StringIO()
-    with (
-            contextlib.redirect_stdout(null),
-            contextlib.redirect_stderr(null),
-    ):
-        stdout_data = (
-            old_main(
-                stdin_data,
-                letters,
-                operation
-            )
-        )
-    null.seek(0)
-    assert not null.read()
-    return stdout_data
-
-
 def old_main(
+    formats_0: str,
     stdin: str,
     letters: str,
-    formats_0: str,
 ) -> str:
 
     labels = letters
