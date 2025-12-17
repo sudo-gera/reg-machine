@@ -297,16 +297,12 @@ def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
     stdin.write(stdin_data)
     stdin.seek(0)
     stdout = io.StringIO()
-    stderr = io.StringIO()
     rc = old_main(
         ['-', *new_commands_to_old_commands[operation], letters],
-        stdin, stdout, stderr)
+        stdin, stdout)
     stdout.seek(0)
-    stderr.seek(0)
     stdout_data = stdout.read()
-    stderr_data = stderr.read()
     assert rc == 0
-    assert stderr_data == ''
     return stdout_data
 
 
@@ -314,21 +310,20 @@ def old_main(
     argv: list[str],
     stdin: typing.IO[str],
     stdout: typing.IO[str],
-    stderr: typing.IO[str],
 ) -> int:
     # print(argv, stdin.read(), stdin.seek(0))
     with (
             contextlib.redirect_stdout(stdout),
-            contextlib.redirect_stderr(stderr),
+            contextlib.redirect_stderr(stdout),
     ):
-        return old_old_main(argv, stdin, stdout)
+        stdout.write(old_old_main(argv, stdin.read()))
+        return 0
 
 
 def old_old_main(
     argv: list[str],
-    stdin: typing.IO[str],
-    stdout: typing.IO[str],
-) -> int:
+    stdin: str,
+) -> str:
 
     [*formats, labels] = [*argv[1:]]
 
@@ -345,20 +340,20 @@ def old_old_main(
     format_indexes = [[*all_formats].index(f) for f in formats]
 
     if formats[0] == 'reg':
-        text = stdin.readline()
+        text = stdin
         s = convert.regex_to_ast(text)
         a = convert.ast_to_eps_nfa(s)
     else:
-        text = stdin.read()
+        text = stdin
         a = fa.dimple_to_fsm(text)
 
     for num in range(*format_indexes):
         func = [*all_formats.values()][num]
         a = func(a)
 
-    print(file=stdout)
-    print(fa.fsm_to_dimple(a), end='', file=stdout)
-    return 0
+    # print(file=stdout)
+    # print(fa.fsm_to_dimple(a), end='', file=stdout)
+    return '\n' + fa.fsm_to_dimple(a)
 
 
 if __name__ == '__main__':
