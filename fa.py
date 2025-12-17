@@ -145,145 +145,150 @@ class FA:
         return node == self.the_only_final_if_exists_or_unrelated_node or node.is_final
 
 
-def fa_to_dimple(fa: FA) -> str:
-    id_map: dd[Node, int] = dd(lambda: len(id_map) + 1)
-    res = io.StringIO()
-    print(id_map[fa.start], file=res)
-    print(file=res)
-    for n in fa.start.bfs():
-        id_map[n]
-        if n.is_final or n == fa.the_only_final_if_exists_or_unrelated_node:
-            print(id_map[n], file=res)
-    print(file=res)
-    for n in fa.start.bfs():
-        for label, nl in n.next_nodes_by_label.items():
-            for nn in nl:
-                print(id_map[n], id_map[nn], label, file=res)
-    res.seek(0)
-    return res.read()
-
-
-def dimple_to_fa(text_str: str) -> FA:
-
-    def index_or_len(a: list[typing.Any], v: typing.Any) -> int:
-        if v in a:
-            return a.index(v)
-        return len(a)
-
-    text = [line.split() for line in text_str.strip().splitlines()]
-    start = text[:index_or_len(text, [])]
-    text = text[len(start) + 1:]
-    stop = text[:index_or_len(text, [])]
-    text = text[len(stop) + 1:]
-    assert len(start) == 1
-    name_to_node: dd[str, Node] = dd(Node)
-    res = FA()
-    res.start = name_to_node[start[0][0]]
-    for line in stop:
-        name_to_node[line[0]].is_final = True
-    for line in text:
-        if len(line) == 2:
-            line.append('')
-        name_to_node[line[0]] >> line[2] >> name_to_node[line[1]]
-    for name, node in name_to_node.items():
-        node.name = name
-    for node in res.start.bfs():
-        assert node.name is not None
-    return res
-
-
-def dimple_to_json(dimple_text: str, _letters: str) -> dict[str, typing.Any]:
-    lines = [line.rstrip() for line in dimple_text.splitlines()]
-
-    i = 0
-    n = len(lines)
-
-    # 1. стартовое состояние
-    if i >= n or lines[i] == "":
-        raise ValueError("Отсутствует стартовое состояние")
-    start_state = lines[i]
-    i += 1
-
-    # 2. пустая строка (если есть)
-    if i < n and lines[i] == "":
-        i += 1
-
-    # 3. финальные состояния
-    final_states = []
-    while i < n and lines[i] != "":
-        final_states.append(lines[i])
-        i += 1
-
-    # 4. пустая строка после финальных (если есть)
-    if i < n and lines[i] == "":
-        i += 1
-
-    # 5. переходы
-    states = {start_state}
-    letters = set(_letters)
-    transitions = []
-
-    while i < n:
-        if lines[i] == "":
-            i += 1
-            continue
-
-        parts = lines[i].split()
-        if len(parts) == 2:
-            frm, to = parts
-            letter = ""
-        elif len(parts) == 3:
-            frm, to, letter = parts
-            letters.add(letter)
-        else:
-            raise ValueError(f"Некорректная строка перехода: {lines[i]}")
-
-        states.add(frm)
-        states.add(to)
-        transitions.append([frm, letter, to])
-        i += 1
-
-    return {
-        "states": sorted(states),
-        "letters": sorted(letters),
-        "transition_function": transitions,
-        "start_states": [start_state],
-        "final_states": final_states
-    }
-
-
-def json_to_dimple(automaton: dict[str, typing.Any]) -> str:
-    start_states = automaton["start_states"]
-    if len(start_states) != 1:
-        raise ValueError("Dimple поддерживает только одно стартовое состояние")
-
-    start_state = start_states[0]
-    final_states = automaton["final_states"]
-    transitions = automaton["transition_function"]
-
-    lines = []
-
-    # 1. старт
-    lines.append(start_state)
-    lines.append("")
-
-    # 2. финальные
-    for s in final_states:
-        lines.append(s)
-    lines.append("")
-
-    # 3. переходы
-    for frm, letter, to in transitions:
-        if letter == "":
-            lines.append(f"{frm} {to}")
-        else:
-            lines.append(f"{frm} {to} {letter}")
-
-    return "\n".join(lines)
 
 def json_to_fa(automaton: dict[str, typing.Any]) -> FA:
+
+    def dimple_to_fa(text_str: str) -> FA:
+
+        def index_or_len(a: list[typing.Any], v: typing.Any) -> int:
+            if v in a:
+                return a.index(v)
+            return len(a)
+
+        text = [line.split() for line in text_str.strip().splitlines()]
+        start = text[:index_or_len(text, [])]
+        text = text[len(start) + 1:]
+        stop = text[:index_or_len(text, [])]
+        text = text[len(stop) + 1:]
+        assert len(start) == 1
+        name_to_node: dd[str, Node] = dd(Node)
+        res = FA()
+        res.start = name_to_node[start[0][0]]
+        for line in stop:
+            name_to_node[line[0]].is_final = True
+        for line in text:
+            if len(line) == 2:
+                line.append('')
+            name_to_node[line[0]] >> line[2] >> name_to_node[line[1]]
+        for name, node in name_to_node.items():
+            node.name = name
+        for node in res.start.bfs():
+            assert node.name is not None
+        return res
+
+
+
+
+    def json_to_dimple(automaton: dict[str, typing.Any]) -> str:
+        start_states = automaton["start_states"]
+        if len(start_states) != 1:
+            raise ValueError("Dimple поддерживает только одно стартовое состояние")
+
+        start_state = start_states[0]
+        final_states = automaton["final_states"]
+        transitions = automaton["transition_function"]
+
+        lines = []
+
+        # 1. старт
+        lines.append(start_state)
+        lines.append("")
+
+        # 2. финальные
+        for s in final_states:
+            lines.append(s)
+        lines.append("")
+
+        # 3. переходы
+        for frm, letter, to in transitions:
+            if letter == "":
+                lines.append(f"{frm} {to}")
+            else:
+                lines.append(f"{frm} {to} {letter}")
+
+        return "\n".join(lines)
     return dimple_to_fa(json_to_dimple(automaton))
 
 
 def fa_to_json(fa: FA, letters: str) -> dict[str, typing.Any]:
+    def fa_to_dimple(fa: FA) -> str:
+        id_map: dd[Node, int] = dd(lambda: len(id_map) + 1)
+        res = io.StringIO()
+        print(id_map[fa.start], file=res)
+        print(file=res)
+        for n in fa.start.bfs():
+            id_map[n]
+            if n.is_final or n == fa.the_only_final_if_exists_or_unrelated_node:
+                print(id_map[n], file=res)
+        print(file=res)
+        for n in fa.start.bfs():
+            for label, nl in n.next_nodes_by_label.items():
+                for nn in nl:
+                    print(id_map[n], id_map[nn], label, file=res)
+        res.seek(0)
+        return res.read()
+
+
+
+
+    def dimple_to_json(dimple_text: str, _letters: str) -> dict[str, typing.Any]:
+        lines = [line.rstrip() for line in dimple_text.splitlines()]
+
+        i = 0
+        n = len(lines)
+
+        # 1. стартовое состояние
+        if i >= n or lines[i] == "":
+            raise ValueError("Отсутствует стартовое состояние")
+        start_state = lines[i]
+        i += 1
+
+        # 2. пустая строка (если есть)
+        if i < n and lines[i] == "":
+            i += 1
+
+        # 3. финальные состояния
+        final_states = []
+        while i < n and lines[i] != "":
+            final_states.append(lines[i])
+            i += 1
+
+        # 4. пустая строка после финальных (если есть)
+        if i < n and lines[i] == "":
+            i += 1
+
+        # 5. переходы
+        states = {start_state}
+        letters = set(_letters)
+        transitions = []
+
+        while i < n:
+            if lines[i] == "":
+                i += 1
+                continue
+
+            parts = lines[i].split()
+            if len(parts) == 2:
+                frm, to = parts
+                letter = ""
+            elif len(parts) == 3:
+                frm, to, letter = parts
+                letters.add(letter)
+            else:
+                raise ValueError(f"Некорректная строка перехода: {lines[i]}")
+
+            states.add(frm)
+            states.add(to)
+            transitions.append([frm, letter, to])
+            i += 1
+
+        return {
+            "states": sorted(states),
+            "letters": sorted(letters),
+            "transition_function": transitions,
+            "start_states": [start_state],
+            "final_states": final_states
+        }
+
+
     return dimple_to_json(fa_to_dimple(fa), letters)

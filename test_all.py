@@ -35,7 +35,6 @@ def can_fa_eval_string(a: fa.FA, path: str, limit: int = 64) -> bool:
                     accessible_by_eps_from_this_node[next_nodes_from_one_current_node])
                 operation_count += 1
                 if operation_count > limit:
-                    print(f'raise at {38}', file=debug)
                     raise InternalTestError
         current_nodes = list(next_nodes)
     res = any([a.is_final(n) for n in current_nodes])
@@ -57,7 +56,6 @@ class created_random_fa:
     def compiled_regex_for_fullmatch(self) -> re.Pattern[str]:
         if self.regex_for_fullmatch is not None:
             return re.compile(self.regex_for_fullmatch)
-        print(f'raise at {60}', file=debug)
         raise InternalTestError
 
 
@@ -627,7 +625,6 @@ def test_fa_stress(arg: int) -> None:
             try:
                 r = random_fa(rand, 8 if arg < 0 else 10, labels)
             except RecursionError:
-                print(f'raise at {677}', file=debug)
                 raise InternalTestError
             fa_or_none: fa.FA | None = None
             eps_nfa = nfa = dfa = full_dfa = min_full_dfa = same_min_dfa = inverted_full_dfa = inverted_min_dfa = inverted_same_min_dfa = fa_or_none
@@ -672,7 +669,6 @@ def test_fa_stress(arg: int) -> None:
                         break
                 raise
             if r.random_string_that_matches is None:
-                print(f'raise at {722}', file=debug)
                 raise InternalTestError
             assert r.random_string_that_matches is not None
 
