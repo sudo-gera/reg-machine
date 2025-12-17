@@ -147,145 +147,77 @@ class FA:
 
 
 import typing
-import io
 from collections import defaultdict as dd
 
 
 def json_to_fa(automaton: dict[str, typing.Any]) -> FA:
-    # -------- json -> text --------
     start_states = automaton["start_states"]
-    if len(start_states) != 1:
-        raise ValueError("Поддерживается только одно стартовое состояние")
+    assert len(start_states) == 1
 
     start_state = start_states[0]
-    final_states = automaton["final_states"]
+    final_states = set(automaton["final_states"])
     transitions = automaton["transition_function"]
-
-    lines: list[str] = []
-
-    lines.append(start_state)
-    lines.append("")
-
-    for s in final_states:
-        lines.append(s)
-    lines.append("")
-
-    for frm, letter, to in transitions:
-        if letter == "":
-            lines.append(f"{frm} {to}")
-        else:
-            lines.append(f"{frm} {to} {letter}")
-
-    text_str = "\n".join(lines)
-
-    # -------- text -> FA --------
-    def index_or_len(a, v):
-        return a.index(v) if v in a else len(a)
-
-    text = [line.split() for line in text_str.strip().splitlines()]
-
-    start = text[:index_or_len(text, [])]
-    text = text[len(start) + 1:]
-
-    stop = text[:index_or_len(text, [])]
-    text = text[len(stop) + 1:]
-
-    assert len(start) == 1
 
     name_to_node: dd[str, Node] = dd(Node)
     res = FA()
 
-    res.start = name_to_node[start[0][0]]
+    # start state
+    res.start = name_to_node[start_state]
 
-    for line in stop:
-        name_to_node[line[0]].is_final = True
+    # final states
+    for s in final_states:
+        name_to_node[s].is_final = True
 
-    for line in text:
-        if len(line) == 2:
-            line.append("")
-        name_to_node[line[0]] >> line[2] >> name_to_node[line[1]]
+    # transitions
+    for frm, letter, to in transitions:
+        name_to_node[frm] >> letter >> name_to_node[to]
 
+    # assign names
     for name, node in name_to_node.items():
         node.name = name
 
+    # sanity check (same as original)
     for node in res.start.bfs():
         assert node.name is not None
 
     return res
 
+import typing
+from collections import defaultdict as dd
+
 
 def fa_to_json(fa: FA, letters: str) -> dict[str, typing.Any]:
-    # -------- FA -> text --------
     id_map: dd[Node, int] = dd(lambda: len(id_map) + 1)
-    buf = io.StringIO()
 
-    print(id_map[fa.start], file=buf)
-    print(file=buf)
+    start_id = str(id_map[fa.start])
 
-    for n in fa.start.bfs():
-        id_map[n]
-        if n.is_final or n == fa.the_only_final_if_exists_or_unrelated_node:
-            print(id_map[n], file=buf)
-
-    print(file=buf)
-
-    for n in fa.start.bfs():
-        for label, nl in n.next_nodes_by_label.items():
-            for nn in nl:
-                print(id_map[n], id_map[nn], label, file=buf)
-
-    buf.seek(0)
-    text = buf.read()
-
-    # -------- text -> json --------
-    lines = [line.rstrip() for line in text.splitlines()]
-    i = 0
-    n = len(lines)
-
-    if i >= n or lines[i] == "":
-        raise ValueError("Отсутствует стартовое состояние")
-    start_state = lines[i]
-    i += 1
-
-    if i < n and lines[i] == "":
-        i += 1
-
+    states: set[str] = {start_id}
     final_states: list[str] = []
-    while i < n and lines[i] != "":
-        final_states.append(lines[i])
-        i += 1
-
-    if i < n and lines[i] == "":
-        i += 1
-
-    states = {start_state}
-    letter_set = set(letters)
     transitions: list[list[str]] = []
+    letter_set = set(letters)
 
-    while i < n:
-        if lines[i] == "":
-            i += 1
-            continue
+    # assign ids and collect states / finals
+    for n in fa.start.bfs():
+        nid = str(id_map[n])
+        states.add(nid)
 
-        parts = lines[i].split()
-        if len(parts) == 2:
-            frm, to = parts
-            letter = ""
-        elif len(parts) == 3:
-            frm, to, letter = parts
-            letter_set.add(letter)
-        else:
-            raise ValueError(f"Некорректная строка перехода: {lines[i]}")
+        if n.is_final or n == fa.the_only_final_if_exists_or_unrelated_node:
+            final_states.append(nid)
 
-        states.add(frm)
-        states.add(to)
-        transitions.append([frm, letter, to])
-        i += 1
+    # collect transitions
+    for n in fa.start.bfs():
+        frm = str(id_map[n])
+        for label, next_nodes in n.next_nodes_by_label.items():
+            for nn in next_nodes:
+                to = str(id_map[nn])
+                transitions.append([frm, label, to])
+                if label != "":
+                    letter_set.add(label)
 
     return {
         "states": sorted(states),
         "letters": sorted(letter_set),
         "transition_function": transitions,
-        "start_states": [start_state],
+        "start_states": [start_id],
         "final_states": final_states,
     }
