@@ -80,7 +80,6 @@ class fa_or_re:
     @staticmethod
     def from_private_str_new(a: fa.FA, letters: str) -> fa_or_re:
         return fa_or_re.from_private_str(fa.fsm_to_dimple(a),  letters)
-        return fa_or_re.from_private_str_new(a, letters)
 
     def is_fa(self) -> bool:
         return isinstance(self.value_, frozen_fa)
@@ -104,17 +103,17 @@ class IsFA(Condition):
 
 class HasNoEps(IsFA):
     def __call__(self, value: fa_or_re) -> bool:
-        return super().__call__(value) and validate.fa_has_no_eps(fa.dimple_to_fsm(value.as_private_str()))
+        return super().__call__(value) and validate.fa_has_no_eps(value.as_private_str_new())
 
 
 class IsDeterministic(HasNoEps):
     def __call__(self, value: fa_or_re) -> bool:
-        return super().__call__(value) and validate.fa_is_det(fa.dimple_to_fsm(value.as_private_str()))
+        return super().__call__(value) and validate.fa_is_det(value.as_private_str_new())
 
 
 class IsFull(IsDeterministic):
     def __call__(self, value: fa_or_re) -> bool:
-        return super().__call__(value) and validate.fa_is_full((value.as_private_str_new()), value.letters())
+        return super().__call__(value) and validate.fa_is_full(value.as_private_str_new(), value.letters())
 
 
 @dataclass(frozen=True)
