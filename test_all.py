@@ -309,16 +309,6 @@ def check_equal(a: fa.FA, s: fa.FA) -> None:
     check_a_to_s(s_to_a, a_to_s)
 
 
-def test_io_simple() -> None:
-
-    assert fa.fa_to_dimple(fa.FA('-') *
-                            fa.FA('+')) == '1\n\n4\n\n1 2 -\n2 3 \n3 4 +\n'
-
-    check_equal(
-        fa.FA('-') * fa.FA('+'),
-        fa.dimple_to_fa('1\n\n2\n\n1 3 -\n3 4 \n4 2 +\n'))
-
-
 def run_main_and_assert(
     argv: list[str],
     text_in: str,

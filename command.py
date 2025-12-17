@@ -16,9 +16,6 @@ import argparse
 import validate
 
 
-private_to_public: dict[str, str] = {}
-public_to_private: dict[str, str] = {}
-
 
 @dataclass(frozen=True)
 class frozen_fa:
@@ -32,10 +29,6 @@ class frozen_fa:
     def from_json_str(data: str) -> frozen_fa:
         value = json.loads(data)
         assert isinstance(value, dict)
-        private = fa.json_to_dimple(value)
-        public = data
-        private_to_public[public] = private
-        private_to_public[private] = public
         return frozen_fa(**value)
 
     def to_json_str(self) -> str:
@@ -61,7 +54,7 @@ class fa_or_re:
 
     def as_private_str(self) -> str:
         if isinstance(self.value_, frozen_fa):
-            return fa.json_to_dimple(json.loads(self.value_.to_json_str()))
+            assert False
         else:
             return self.value_
 
