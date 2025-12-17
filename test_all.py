@@ -574,6 +574,15 @@ def get_io_tests() -> list[io_test]:
         command.main,
     )
 
+    append_to_tests(
+        ['command.py', '--letters', 'qw', '--operations', 'minimize'],
+        full_dfa,
+        '',
+        1,
+        "FA has letters 'er' missing in command line arguments.\n",
+        command.main,
+    )
+
     return tests
 
 
