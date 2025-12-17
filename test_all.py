@@ -305,7 +305,7 @@ def run_main_and_assert(
     stdin.seek(0)
     stdout = io.StringIO()
     stderr = io.StringIO()
-    rc = command.old_main(argv, stdin, stdout, stderr)
+    rc = main(argv, stdin, stdout, stderr)
     stdout.seek(0)
     stderr.seek(0)
     try:
@@ -369,7 +369,7 @@ def get_io_tests() -> list[io_test]:
                 text_out=text_out,
                 code=code,
                 text_err=text_err,
-                main=main
+                main=main,
             )
         )
 
@@ -413,6 +413,15 @@ def get_io_tests() -> list[io_test]:
         '',
         1,
         'Incorrect input data.\n',
+    )
+
+    append_to_tests(
+        ['command.py', '--letters', 'qw', '--operations'],
+        '0',
+        '0\n',
+        0,
+        '',
+        command.main,
     )
 
     return tests

@@ -221,6 +221,8 @@ def main(
     stdout: typing.IO[str],
     stderr: typing.IO[str],
 ) -> int:
+    print(f'{argv = }', f'{stdin.read() = }', file=debug)
+    stdin.seek(0)
     with (
             contextlib.redirect_stdout(stdout),
             contextlib.redirect_stderr(stderr),
