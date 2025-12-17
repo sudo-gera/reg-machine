@@ -182,7 +182,7 @@ def process_args(
                 msg = f'{precondition = } of {operation = } is not fulfilled by postconditions of '
                 operation = left_operation
                 msg += f'{operation = }.'
-                print(msg)
+                print(msg, file=stderr)
                 return 1
 
     try:
