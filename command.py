@@ -70,75 +70,77 @@ class fa_or_re:
         return isinstance(self.value_, frozen_fa)
 
 
+@dataclass
 class Condition(abc.ABC):
-    @abc.abstractmethod
     def __call__(self, value: fa_or_re) -> bool:
-        pass
+        return True
 
 
-class IsReg(Condition):
+class IsRE(Condition):
     def __call__(self, value: fa_or_re) -> bool:
-        return not value.is_fa()
+        return super().__call__(value) and not value.is_fa()
 
 
-class IsFa(Condition):
+class IsFA(Condition):
     def __call__(self, value: fa_or_re) -> bool:
-        return value.is_fa()
+        return super().__call__(value) and value.is_fa()
 
 
-class HasNoEps(IsFa):
+class HasNoEps(IsFA):
     def __call__(self, value: fa_or_re) -> bool:
-        return validate.fa_has_eps(fa.from_dimple(value.as_private_str()))
+        return super().__call__(value) and validate.fa_has_no_eps(fa.from_dimple(value.as_private_str()))
 
 
-class IsDet(HasNoEps):
+class IsDeterministic(HasNoEps):
     def __call__(self, value: fa_or_re) -> bool:
-        return validate.fa_is_det(fa.from_dimple(value.as_private_str()))
+        return super().__call__(value) and validate.fa_is_det(fa.from_dimple(value.as_private_str()))
 
 
 class IsFull(HasNoEps):
     def __call__(self, value: fa_or_re) -> bool:
-        return validate.fa_is_full(fa.from_dimple(value.as_private_str()), value.letters())
+        return super().__call__(value) and validate.fa_is_full(fa.from_dimple(value.as_private_str()), value.letters())
 
 
 @dataclass(frozen=True)
-class command_line_action_base:
+class command_line_operation_base:
     name: str
-    preconditions: tuple[type[Condition]]
-    postconditions: tuple[type[Condition]]
-    # action: typing.Callable[[fa_or_re], fa_or_re]
+    preconditions: tuple[Condition]
+    postconditions: tuple[Condition]
 
 
-class command_line_action(command_line_action_base):
+class command_line_operation(command_line_operation_base):
 
-    def __new__(cls, *args: typing.Any, **kwargs: typing.Any) -> command_line_action:
+    @staticmethod
+    def name_or_none(*args: typing.Any, **kwargs: typing.Any) -> str|None:
         if len(args) == 1 and len(kwargs) == 0:
             name = args[0]
             if isinstance(name, str):
-                if name in command_line_actions:
-                    return command_line_actions[name]
+                if name in command_line_operations:
+                    return name
+        return None
+
+    def __new__(cls, *args: typing.Any, **kwargs: typing.Any) -> command_line_operation:
+        name = command_line_operation.name_or_none(*args, **kwargs)
+        if name is not None:
+            return command_line_operations[name]
         return super().__new__(cls)
-    
+
     def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
-        print(args, kwargs)
+        name = command_line_operation.name_or_none(*args, **kwargs)
+        if name is not None:
+            return
         super().__init__(*args, **kwargs)
 
 
-command_line_actions = {
-    'reg-to-eps-nfa':       command_line_action(name='reg-to-eps-nfa',      preconditions=(IsReg,),      postconditions=(IsFa,)),
-    'remove-eps':           command_line_action(name='remove-eps',          preconditions=(IsFa,),       postconditions=(HasNoEps,)),
-    'make-deterministic':   command_line_action(name='make-deterministic',  preconditions=(HasNoEps,),   postconditions=(IsDet,)),
-    'make-full':            command_line_action(name='make-full',           preconditions=(IsDet,),      postconditions=(IsFull,)),
-    'minimize':             command_line_action(name='minimize',            preconditions=(IsFull,),     postconditions=(IsFull,)),
-    'invert':               command_line_action(name='invert',              preconditions=(IsFull,),     postconditions=(IsFull,)),
-    'full-dfa-to-reg':      command_line_action(name='full-dfa-to-reg',     preconditions=(IsFull,),     postconditions=(IsReg,)),
+command_line_operations = {
+    're-to-eps-nfa':        command_line_operation(name='re-to-eps-nfa',       preconditions=(IsRE(),),      postconditions=(IsFA(),)),
+    'remove-eps':           command_line_operation(name='remove-eps',          preconditions=(IsFA(),),       postconditions=(HasNoEps(),)),
+    'make-deterministic':   command_line_operation(name='make-deterministic',  preconditions=(HasNoEps(),),   postconditions=(IsDeterministic(),)),
+    'make-full':            command_line_operation(name='make-full',           preconditions=(IsDeterministic(),),      postconditions=(IsFull(),)),
+    'minimize':             command_line_operation(name='minimize',            preconditions=(IsFull(),),     postconditions=(IsFull(),)),
+    'invert':               command_line_operation(name='invert',              preconditions=(IsFull(),),     postconditions=(IsFull(),)),
+    'full-dfa-to-re':       command_line_operation(name='full-dfa-to-re',      preconditions=(IsFull(),),     postconditions=(IsRE(),)),
 }
-
-# possible_actions = [
-#     'reg-to-eps-nfa', 'remove-eps', 'make-deterministic', 'make-full',
-#     'make-min', 'invert', 'nfa-to-reg'
-# ]
-
 
 def process_args(
     argv: list[str],
@@ -149,11 +151,11 @@ def process_args(
 
     parser = ThrowingArgumentParser(exit_on_error=False)
     parser.add_argument(
-        '--actions',
-        choices=[*command_line_actions.values()],
+        '--operations',
+        choices=list(command_line_operations.values()),
         required=True,
         nargs='*',
-        type=command_line_action,
+        type=command_line_operation,
     )
     parser.add_argument('--letters', required=True)
 
@@ -163,19 +165,24 @@ def process_args(
         print(e, file=stderr)
         return 1
 
-    actions = typing.cast(list[command_line_action], args.actions)
+    operations = typing.cast(list[command_line_operation], args.operations)
     letters = typing.cast(str, args.letters)
 
-    assert issubclass(IsFull, IsFa)
+    assert issubclass(IsFull, IsFA)
 
-    for left_action, right_action in zip(actions, actions[1:]):
+    for left_operation, right_operation in zip(operations, operations[1:]):
 
-        for precondition in right_action.preconditions:
-            for postcondition in left_action.postconditions:
-                if issubclass(postcondition, precondition):
+        for precondition in right_operation.preconditions:
+            for postcondition in left_operation.postconditions:
+                if issubclass(type(postcondition), type(precondition)):
                     break
             else:
-                assert False
+                operation = right_operation
+                msg = f'{precondition = } of {operation = } is not fulfilled by postconditions of '
+                operation = left_operation
+                msg += f'{operation = }.'
+                print(msg)
+                return 1
 
     try:
         value = fa_or_re.from_public_str(stdin.read())
@@ -183,14 +190,21 @@ def process_args(
         print(f'{e!r}', file=stderr)
         return 1
 
-    if actions:
-        for precondition in actions[0].preconditions:
-            assert precondition()(value)
+    if operations:
+        operation = operations[0]
+        for precondition in operation.preconditions:
+            if not precondition(value):
+                print(f'Input {value!r} dit not pass {precondition = !r} of the {operation = !r}.', file=stderr)
+                return 1
 
-    for action in actions:
-        for precondition in action.preconditions:
-            assert precondition()(value)
-        value = eval(action.name.replace('-', '_'))(value, letters)
+    for operation in operations:
+        for precondition in operation.preconditions:
+            assert precondition(value)
+        func = typing.cast(typing.Callable[[str, str], str], eval(operation.name.replace('-', '_')))
+        value = fa_or_re.from_private_str(func(value.as_private_str(), letters)[1:], letters)
+        for postcondition in operation.postconditions:
+            # print(postcondition, value)
+            assert postcondition(value)
 
     print(value.as_public_str())
 
@@ -210,8 +224,8 @@ def main(
         return process_args(argv, stdin, stdout, stderr)
 
 
-def reg_to_eps_nfa(value: str, letters: str) -> str:
-    return call_old_main('reg_to_eps_nfa', value, letters)
+def re_to_eps_nfa(value: str, letters: str) -> str:
+    return call_old_main('re_to_eps_nfa', value, letters)
 
 
 def remove_eps(value: str, letters: str) -> str:
@@ -233,30 +247,35 @@ def minimize(value: str, letters: str) -> str:
 def invert(value: str, letters: str) -> str:
     return call_old_main('invert', value, letters)
 
+def full_dfa_to_re(value: str, letters: str) -> str:
+    return call_old_main('full_dfa_to_re', value, letters)
+
 
 new_commands_to_old_commands = {
-    'reg_to_eps_nfa':     ('reg',          'eps-non-det-fsm'),
+    're_to_eps_nfa':      ('reg',             'eps-non-det-fsm'),
 
-    'remove_eps':         ('eps-non-det-fsm',              'non-det-fsm'),
+    'remove_eps':         ('eps-non-det-fsm',     'non-det-fsm'),
 
-    'make_deterministic': ('non-det-fsm',                 'det-fsm'),
+    'make_deterministic': ('non-det-fsm',             'det-fsm'),
 
     'make_full':          ('det-fsm',            'full-det-fsm'),
 
     'minimize':           ('full-det-fsm',        'min-full-det-fsm'),
 
-    'invert':             ('min-full-det-fsm', 'invert-min-full-det-fsm'),
+    'invert':             ('min-full-det-fsm', 'invert-full-det-fsm'),
+
+    'full_dfa_to_re':     ('todo', 'todo'),
 }
 
 
-def call_old_main(action: str, stdin_data: str, letters: str) -> str:
+def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
     stdin = io.StringIO()
     stdin.write(stdin_data)
     stdin.seek(0)
     stdout = io.StringIO()
     stderr = io.StringIO()
     rc = old_main(
-        ['-', *new_commands_to_old_commands[action], letters],
+        ['-', *new_commands_to_old_commands[operation], letters],
         stdin, stdout, stderr)
     stdout.seek(0)
     stderr.seek(0)
