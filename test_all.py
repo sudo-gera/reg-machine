@@ -66,7 +66,7 @@ def random_fa(
         depth: int,
         labels: str,  # allowed letters
 ) -> created_random_fa:
-    def _z0() -> created_random_fa:
+    def constant() -> created_random_fa:
             arg = rand.choice([None, '', *list(labels)])
             return created_random_fa(
                 fa=fa.FA(arg),
@@ -81,7 +81,7 @@ def random_fa(
                     arg
                 ),
             )
-    def _z12() -> created_random_fa:
+    def add() -> created_random_fa:
         left = random_fa(rand, depth - 1, labels)
         right = random_fa(rand, depth - 1, labels)
         if left.random_string_that_matches is None:
@@ -116,7 +116,7 @@ def random_fa(
                 ],
                 regex_for_converting_to_fa=f'({left.regex_for_converting_to_fa} + {right.regex_for_converting_to_fa})',
             )
-    def _z3456() -> created_random_fa:
+    def mul() -> created_random_fa:
         left = random_fa(rand, depth - 1, labels)
         right = random_fa(rand, depth - 1, labels)
         if left.random_string_that_matches is None or left.regex_for_fullmatch is None or right.random_string_that_matches is None or right.regex_for_fullmatch is None:
@@ -135,9 +135,14 @@ def random_fa(
         else:
             return created_random_fa(
                 fa=left.fa * right.fa,
-                random_string_that_matches=left.random_string_that_matches +
-                right.random_string_that_matches,
-                regex_for_fullmatch=left.regex_for_fullmatch + right.regex_for_fullmatch,
+                random_string_that_matches=(
+                    left.random_string_that_matches +
+                    right.random_string_that_matches
+                ),
+                regex_for_fullmatch=(
+                    left.regex_for_fullmatch +
+                    right.regex_for_fullmatch
+                ),
                 random_strings_that_maybe_match=[
                     rand.choice([
                         left.random_strings_that_maybe_match[q],
@@ -148,16 +153,22 @@ def random_fa(
                 ],
                 regex_for_converting_to_fa=f'({left.regex_for_converting_to_fa} * {right.regex_for_converting_to_fa})',
             )
-    def _z7() -> created_random_fa:
+    def pow() -> created_random_fa:
         right_n = rand.choice([*range(-2, 3)])
         left = random_fa(rand, depth - 1, labels)
         if right_n < 0:
             return created_random_fa(
                 fa=~left.fa,
-                random_string_that_matches=left.random_string_that_matches * -right_n
-                if left.random_string_that_matches is not None else '',
-                regex_for_fullmatch=f'({left.regex_for_fullmatch})*'
-                if left.regex_for_fullmatch is not None else '',
+                random_string_that_matches=(
+                    left.random_string_that_matches * -right_n
+                    if left.random_string_that_matches is not None
+                    else ''
+                ),
+                regex_for_fullmatch=(
+                    f'({left.regex_for_fullmatch})*'
+                    if left.regex_for_fullmatch is not None
+                    else ''
+                ),
                 random_strings_that_maybe_match=[
                     left.random_strings_that_maybe_match[q] * -right_n if
                     left.random_strings_that_maybe_match[q] is not None else ''
@@ -168,10 +179,15 @@ def random_fa(
         elif right_n > 0:
             return created_random_fa(
                 fa=left.fa ** right_n,
-                random_string_that_matches=left.random_string_that_matches * right_n
-                if left.random_string_that_matches is not None else None,
-                regex_for_fullmatch=left.regex_for_fullmatch *
-                right_n if left.regex_for_fullmatch is not None else None,
+                random_string_that_matches=(
+                    left.random_string_that_matches * right_n
+                    if left.random_string_that_matches is not None else
+                    None),
+                regex_for_fullmatch=(
+                    left.regex_for_fullmatch * right_n
+                    if left.regex_for_fullmatch is not None else
+                    None
+                ),
                 random_strings_that_maybe_match=[
                     left.random_strings_that_maybe_match[q] * -right_n if
                     left.random_strings_that_maybe_match[q] is not None else ''
@@ -181,7 +197,7 @@ def random_fa(
             )
         else:
             return created_random_fa(
-                fa=left.fa**right_n,
+                fa=left.fa ** right_n,
                 random_string_that_matches='',
                 regex_for_fullmatch='',
                 random_strings_that_maybe_match=[
@@ -194,14 +210,14 @@ def random_fa(
     n = rand.randint(0, 7)
     n *= bool(depth)
     return [
-        _z0,
-        _z12,
-        _z12,
-        _z3456,
-        _z3456,
-        _z3456,
-        _z3456,
-        _z7,
+        constant,
+        add,
+        add,
+        mul,
+        mul,
+        mul,
+        mul,
+        pow,
     ][n]()
 
 
@@ -384,78 +400,6 @@ def get_io_tests() -> list[io_test]:
                 main=main,
             )
         )
-
-    # append_to_tests(
-    #     ['command.py'],
-    #     '',
-    #     '',
-    #     1,
-    #     'usage: command.py <input format> <output format> [<labels>]\n',
-    #     command.old_main,
-    # )
-    # append_to_tests(
-    #     ['command.py', 'reg', 'reg'],
-    #     '0\n',
-    #     '0\n',
-    #     0,
-    #     '',
-    #     command.old_main,
-    # )
-    # append_to_tests(
-    #     ['command.py', 'reg', 'peg'], '',
-    #     '',
-    #     1,
-    #     'unknown format: peg.\nsupported formats are:\n    reg\n    eps-non-det-fsm\n    non-det-fsm\n    det-fsm\n    full-det-fsm\n    min-full-det-fsm\n    invert-full-det-fsm\n',
-    #     command.old_main,
-    # )
-    # append_to_tests(
-    #     ['command.py', 'det-fsm', 'reg'],
-    #     '',
-    #     '',
-    #     1,
-    #     'this conversion order is not supported.\n',
-    #     command.old_main,
-    # )
-    # append_to_tests(
-    #     ['command.py', 'reg', 'det-fsm'],
-    #     '0',
-    #     '\n1\n\n\n',
-    #     0,
-    #     '',
-    #     command.old_main,
-    # )
-    # append_to_tests(
-    #     ['command.py', 'eps-non-det-fsm', 'det-fsm'],
-    #     '\n1\n\n\n',
-    #     '\n1\n\n\n',
-    #     0,
-    #     '',
-    #     command.old_main,
-    # )
-    # append_to_tests(
-    #     ['command.py', 'reg', 'full-det-fsm'],
-    #     '0',
-    #     '',
-    #     1,
-    #     'labels argument is undefined.\n',
-    #     command.old_main,
-    # )
-    # append_to_tests(
-    #     ['command.py', 'non-det-fsm', 'min-full-det-fsm', 'ab'],
-    #     '0\n\n3\n\n0 3 a\n3 3 a\n3 3 b\n0 1 b\n2 3 a\n2 1 b\n1 2 b\n1 1 a\n',
-    #     '\n1\n\n2\n\n1 2 a\n1 3 b\n2 2 a\n2 2 b\n3 1 b\n3 3 a\n',
-    #     0,
-    #     '',
-    #     command.old_main,
-    # )
-    # append_to_tests(
-    #     ['command.py', 'reg', 'det-fsm'],
-    #     '',
-    #     '',
-    #     1,
-    #     'Incorrect input data.\n',
-    #     command.old_main,
-    # )
 
     append_to_tests(
         ['command.py', '--letters', 'qwer', '--operations'],
