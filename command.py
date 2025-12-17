@@ -305,10 +305,6 @@ def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
     stderr.seek(0)
     stdout_data = stdout.read()
     stderr_data = stderr.read()
-    if rc:
-        print(f'{rc = }')
-        print(stdout_data)
-        print(stderr_data)
     assert rc == 0
     assert stderr_data == ''
     return stdout_data
@@ -335,15 +331,7 @@ def old_old_main(
     stderr: typing.IO[str],
 ) -> int:
 
-    if len(argv) not in [3, 4]:
-        print(f'usage: {argv[0]} <input format> <output format> [<labels>]',
-              file=stderr)
-        return 1
-
-    if len(argv) == 3:
-        [*formats, labels] = [*argv[1:], '']
-    else:
-        [*formats, labels] = [*argv[1:]]
+    [*formats, labels] = [*argv[1:]]
 
     all_formats: dict[str, typing.Callable[[fa.FA], fa.FA]] = {
         'reg': lambda a: a,
@@ -355,49 +343,23 @@ def old_old_main(
         'invert-full-det-fsm': lambda a: a,
     }
 
-    for arg in formats:
-        if arg not in all_formats:
-            print(f'unknown format: {arg}.', file=stderr)
-            print('supported formats are:', file=stderr)
-            for f in all_formats:
-                print(f'    {f}', file=stderr)
-            return 1
-
     format_indexes = [[*all_formats].index(f) for f in formats]
 
-    if format_indexes[0] > format_indexes[1]:
-        print('this conversion order is not supported.', file=stderr)
-        return 1
+    if formats[0] == 'reg':
+        text = stdin.readline()
+        s = convert.regex_to_ast(text)
+        a = convert.ast_to_eps_nfa(s)
+    else:
+        text = stdin.read()
+        a = fa.dimple_to_fsm(text)
 
-    try:
-        if formats[0] == 'reg':
-            text = stdin.readline()
-            if text[-1] == '\n':
-                text = text[:-1]
-            if formats[1] == 'reg':
-                print(text, file=stdout)
-                return 0
-            else:
-                s = convert.regex_to_ast(text)
-                a = convert.ast_to_eps_nfa(s)
-        else:
-            text = stdin.read()
-            a = fa.dimple_to_fsm(text)
+    for num in range(*format_indexes):
+        func = [*all_formats.values()][num]
+        a = func(a)
 
-        for num in range(*format_indexes):
-            func = [*all_formats.values()][num]
-            if func.__closure__ is not None and not labels:
-                print('labels argument is undefined.', file=stderr)
-                return 1
-            a = func(a)
-
-        print(file=stdout)
-        print(fa.fsm_to_dimple(a), end='', file=stdout)
-        return 0
-    except Exception:
-        print('Incorrect input data.', file=stderr)
-        print(traceback.format_exc(), file=debug)
-        return 1
+    print(file=stdout)
+    print(fa.fsm_to_dimple(a), end='', file=stdout)
+    return 0
 
 
 if __name__ == '__main__':
