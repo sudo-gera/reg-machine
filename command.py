@@ -224,18 +224,17 @@ def process_args(
             assert precondition(value)
 
         func = typing.cast(
-            typing.Callable[[str, str], str],
+            typing.Callable[[fa_or_re, str], fa_or_re],
             eval(
                 operation.name.replace('-', '_')
             )
         )
 
-        value = fa_or_re.from_private_str(
+        value = (
             func(
-                value.as_private_str(),
+                value,
                 letters
-            )[1:],
-            letters
+            )
         )
 
         for postcondition in operation.postconditions:
@@ -259,68 +258,68 @@ def main(
         return process_args(argv, stdin, stdout, stderr)
 
 
-def re_to_eps_nfa(value: str, letters: str) -> str:
+def re_to_eps_nfa(value: fa_or_re, letters: str) -> fa_or_re:
 
-    text = value
+    text = value.as_private_str()
     s = convert.regex_to_ast(text)
     a = convert.ast_to_eps_nfa(s)
 
-    return '\n' + fa.fsm_to_dimple(a)
+    return fa_or_re.from_private_str(fa.fsm_to_dimple(a), letters)
 
 
-def remove_eps(value: str, letters: str) -> str:
+def remove_eps(value: fa_or_re, letters: str) -> fa_or_re:
 
-    text = value
+    text = value.as_private_str()
     a = fa.dimple_to_fsm(text)
 
     a = convert.remove_eps(a)
 
-    return '\n' + fa.fsm_to_dimple(a)
+    return fa_or_re.from_private_str(fa.fsm_to_dimple(a), letters)
 
 
-def make_deterministic(value: str, letters: str) -> str:
+def make_deterministic(value: fa_or_re, letters: str) -> fa_or_re:
 
-    text = value
+    text = value.as_private_str()
     a = fa.dimple_to_fsm(text)
 
     a = convert.make_deterministic(a)
 
-    return '\n' + fa.fsm_to_dimple(a)
+    return fa_or_re.from_private_str(fa.fsm_to_dimple(a), letters)
 
 
-def make_full(value: str, letters: str) -> str:
+def make_full(value: fa_or_re, letters: str) -> fa_or_re:
 
-    text = value
+    text = value.as_private_str()
     a = fa.dimple_to_fsm(text)
 
     a = convert.make_full(a, letters + letters[0][:0])
 
-    return '\n' + fa.fsm_to_dimple(a)
+    return fa_or_re.from_private_str(fa.fsm_to_dimple(a), letters)
 
 
-def minimize(value: str, letters: str) -> str:
+def minimize(value: fa_or_re, letters: str) -> fa_or_re:
 
-    text = value
+    text = value.as_private_str()
     a = fa.dimple_to_fsm(text)
 
     a = convert.make_min(a)
 
-    return '\n' + fa.fsm_to_dimple(a)
+    return fa_or_re.from_private_str(fa.fsm_to_dimple(a), letters)
 
 
-def invert(value: str, letters: str) -> str:
+def invert(value: fa_or_re, letters: str) -> fa_or_re:
 
-    text = value
+    text = value.as_private_str()
     a = fa.dimple_to_fsm(text)
 
     a = convert.invert_full_fa(a)
 
-    return '\n' + fa.fsm_to_dimple(a)
+    return fa_or_re.from_private_str(fa.fsm_to_dimple(a), letters)
 
 
-def full_dfa_to_re(value: str, letters: str) -> str:
-    ...
-    return ''
+# def full_dfa_to_re(value: fa_or_re, letters: str) -> fa_or_re:
+#     ...
+#     return ''
 
 
 if __name__ == '__main__':
