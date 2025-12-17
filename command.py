@@ -318,13 +318,8 @@ def old_main(
     stdin: typing.IO[str],
     stdout: typing.IO[str],
 ) -> int:
-    # print(argv, stdin.read(), stdin.seek(0))
-    with (
-            contextlib.redirect_stdout(stdout),
-            contextlib.redirect_stderr(stdout),
-    ):
-        stdout.write(old_old_main(argv, stdin.read()))
-        return 0
+    stdout.write(old_old_main(argv, stdin.read()))
+    return 0
 
 
 def old_old_main(
