@@ -321,14 +321,13 @@ def old_main(
             contextlib.redirect_stdout(stdout),
             contextlib.redirect_stderr(stderr),
     ):
-        return old_old_main(argv, stdin, stdout, stderr)
+        return old_old_main(argv, stdin, stdout)
 
 
 def old_old_main(
     argv: list[str],
     stdin: typing.IO[str],
     stdout: typing.IO[str],
-    stderr: typing.IO[str],
 ) -> int:
 
     [*formats, labels] = [*argv[1:]]
