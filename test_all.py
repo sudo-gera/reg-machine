@@ -426,8 +426,8 @@ def get_io_tests() -> list[io_test]:
 
     append_to_tests(
         ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa'],
-        'q*w+e*r',
-        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6",\n        "7",\n        "8"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "",\n            "3"\n        ],\n        [\n            "2",\n            "",\n            "4"\n        ],\n        [\n            "3",\n            "e",\n            "5"\n        ],\n        [\n            "4",\n            "w",\n            "6"\n        ],\n        [\n            "5",\n            "",\n            "7"\n        ],\n        [\n            "7",\n            "r",\n            "8"\n        ],\n        [\n            "8",\n            "",\n            "6"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "6"\n    ]\n}\n',
+        'q*w+e*r+q*w',
+        '{\n    "states": [\n        "1",\n        "10",\n        "11",\n        "12",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6",\n        "7",\n        "8",\n        "9"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "",\n            "3"\n        ],\n        [\n            "1",\n            "",\n            "4"\n        ],\n        [\n            "2",\n            "",\n            "5"\n        ],\n        [\n            "3",\n            "e",\n            "6"\n        ],\n        [\n            "4",\n            "q",\n            "7"\n        ],\n        [\n            "5",\n            "w",\n            "8"\n        ],\n        [\n            "6",\n            "",\n            "9"\n        ],\n        [\n            "7",\n            "",\n            "10"\n        ],\n        [\n            "9",\n            "r",\n            "11"\n        ],\n        [\n            "10",\n            "w",\n            "12"\n        ],\n        [\n            "11",\n            "",\n            "8"\n        ],\n        [\n            "12",\n            "",\n            "8"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "8"\n    ]\n}\n',
         0,
         '',
         command.main,
@@ -435,8 +435,35 @@ def get_io_tests() -> list[io_test]:
 
     append_to_tests(
         ['command.py', '--letters', 'qw', '--operations', 'remove-eps'],
-        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6",\n        "7",\n        "8"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "",\n            "3"\n        ],\n        [\n            "2",\n            "",\n            "4"\n        ],\n        [\n            "3",\n            "e",\n            "5"\n        ],\n        [\n            "4",\n            "w",\n            "6"\n        ],\n        [\n            "5",\n            "",\n            "7"\n        ],\n        [\n            "7",\n            "r",\n            "8"\n        ],\n        [\n            "8",\n            "",\n            "6"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "6"\n    ]\n}\n',
+        '{\n    "states": [\n        "1",\n        "10",\n        "11",\n        "12",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6",\n        "7",\n        "8",\n        "9"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "",\n            "3"\n        ],\n        [\n            "1",\n            "",\n            "4"\n        ],\n        [\n            "2",\n            "",\n            "5"\n        ],\n        [\n            "3",\n            "e",\n            "6"\n        ],\n        [\n            "4",\n            "q",\n            "7"\n        ],\n        [\n            "5",\n            "w",\n            "8"\n        ],\n        [\n            "6",\n            "",\n            "9"\n        ],\n        [\n            "7",\n            "",\n            "10"\n        ],\n        [\n            "9",\n            "r",\n            "11"\n        ],\n        [\n            "10",\n            "w",\n            "12"\n        ],\n        [\n            "11",\n            "",\n            "8"\n        ],\n        [\n            "12",\n            "",\n            "8"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "8"\n    ]\n}\n',
+        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6",\n        "7"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "q",\n            "3"\n        ],\n        [\n            "1",\n            "e",\n            "4"\n        ],\n        [\n            "2",\n            "w",\n            "5"\n        ],\n        [\n            "3",\n            "w",\n            "6"\n        ],\n        [\n            "4",\n            "r",\n            "7"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "5",\n        "6",\n        "7"\n    ]\n}\n',
+        0,
+        '',
+        command.main,
+    )
+
+    append_to_tests(
+        ['command.py', '--letters', 'qw', '--operations', 'make-deterministic'],
+        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6",\n        "7"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "q",\n            "3"\n        ],\n        [\n            "1",\n            "e",\n            "4"\n        ],\n        [\n            "2",\n            "w",\n            "5"\n        ],\n        [\n            "3",\n            "w",\n            "6"\n        ],\n        [\n            "4",\n            "r",\n            "7"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "5",\n        "6",\n        "7"\n    ]\n}\n',
         '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "5"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "4",\n        "5"\n    ]\n}\n',
+        0,
+        '',
+        command.main,
+    )
+
+    append_to_tests(
+        ['command.py', '--letters', 'qw', '--operations', 'make-full'],
+        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "5"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "4",\n        "5"\n    ]\n}\n',
+        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "1",\n            "w",\n            "4"\n        ],\n        [\n            "2",\n            "w",\n            "5"\n        ],\n        [\n            "2",\n            "q",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "6"\n        ],\n        [\n            "3",\n            "q",\n            "4"\n        ],\n        [\n            "3",\n            "w",\n            "4"\n        ],\n        [\n            "4",\n            "q",\n            "4"\n        ],\n        [\n            "4",\n            "w",\n            "4"\n        ],\n        [\n            "5",\n            "q",\n            "4"\n        ],\n        [\n            "5",\n            "w",\n            "4"\n        ],\n        [\n            "6",\n            "q",\n            "4"\n        ],\n        [\n            "6",\n            "w",\n            "4"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "5",\n        "6"\n    ]\n}\n',
+        0,
+        '',
+        command.main,
+    )
+
+    append_to_tests(
+        ['command.py', '--letters', 'qw', '--operations', 'minimize'],
+        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "1",\n            "w",\n            "4"\n        ],\n        [\n            "2",\n            "w",\n            "5"\n        ],\n        [\n            "2",\n            "q",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "6"\n        ],\n        [\n            "3",\n            "q",\n            "4"\n        ],\n        [\n            "3",\n            "w",\n            "4"\n        ],\n        [\n            "4",\n            "q",\n            "4"\n        ],\n        [\n            "4",\n            "w",\n            "4"\n        ],\n        [\n            "5",\n            "q",\n            "4"\n        ],\n        [\n            "5",\n            "w",\n            "4"\n        ],\n        [\n            "6",\n            "q",\n            "4"\n        ],\n        [\n            "6",\n            "w",\n            "4"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "5",\n        "6"\n    ]\n}\n',
+        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "1",\n            "w",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "2",\n            "q",\n            "3"\n        ],\n        [\n            "3",\n            "q",\n            "3"\n        ],\n        [\n            "3",\n            "w",\n            "3"\n        ],\n        [\n            "4",\n            "q",\n            "3"\n        ],\n        [\n            "4",\n            "w",\n            "3"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "4"\n    ]\n}\n',
         0,
         '',
         command.main,
@@ -460,50 +487,59 @@ def get_io_tests() -> list[io_test]:
         command.main,
     )
 
-    append_to_tests(
-        ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'remove-eps'],
-        'q*w+e*r',
-        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "5"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "4",\n        "5"\n    ]\n}\n',
-        0,
-        '',
-        command.main,
-    )
+    # append_to_tests(
+    #     ['command.py', '--letters', 'qw', '--operations', 'make-full'],
+    #     '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "5"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "4",\n        "5"\n    ]\n}\n',
+    #     '',
+    #     1,
+    #     "Input fa_or_re(value_=frozen_fa(states=['1', '2', '3', '4', '5', '6', '7', '8'], letters=['e', 'q', 'r', 'w'], transition_function=[['1', 'q', '2'], ['1', '', '3'], ['2', '', '4'], ['3', 'e', '5'], ['4', 'w', '6'], ['5', '', '7'], ['7', 'r', '8'], ['8', '', '6']], start_states=['1'], final_states=['6'])) dit not pass precondition = IsDeterministic() of the operation = command_line_operation(name='make-full', preconditions=(IsDeterministic(),), postconditions=(IsFull(),)).\n",
+    #     command.main,
+    # )
 
-    append_to_tests(
-        ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'remove-eps', 'make-deterministic', 'make-full', 'minimize', 'invert'],
-        'q*w+e*r',
-        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "1",\n            "w",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "2",\n            "q",\n            "3"\n        ],\n        [\n            "3",\n            "q",\n            "3"\n        ],\n        [\n            "3",\n            "w",\n            "3"\n        ],\n        [\n            "4",\n            "q",\n            "3"\n        ],\n        [\n            "4",\n            "w",\n            "3"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "1",\n        "2",\n        "3"\n    ]\n}\n',
-        0,
-        '',
-        command.main,
-    )
+    # append_to_tests(
+    #     ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'remove-eps'],
+    #     'q*w+e*r',
+    #     '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "5"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "4",\n        "5"\n    ]\n}\n',
+    #     0,
+    #     '',
+    #     command.main,
+    # )
 
-    append_to_tests(
-        ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'minimize'],
-        'q*w+e*r',
-        '',
-        1,
-        "precondition = IsFull() of operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)) is not fulfilled by postconditions of operation = command_line_operation(name='re-to-eps-nfa', preconditions=(IsRE(),), postconditions=(IsFA(),)).\n",
-        command.main,
-    )
+    # append_to_tests(
+    #     ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'remove-eps', 'make-deterministic', 'make-full', 'minimize', 'invert'],
+    #     'q*w+e*r',
+    #     '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "1",\n            "w",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "2",\n            "q",\n            "3"\n        ],\n        [\n            "3",\n            "q",\n            "3"\n        ],\n        [\n            "3",\n            "w",\n            "3"\n        ],\n        [\n            "4",\n            "q",\n            "3"\n        ],\n        [\n            "4",\n            "w",\n            "3"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "1",\n        "2",\n        "3"\n    ]\n}\n',
+    #     0,
+    #     '',
+    #     command.main,
+    # )
 
-    append_to_tests(
-        ['command.py', '--letters', 'qw', '--operations', 'minimize'],
-        'q*w+e*r',
-        '',
-        1,
-        "Input fa_or_re(value_='q*w+e*r') dit not pass precondition = IsFull() of the operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)).\n",
-        command.main,
-    )
+    # append_to_tests(
+    #     ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'minimize'],
+    #     'q*w+e*r',
+    #     '',
+    #     1,
+    #     "precondition = IsFull() of operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)) is not fulfilled by postconditions of operation = command_line_operation(name='re-to-eps-nfa', preconditions=(IsRE(),), postconditions=(IsFA(),)).\n",
+    #     command.main,
+    # )
 
-    append_to_tests(
-        ['command.py', '--letters', 'qw'],
-        'q*w+e*r',
-        '',
-        1,
-        "usage: __main__.py [-h] --operations\n                   [{command_line_operation(name='re-to-eps-nfa', preconditions=(IsRE,), postconditions=(IsFA,)),command_line_operation(name='remove-eps', preconditions=(IsFA,), postconditions=(HasNoEps,)),command_line_operation(name='make-deterministic', preconditions=(HasNoEps,), postconditions=(IsDeterministic,)),command_line_operation(name='make-full', preconditions=(IsDeterministic,), postconditions=(IsFull,)),command_line_operation(name='minimize', preconditions=(IsFull,), postconditions=(IsFull,)),command_line_operation(name='invert', preconditions=(IsFull,), postconditions=(IsFull,)),command_line_operation(name='full-dfa-to-re', preconditions=(IsFull,), postconditions=(IsRE,))} ...]\n                   --letters LETTERS\n__main__.py: error: the following arguments are required: --operations\n\n",
-        command.main,
-    )
+    # append_to_tests(
+    #     ['command.py', '--letters', 'qw', '--operations', 'minimize'],
+    #     'q*w+e*r',
+    #     '',
+    #     1,
+    #     "Input fa_or_re(value_='q*w+e*r') dit not pass precondition = IsFull() of the operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)).\n",
+    #     command.main,
+    # )
+
+    # append_to_tests(
+    #     ['command.py', '--letters', 'qw'],
+    #     'q*w+e*r',
+    #     '',
+    #     1,
+    #     "usage: __main__.py [-h] --operations\n                   [{command_line_operation(name='re-to-eps-nfa', preconditions=(IsRE,), postconditions=(IsFA,)),command_line_operation(name='remove-eps', preconditions=(IsFA,), postconditions=(HasNoEps,)),command_line_operation(name='make-deterministic', preconditions=(HasNoEps,), postconditions=(IsDeterministic,)),command_line_operation(name='make-full', preconditions=(IsDeterministic,), postconditions=(IsFull,)),command_line_operation(name='minimize', preconditions=(IsFull,), postconditions=(IsFull,)),command_line_operation(name='invert', preconditions=(IsFull,), postconditions=(IsFull,)),command_line_operation(name='full-dfa-to-re', preconditions=(IsFull,), postconditions=(IsRE,))} ...]\n                   --letters LETTERS\n__main__.py: error: the following arguments are required: --operations\n\n",
+    #     command.main,
+    # )
 
     return tests
 
