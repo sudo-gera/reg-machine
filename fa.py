@@ -8,6 +8,12 @@ import typing
 import io
 from dataclasses import dataclass
 
+# operators = [
+#     '',
+#     '+',
+#     '*',
+#     '**',
+# ]
 
 class Node:
 
@@ -18,7 +24,7 @@ class Node:
         self.regex_by_next_node: dd[Node, str] = dd(lambda: '0')
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}(name={self.name!r}, is_final={self.is_final!r})'
+        return f'{self.__class__.__name__}(name={self.name!r}, is_final={self.is_final!r}, id={id(self)})'
 
     def __rshift__(self: Node, label: str) -> tuple[Node, str]:
         '''

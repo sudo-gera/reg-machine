@@ -139,8 +139,10 @@ def fa_to_re(a: fa.FA) -> str:
 
     a.the_only_final_if_exists_or_unrelated_node.is_final = True
 
+    print(f'{a.the_only_final_if_exists_or_unrelated_node = }', file=debug)
+
     for node in a.start.bfs():
-        if node.is_final:
+        if node.is_final and node is not a.the_only_final_if_exists_or_unrelated_node:
             node.is_final = False
             node.next_nodes_by_label[''] |= {a.the_only_final_if_exists_or_unrelated_node}
     
@@ -149,7 +151,12 @@ def fa_to_re(a: fa.FA) -> str:
     if a.the_only_final_if_exists_or_unrelated_node not in nodes:
         return '0'
 
-    # now a.the_only_final... is indeed the only final and not unrelated
+    assert a.the_only_final_if_exists_or_unrelated_node in nodes
+
+    for node in nodes:
+        assert node is a.the_only_final_if_exists_or_unrelated_node and node.is_final or not node.is_final
+
+    # now a.the_only_final_if_exists_or_unrelated_node is indeed the only final and not unrelated
 
     for node in a.start.bfs():
         for label, next_nodes in node.next_nodes_by_label.items():
@@ -160,8 +167,14 @@ def fa_to_re(a: fa.FA) -> str:
                 else:
                     node.regex_by_next_node[next_node] = ltext
 
+    print(f'{a.the_only_final_if_exists_or_unrelated_node = }', file=debug)
+
     while 1:
         nodes = {*a.start.bfs()}
+        print(nodes, file=debug)
+        for node in nodes:
+            for next_node, re in node.regex_by_next_node.items():
+                print(f'{node} -> {re} -> {next_node}', file=debug)
         
         assert a.start in nodes
         assert a.the_only_final_if_exists_or_unrelated_node in nodes
@@ -181,7 +194,45 @@ def fa_to_re(a: fa.FA) -> str:
 
             for i in nodes - {q}:
                 for j in nodes - {q}:
-                    i.regex_by_next_node[j] = f'({i.regex_by_next_node[j]}+{i.regex_by_next_node[q]}*{loop}*{q.regex_by_next_node[j]})'
+                    ij = i.regex_by_next_node[j]
+                    iq = i.regex_by_next_node[q]
+                    qj = q.regex_by_next_node[j]
+                    if '0' in [iq, loop, qj]:
+                        res = ij
+                    elif ij == '0':
+                        if iq == loop == '1':
+                            res = qj
+                        elif iq == qj == '1':
+                            res = loop
+                        elif loop == qj == '1':
+                            res = iq
+                        elif iq == '1':
+                            res = f'({loop}*{qj})'
+                        elif loop == '1':
+                            res = f'({iq}*{qj})'
+                        elif qj == '1':
+                            res = f'({iq}*{loop})'
+                        else:
+                            res = f'({iq}*{loop}*{qj})'
+                    else:
+                        if iq == loop == '1':
+                            res = f'({ij}+{qj})'
+                        elif iq == qj == '1':
+                            res = f'({ij}+{loop})'
+                        elif loop == qj == '1':
+                            res = f'({ij}+{iq})'
+                        elif iq == '1':
+                            res = f'({ij}+{loop}*{qj})'
+                        elif loop == '1':
+                            res = f'({ij}+{iq}*{qj})'
+                        elif qj == '1':
+                            res = f'({ij}+{iq}*{loop})'
+                        else:
+                            res = f'({ij}+{iq}*{loop}*{qj})'
+                    print(f'{ij = !r} + {iq = !r} * {loop = !r} * {qj = !r} -> {res = !r}', file=debug)
+                    i.regex_by_next_node[j] = res
+                    # f'({i.regex_by_next_node[j]}+{i.regex_by_next_node[q]}*{loop}*{q.regex_by_next_node[j]})'
+                    i.next_nodes_by_label['--'] |= {j}
 
             for node in nodes - {q}:
 

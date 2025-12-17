@@ -551,7 +551,7 @@ def get_io_tests() -> list[io_test]:
         'q*w+e*r',
         '',
         1,
-        "usage: __main__.py [-h] --operations\n                   [{command_line_operation(name='re-to-eps-nfa', preconditions=(IsRE,), postconditions=(IsFA,)),command_line_operation(name='remove-eps', preconditions=(IsFA,), postconditions=(HasNoEps,)),command_line_operation(name='make-deterministic', preconditions=(HasNoEps,), postconditions=(IsDeterministic,)),command_line_operation(name='make-full', preconditions=(IsDeterministic,), postconditions=(IsFull,)),command_line_operation(name='minimize', preconditions=(IsFull,), postconditions=(IsFull,)),command_line_operation(name='invert', preconditions=(IsFull,), postconditions=(IsFull,)),command_line_operation(name='full-dfa-to-re', preconditions=(IsFull,), postconditions=(IsRE,))} ...]\n                   --letters LETTERS\n__main__.py: error: the following arguments are required: --operations\n\n",
+        "usage: __main__.py [-h] --operations\n                   [{command_line_operation(name='re-to-eps-nfa', preconditions=(IsRE,), postconditions=(IsFA,)),command_line_operation(name='remove-eps', preconditions=(IsFA,), postconditions=(HasNoEps,)),command_line_operation(name='make-deterministic', preconditions=(HasNoEps,), postconditions=(IsDeterministic,)),command_line_operation(name='make-full', preconditions=(IsDeterministic,), postconditions=(IsFull,)),command_line_operation(name='minimize', preconditions=(IsFull,), postconditions=(IsFull,)),command_line_operation(name='invert', preconditions=(IsFull,), postconditions=(IsFull,)),command_line_operation(name='eps-nfa-to-re', preconditions=(IsFA,), postconditions=(IsRE,))} ...]\n                   --letters LETTERS\n__main__.py: error: the following arguments are required: --operations\n\n",
         command.main,
     )
 
@@ -718,8 +718,21 @@ def test_fa_stress(arg: int) -> None:
 
 test_fa_stress = pytest.mark.parametrize('arg', arg_values)(test_fa_stress)
 
-def test_fa_to_re_simple() -> None:
-    old_re = '0'
+# def test_fa_to_re_0() -> None:
+#     old_re = '0'
+
+#     fa = convert.ast_to_eps_nfa(convert.regex_to_ast(old_re))
+
+#     # print(command.fa_or_re.from_private_fa(fa, 'q').as_public_str(), file=debug)
+
+#     new_re = convert.fa_to_re(fa)
+
+#     # print(new_re, file=debug)
+
+#     assert new_re == '0'
+
+def test_fa_to_re_1() -> None:
+    old_re = '1'
 
     fa = convert.ast_to_eps_nfa(convert.regex_to_ast(old_re))
 
@@ -728,6 +741,8 @@ def test_fa_to_re_simple() -> None:
     new_re = convert.fa_to_re(fa)
 
     print(new_re, file=debug)
+
+    assert new_re == '1'
 
 
 

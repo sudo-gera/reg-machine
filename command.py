@@ -77,6 +77,10 @@ class fa_or_re:
             )
         )
 
+    @staticmethod
+    def from_private_re(a: str, letters: str) -> fa_or_re:
+        return fa_or_re(a)
+
     def is_fa(self) -> bool:
         return isinstance(self.value_, frozen_fa)
 
@@ -150,7 +154,7 @@ command_line_operations = {
     'make-full':            command_line_operation(name='make-full',           preconditions=(IsDeterministic(),), postconditions=(IsFull(),)),
     'minimize':             command_line_operation(name='minimize',            preconditions=(IsFull(),),          postconditions=(IsFull(),)),
     'invert':               command_line_operation(name='invert',              preconditions=(IsFull(),),          postconditions=(IsFull(),)),
-    'full-dfa-to-re':       command_line_operation(name='full-dfa-to-re',      preconditions=(IsFull(),),          postconditions=(IsRE(),)),
+    'eps-nfa-to-re':        command_line_operation(name='eps-nfa-to-re',       preconditions=(IsFA(),),            postconditions=(IsRE(),)),
 }
 
 
@@ -315,9 +319,14 @@ def invert(value: fa_or_re, letters: str) -> fa_or_re:
     return fa_or_re.from_private_fa(a, letters)
 
 
-# def full_dfa_to_re(value: fa_or_re, letters: str) -> fa_or_re:
-#     ...
-#     return ''
+def eps_nfa_to_re(value: fa_or_re, letters: str) -> fa_or_re:
+
+    a = value.as_private_fa()
+
+    s = convert.fa_to_re(a)
+
+    return fa_or_re.from_private_re(s, letters)
+
 
 
 if __name__ == '__main__':
