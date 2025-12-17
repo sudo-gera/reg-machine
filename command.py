@@ -248,79 +248,63 @@ def main(
 
 
 def re_to_eps_nfa(value: str, letters: str) -> str:
-    return old_main('re_to_eps_nfa', value, letters)
+    f0='re_to_eps_nfa'
+    return old_main(f0, value, letters)
 
 
 def remove_eps(value: str, letters: str) -> str:
-    return old_main('remove_eps', value, letters)
+    f0='remove_eps'
+    return old_main(f0, value, letters)
 
 
 def make_deterministic(value: str, letters: str) -> str:
-    return old_main('make_deterministic', value, letters)
+    f0='make_deterministic'
+    return old_main(f0, value, letters)
 
 
 def make_full(value: str, letters: str) -> str:
-    return old_main('make_full', value, letters)
+    f0='make_full'
+    return old_main(f0, value, letters)
 
 
 def minimize(value: str, letters: str) -> str:
-    return old_main('minimize', value, letters)
+    f0='minimize'
+    return old_main(f0, value, letters)
 
 
 def invert(value: str, letters: str) -> str:
-    return old_main('invert', value, letters)
+    f0='invert'
+    return old_main(f0, value, letters)
 
 
 def full_dfa_to_re(value: str, letters: str) -> str:
-    return old_main('full_dfa_to_re', value, letters)
-
-
-new_commands_to_old_commands = {
-    're_to_eps_nfa':      ('re_to_eps_nfa',             'remove_eps'),
-
-    'remove_eps':         ('remove_eps',     'make_deterministic'),
-
-    'make_deterministic': ('make_deterministic',             'make_full'),
-
-    'make_full':          ('make_full',            'minimize'),
-
-    'minimize':           ('minimize',        'invert'),
-
-    'invert':             ('invert', 'invert-full-det-fsm'),
-
-    'full_dfa_to_re':     ('todo', 'todo'),
-}
+    f0='full_dfa_to_re'
+    return old_main(f0, value, letters)
 
 
 def old_main(
-    formats_0: str,
-    stdin: str,
+    f0: str,
+    value: str,
     letters: str,
 ) -> str:
 
-    labels = letters
-
-    all_formats: dict[str, typing.Callable[[fa.FA], fa.FA]] = {
-        're_to_eps_nfa': lambda a: a,
-        'remove_eps': convert.remove_eps,
-        'make_deterministic': convert.make_deterministic,
-        'make_full': lambda a: convert.make_full(a, labels + labels[0][:0]),
-        'minimize': convert.make_min,
-        'invert': convert.invert_full_fa,
-        'invert-full-det-fsm': lambda a: a,
-    }
-
-    if formats_0 == 're_to_eps_nfa':
-        text = stdin
+    if f0 == 're_to_eps_nfa':
+        text = value
         s = convert.regex_to_ast(text)
         a = convert.ast_to_eps_nfa(s)
     else:
-        text = stdin
+        text = value
         a = fa.dimple_to_fsm(text)
 
-
-    func = all_formats[formats_0]
-    a = func(a)
+    a = {
+        're_to_eps_nfa': lambda a: a,
+        'remove_eps': convert.remove_eps,
+        'make_deterministic': convert.make_deterministic,
+        'make_full': lambda a: convert.make_full(a, letters + letters[0][:0]),
+        'minimize': convert.make_min,
+        'invert': convert.invert_full_fa,
+        'invert-full-det-fsm': lambda a: a,
+    }[f0](a)
 
     return '\n' + fa.fsm_to_dimple(a)
 
