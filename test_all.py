@@ -443,6 +443,15 @@ def get_io_tests() -> list[io_test]:
     )
 
     append_to_tests(
+        ['command.py', '--letters', 'qw', '--operations', 'make-deterministic'],
+        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6",\n        "7",\n        "8"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "",\n            "3"\n        ],\n        [\n            "2",\n            "",\n            "4"\n        ],\n        [\n            "3",\n            "e",\n            "5"\n        ],\n        [\n            "4",\n            "w",\n            "6"\n        ],\n        [\n            "5",\n            "",\n            "7"\n        ],\n        [\n            "7",\n            "r",\n            "8"\n        ],\n        [\n            "8",\n            "",\n            "6"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "6"\n    ]\n}\n',
+        '',
+        1,
+        "Input fa_or_re(value_=frozen_fa(states=['1', '2', '3', '4', '5', '6', '7', '8'], letters=['e', 'q', 'r', 'w'], transition_function=[['1', 'q', '2'], ['1', '', '3'], ['2', '', '4'], ['3', 'e', '5'], ['4', 'w', '6'], ['5', '', '7'], ['7', 'r', '8'], ['8', '', '6']], start_states=['1'], final_states=['6'])) dit not pass precondition = HasNoEps() of the operation = command_line_operation(name='make-deterministic', preconditions=(HasNoEps(),), postconditions=(IsDeterministic(),)).\n",
+        command.main,
+    )
+
+    append_to_tests(
         ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'remove-eps'],
         'q*w+e*r',
         '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "5"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "4",\n        "5"\n    ]\n}\n',
