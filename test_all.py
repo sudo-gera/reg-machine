@@ -433,14 +433,14 @@ def get_io_tests() -> list[io_test]:
         command.main,
     )
 
-    # append_to_tests(
-    #     ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'minimize'],
-    #     '0',
-    #     '',
-    #     1,
-    #     "precondition = IsFull() of operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)) is not fulfilled by postconditions of operation = command_line_operation(name='re-to-eps-nfa', preconditions=(IsRE(),), postconditions=(IsFA(),)).\n",
-    #     command.main,
-    # )
+    append_to_tests(
+        ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'minimize'],
+        '0',
+        '',
+        1,
+        "precondition = IsFull() of operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)) is not fulfilled by postconditions of operation = command_line_operation(name='re-to-eps-nfa', preconditions=(IsRE(),), postconditions=(IsFA(),)).\n",
+        command.main,
+    )
 
     append_to_tests(
         ['command.py', '--letters', 'qw', '--operations', 'minimize'],
