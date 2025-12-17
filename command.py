@@ -114,7 +114,7 @@ class IsDeterministic(HasNoEps):
 
 class IsFull(IsDeterministic):
     def __call__(self, value: fa_or_re) -> bool:
-        return super().__call__(value) and validate.fa_is_full(fa.dimple_to_fsm(value.as_private_str()), value.letters())
+        return super().__call__(value) and validate.fa_is_full((value.as_private_str_new()), value.letters())
 
 
 @dataclass(frozen=True)
