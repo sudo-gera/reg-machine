@@ -424,6 +424,15 @@ def get_io_tests() -> list[io_test]:
         command.main,
     )
 
+    append_to_tests(
+        ['command.py', '--letters', 'qw', '--operations', 'minimize'],
+        '0',
+        '',
+        1,
+        "Input fa_or_re(value_='0') dit not pass precondition = IsFull() of the operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)).\n",
+        command.main,
+    )
+
     return tests
 
 
