@@ -336,6 +336,7 @@ def old_main(
         text = stdin
         a = fa.dimple_to_fsm(text)
 
+    assert len(range(*format_indexes)) == 1
     for num in range(*format_indexes):
         func = [*all_formats.values()][num]
         a = func(a)
