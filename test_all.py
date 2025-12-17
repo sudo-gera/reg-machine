@@ -66,9 +66,7 @@ def random_fa(
         depth: int,
         labels: str,  # allowed letters
 ) -> created_random_fa:
-    n = rand.randint(0, 7)
-    n *= bool(depth)
-    if n == 0:
+    def _z0() -> created_random_fa:
         arg = rand.choice([None, '', *list(labels)])
         return created_random_fa(
             fa.FA(arg),
@@ -83,7 +81,7 @@ def random_fa(
                 arg
             ),
         )
-    elif n < 3:
+    def _z12() -> created_random_fa:
         left = random_fa(rand, depth - 1, labels)
         right = random_fa(rand, depth - 1, labels)
         if left.random_string_that_matches is None:
@@ -117,7 +115,7 @@ def random_fa(
             ],
             f'({left.regex_for_converting_to_fa} + {right.regex_for_converting_to_fa})',
         )
-    elif n < 7:
+    def _z3456() -> created_random_fa:
         left = random_fa(rand, depth - 1, labels)
         right = random_fa(rand, depth - 1, labels)
         if left.random_string_that_matches is None or left.regex_for_fullmatch is None or right.random_string_that_matches is None or right.regex_for_fullmatch is None:
@@ -149,7 +147,7 @@ def random_fa(
                 ],
                 f'({left.regex_for_converting_to_fa} * {right.regex_for_converting_to_fa})',
             )
-    elif n == 7:
+    def _z7() -> created_random_fa:
         right_n = rand.choice([*range(-2, 3)])
         left = random_fa(rand, depth - 1, labels)
         if right_n < 0:
@@ -192,7 +190,18 @@ def random_fa(
                 ],
                 f'({left.regex_for_converting_to_fa}) ** {right_n}',
             )
-    assert False
+    n = rand.randint(0, 7)
+    n *= bool(depth)
+    return [
+        _z0,
+        _z12,
+        _z12,
+        _z3456,
+        _z3456,
+        _z3456,
+        _z3456,
+        _z7,
+    ][n]()
 
 
 def graphviz(a: fa.FA) -> str:
