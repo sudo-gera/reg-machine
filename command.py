@@ -74,12 +74,18 @@ class fa_or_re:
         assert False
 
     @staticmethod
-    def from_private_str(data: str, letters: str) -> fa_or_re:
-        return fa_or_re(frozen_fa.from_json_str(json.dumps(fa.dimple_to_json(data, letters))))
-
-    @staticmethod
     def from_private_str_new(a: fa.FA, letters: str) -> fa_or_re:
-        return fa_or_re.from_private_str(fa.fsm_to_dimple(a),  letters)
+        return fa_or_re(
+            frozen_fa.from_json_str(
+                json.dumps(
+                    fa.dimple_to_json(
+                        fa.fsm_to_dimple(a),
+                        letters
+                    )
+                )
+            )
+        )
+        
 
     def is_fa(self) -> bool:
         return isinstance(self.value_, frozen_fa)
