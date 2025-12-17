@@ -300,10 +300,10 @@ def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
     ):
         stdout_data = (
             old_main(
-                ['-', *new_commands_to_old_commands[operation], letters],
                 stdin_data,
                 operation,
                 letters,
+                new_commands_to_old_commands[operation][0]
             )
         )
     null.seek(0)
@@ -312,16 +312,14 @@ def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
 
 
 def old_main(
-    argv: list[str],
     stdin: str,
     operation: str,
     letters: str,
+    formats_0: str,
 ) -> str:
 
-    [*formats, labels] = [*argv[1:]]
-
-    assert labels == letters
-    assert new_commands_to_old_commands[operation] == tuple(formats)
+    labels = letters
+    formats = list(new_commands_to_old_commands[operation])
 
     all_formats: dict[str, typing.Callable[[fa.FA], fa.FA]] = {
         'reg': lambda a: a,
@@ -333,8 +331,6 @@ def old_main(
         'invert-full-det-fsm': lambda a: a,
     }
 
-    format_indexes = [[*all_formats].index(f) for f in formats]
-
     if formats[0] == 'reg':
         text = stdin
         s = convert.regex_to_ast(text)
@@ -343,12 +339,9 @@ def old_main(
         text = stdin
         a = fa.dimple_to_fsm(text)
 
-    assert len(range(*format_indexes)) == 1
 
-    for num in range(*format_indexes):
-        func = [*all_formats.values()][num]
-        assert func is all_formats[new_commands_to_old_commands[operation][0]]
-        a = func(a)
+    func = all_formats[new_commands_to_old_commands[operation][0]]
+    a = func(a)
 
     return '\n' + fa.fsm_to_dimple(a)
 
