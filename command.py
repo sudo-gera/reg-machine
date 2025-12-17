@@ -297,9 +297,16 @@ def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
     stdin.write(stdin_data)
     stdin.seek(0)
     stdout = io.StringIO()
-    rc = old_main(
-        ['-', *new_commands_to_old_commands[operation], letters],
-        stdin, stdout)
+    null = io.StringIO()
+    with (
+            contextlib.redirect_stdout(null),
+            contextlib.redirect_stderr(null),
+    ):
+        rc = old_main(
+            ['-', *new_commands_to_old_commands[operation], letters],
+            stdin, stdout)
+    null.seek(0)
+    assert not null.read()
     stdout.seek(0)
     stdout_data = stdout.read()
     assert rc == 0
@@ -351,8 +358,6 @@ def old_old_main(
         func = [*all_formats.values()][num]
         a = func(a)
 
-    # print(file=stdout)
-    # print(fa.fsm_to_dimple(a), end='', file=stdout)
     return '\n' + fa.fsm_to_dimple(a)
 
 
