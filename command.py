@@ -77,6 +77,11 @@ class fa_or_re:
     def from_private_str(data: str, letters: str) -> fa_or_re:
         return fa_or_re(frozen_fa.from_json_str(json.dumps(fa.dimple_to_json(data, letters))))
 
+    @staticmethod
+    def from_private_str_new(a: fa.FA, letters: str) -> fa_or_re:
+        return fa_or_re.from_private_str(fa.fsm_to_dimple(a),  letters)
+        return fa_or_re.from_private_str_new(a, letters)
+
     def is_fa(self) -> bool:
         return isinstance(self.value_, frozen_fa)
 
@@ -267,7 +272,7 @@ def re_to_eps_nfa(value: fa_or_re, letters: str) -> fa_or_re:
     s = convert.regex_to_ast(text)
     a = convert.ast_to_eps_nfa(s)
 
-    return fa_or_re.from_private_str(fa.fsm_to_dimple(a), letters)
+    return fa_or_re.from_private_str_new(a, letters)
 
 
 def remove_eps(value: fa_or_re, letters: str) -> fa_or_re:
@@ -276,7 +281,7 @@ def remove_eps(value: fa_or_re, letters: str) -> fa_or_re:
 
     a = convert.remove_eps(a)
 
-    return fa_or_re.from_private_str(fa.fsm_to_dimple(a), letters)
+    return fa_or_re.from_private_str_new(a, letters)
 
 
 def make_deterministic(value: fa_or_re, letters: str) -> fa_or_re:
@@ -285,7 +290,7 @@ def make_deterministic(value: fa_or_re, letters: str) -> fa_or_re:
 
     a = convert.make_deterministic(a)
 
-    return fa_or_re.from_private_str(fa.fsm_to_dimple(a), letters)
+    return fa_or_re.from_private_str_new(a, letters)
 
 
 def make_full(value: fa_or_re, letters: str) -> fa_or_re:
@@ -294,7 +299,7 @@ def make_full(value: fa_or_re, letters: str) -> fa_or_re:
 
     a = convert.make_full(a, letters + letters[0][:0])
 
-    return fa_or_re.from_private_str(fa.fsm_to_dimple(a), letters)
+    return fa_or_re.from_private_str_new(a, letters)
 
 
 def minimize(value: fa_or_re, letters: str) -> fa_or_re:
@@ -303,7 +308,7 @@ def minimize(value: fa_or_re, letters: str) -> fa_or_re:
 
     a = convert.make_min(a)
 
-    return fa_or_re.from_private_str(fa.fsm_to_dimple(a), letters)
+    return fa_or_re.from_private_str_new(a, letters)
 
 
 def invert(value: fa_or_re, letters: str) -> fa_or_re:
@@ -312,7 +317,7 @@ def invert(value: fa_or_re, letters: str) -> fa_or_re:
 
     a = convert.invert_full_fa(a)
 
-    return fa_or_re.from_private_str(fa.fsm_to_dimple(a), letters)
+    return fa_or_re.from_private_str_new(a, letters)
 
 
 # def full_dfa_to_re(value: fa_or_re, letters: str) -> fa_or_re:
