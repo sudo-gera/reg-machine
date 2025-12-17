@@ -1,3 +1,5 @@
+from __future__ import annotations
+import abc
 import convert
 import sys
 import typing
@@ -11,11 +13,131 @@ from dataclasses import dataclass
 from utils import *
 import fa
 import argparse
+import validate
 
-possible_actions = [
-    'reg-to-eps-nfa', 'remove-eps', 'make-deterministic', 'make-full',
-    'make-min', 'invert', 'nfa-to-reg'
-]
+
+@dataclass(frozen=True)
+class frozen_fa:
+    states: tuple[str]
+    letters: tuple[str]
+    transition_function: tuple[tuple[str]]
+    start_states: tuple[str]
+    final_states: tuple[str]
+
+    @staticmethod
+    def from_json_str(data: str) -> frozen_fa:
+        value = json.loads(data)
+        assert isinstance(value, dict)
+        return frozen_fa(**value)
+
+    def to_json_str(self) -> str:
+        return json.dumps(vars(self), indent=4)
+
+
+@dataclass(frozen=True)
+class fa_or_re:
+    value_: str | frozen_fa
+
+    @staticmethod
+    def from_public_str(data: str) -> fa_or_re:
+        try:
+            return fa_or_re(frozen_fa.from_json_str(data))
+        except Exception:
+            return fa_or_re(data)
+
+    def as_public_str(self) -> str:
+        if isinstance(self.value_, frozen_fa):
+            return self.value_.to_json_str()
+        else:
+            return self.value_
+
+    def as_private_str(self) -> str:
+        if isinstance(self.value_, frozen_fa):
+            return fa.json_to_dimple(json.loads(self.value_.to_json_str()))
+        else:
+            return self.value_
+
+    def letters(self) -> str:
+        if isinstance(self.value_, frozen_fa):
+            return ''.join(self.value_.letters)
+        assert False
+
+    @staticmethod
+    def from_private_str(data: str, letters: str) -> fa_or_re:
+        return fa_or_re(frozen_fa.from_json_str(json.dumps(fa.dimple_to_json(data, letters))))
+
+    def is_fa(self) -> bool:
+        return isinstance(self.value_, frozen_fa)
+
+
+class Condition(abc.ABC):
+    @abc.abstractmethod
+    def __call__(self, value: fa_or_re) -> bool:
+        pass
+
+
+class IsReg(Condition):
+    def __call__(self, value: fa_or_re) -> bool:
+        return not value.is_fa()
+
+
+class IsFa(Condition):
+    def __call__(self, value: fa_or_re) -> bool:
+        return value.is_fa()
+
+
+class HasNoEps(IsFa):
+    def __call__(self, value: fa_or_re) -> bool:
+        return validate.fa_has_eps(fa.from_dimple(value.as_private_str()))
+
+
+class IsDet(HasNoEps):
+    def __call__(self, value: fa_or_re) -> bool:
+        return validate.fa_is_det(fa.from_dimple(value.as_private_str()))
+
+
+class IsFull(HasNoEps):
+    def __call__(self, value: fa_or_re) -> bool:
+        return validate.fa_is_full(fa.from_dimple(value.as_private_str()), value.letters())
+
+
+@dataclass(frozen=True)
+class command_line_action_base:
+    name: str
+    preconditions: tuple[type[Condition]]
+    postconditions: tuple[type[Condition]]
+    # action: typing.Callable[[fa_or_re], fa_or_re]
+
+
+class command_line_action(command_line_action_base):
+
+    def __new__(cls, *args: typing.Any, **kwargs: typing.Any) -> command_line_action:
+        if len(args) == 1 and len(kwargs) == 0:
+            name = args[0]
+            if isinstance(name, str):
+                if name in command_line_actions:
+                    return command_line_actions[name]
+        return super().__new__(cls)
+    
+    def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
+        print(args, kwargs)
+        super().__init__(*args, **kwargs)
+
+
+command_line_actions = {
+    'reg-to-eps-nfa':       command_line_action(name='reg-to-eps-nfa',      preconditions=(IsReg,),      postconditions=(IsFa,)),
+    'remove-eps':           command_line_action(name='remove-eps',          preconditions=(IsFa,),       postconditions=(HasNoEps,)),
+    'make-deterministic':   command_line_action(name='make-deterministic',  preconditions=(HasNoEps,),   postconditions=(IsDet,)),
+    'make-full':            command_line_action(name='make-full',           preconditions=(IsDet,),      postconditions=(IsFull,)),
+    'minimize':             command_line_action(name='minimize',            preconditions=(IsFull,),     postconditions=(IsFull,)),
+    'invert':               command_line_action(name='invert',              preconditions=(IsFull,),     postconditions=(IsFull,)),
+    'full-dfa-to-reg':      command_line_action(name='full-dfa-to-reg',     preconditions=(IsFull,),     postconditions=(IsReg,)),
+}
+
+# possible_actions = [
+#     'reg-to-eps-nfa', 'remove-eps', 'make-deterministic', 'make-full',
+#     'make-min', 'invert', 'nfa-to-reg'
+# ]
 
 
 def process_args(
@@ -24,43 +146,54 @@ def process_args(
     stdout: typing.IO[str],
     stderr: typing.IO[str],
 ) -> int:
+
     parser = ThrowingArgumentParser(exit_on_error=False)
-    parser.add_argument('--input-mode', choices=['reg', 'fa'], required=True)
-    parser.add_argument('--actions', 
-                        choices=possible_actions,
-                        required=True,
-                        nargs='*') 
+    parser.add_argument(
+        '--actions',
+        choices=[*command_line_actions.values()],
+        required=True,
+        nargs='*',
+        type=command_line_action,
+    )
     parser.add_argument('--letters', required=True)
+
     try:
         args = parser.parse_args(argv[1:])
     except Exception as e:
         print(e, file=stderr)
         return 1
 
-    input_mode = typing.cast(str, args.input_mode)
-    actions = typing.cast(str, args.actions)
+    actions = typing.cast(list[command_line_action], args.actions)
     letters = typing.cast(str, args.letters)
 
-    if input_mode == 'fa': 
-        try:
-            value = fa.json_to_dimple(json.loads(stdin.read()))
-        except Exception as e:
-            print(f'{e!r}', file=stderr)
-            return 1
-    else:
-        value = stdin.read()
+    assert issubclass(IsFull, IsFa)
+
+    for left_action, right_action in zip(actions, actions[1:]):
+
+        for precondition in right_action.preconditions:
+            for postcondition in left_action.postconditions:
+                if issubclass(postcondition, precondition):
+                    break
+            else:
+                assert False
+
+    try:
+        value = fa_or_re.from_public_str(stdin.read())
+    except Exception as e:
+        print(f'{e!r}', file=stderr)
+        return 1
+
+    if actions:
+        for precondition in actions[0].preconditions:
+            assert precondition()(value)
 
     for action in actions:
-        if action not in possible_actions:
-            print(f'Unknown action: {action!r}')
-            return 1
+        for precondition in action.preconditions:
+            assert precondition()(value)
+        value = eval(action.name.replace('-', '_'))(value, letters)
 
-    for action in actions:
-        value = eval(action.replace('-', '_'))(value, letters)
+    print(value.as_public_str())
 
-    value = value[1:]
-
-    print(json.dumps(fa.dimple_to_json(value, letters), indent=4))
     return 0
 
 
@@ -76,35 +209,41 @@ def main(
     ):
         return process_args(argv, stdin, stdout, stderr)
 
+
 def reg_to_eps_nfa(value: str, letters: str) -> str:
     return call_old_main('reg_to_eps_nfa', value, letters)
+
 
 def remove_eps(value: str, letters: str) -> str:
     return call_old_main('remove_eps', value, letters)
 
+
 def make_deterministic(value: str, letters: str) -> str:
     return call_old_main('make_deterministic', value, letters)
+
 
 def make_full(value: str, letters: str) -> str:
     return call_old_main('make_full', value, letters)
 
-def make_min(value: str, letters: str) -> str:
-    return call_old_main('make_min', value, letters)
+
+def minimize(value: str, letters: str) -> str:
+    return call_old_main('minimize', value, letters)
+
 
 def invert(value: str, letters: str) -> str:
     return call_old_main('invert', value, letters)
 
 
 new_commands_to_old_commands = {
-    'reg_to_eps_nfa':     (            'reg',          'eps-non-det-fsm'),
+    'reg_to_eps_nfa':     ('reg',          'eps-non-det-fsm'),
 
     'remove_eps':         ('eps-non-det-fsm',              'non-det-fsm'),
 
-    'make_deterministic': (     'non-det-fsm',                 'det-fsm'),
+    'make_deterministic': ('non-det-fsm',                 'det-fsm'),
 
-    'make_full':          (         'det-fsm',            'full-det-fsm'),
+    'make_full':          ('det-fsm',            'full-det-fsm'),
 
-    'make_min':           (    'full-det-fsm',        'min-full-det-fsm'),
+    'minimize':           ('full-det-fsm',        'min-full-det-fsm'),
 
     'invert':             ('min-full-det-fsm', 'invert-min-full-det-fsm'),
 }
@@ -128,7 +267,7 @@ def call_old_main(action: str, stdin_data: str, letters: str) -> str:
         print(stdout_data)
         print(stderr_data)
     assert rc == 0
-    assert stderr_data == '' 
+    assert stderr_data == ''
     return stdout_data
 
 
@@ -159,7 +298,7 @@ def old_old_main(
         return 1
 
     if len(argv) == 3:
-        [*formats, labels] = [*argv[1:], ''] 
+        [*formats, labels] = [*argv[1:], '']
     else:
         [*formats, labels] = [*argv[1:]]
 
@@ -188,11 +327,11 @@ def old_old_main(
         return 1
 
     try:
-        if formats[0] == 'reg': 
+        if formats[0] == 'reg':
             text = stdin.readline()
-            if text[-1] == '\n': 
+            if text[-1] == '\n':
                 text = text[:-1]
-            if formats[1] == 'reg': 
+            if formats[1] == 'reg':
                 print(text, file=stdout)
                 return 0
             else:
@@ -218,6 +357,6 @@ def old_old_main(
         return 1
 
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
     # exit(old_main(sys.argv, sys.stdin, sys.stdout, sys.stderr))
     exit(main(sys.argv, sys.stdin, sys.stdout, sys.stderr))
