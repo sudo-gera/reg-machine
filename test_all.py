@@ -608,7 +608,7 @@ test_io = pytest.mark.parametrize('arg', io_tests)(test_io)
 
 # seed = 3099010176601051186
 seed = 5239794841096733654
-seed = random.randint(0, 1 << 64 - 1)
+# seed = random.randint(0, 1 << 64 - 1)
 print(f'{seed = }', file=debug)
 rand = random.Random(seed)
 # print(f'{seed = }', file=open('/dev/tty', 'w'))
