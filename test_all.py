@@ -803,10 +803,10 @@ def test_fa_stress_fa_to_re(arg: int) -> None:
                 fa = min_full_dfa
                 res : set[str] = set()
                 for q in range(16):
-                    print(command.fa_or_re.from_private_fa(fa, labels).as_public_str(), file=debug)
+                    # print(command.fa_or_re.from_private_fa(fa, labels).as_public_str(), file=debug)
                     created_re = convert.fa_to_re(fa)
                     res.add(created_re)
-                    print(created_re, file=debug)
+                    # print(created_re, file=debug)
                     fa = convert.ast_to_eps_nfa(convert.regex_to_ast(created_re))
                     fa = convert.make_min(convert.make_full(convert.make_deterministic(convert.remove_eps(fa)), labels))
                 assert len(res) <= 8
