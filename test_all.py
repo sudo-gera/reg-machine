@@ -521,6 +521,15 @@ def get_io_tests() -> list[io_test]:
     )
 
     append_to_tests(
+        ['command.py', '--letters', 'qwer', '--operations', 'minimize'],
+        dfa,
+        '',
+        1,
+        "Input fa_or_re(value_=frozen_fa(states=['1', '2', '3', '4', '5'], letters=['e', 'q', 'r', 'w'], transition_function=[['1', 'q', '2'], ['1', 'e', '3'], ['2', 'w', '4'], ['3', 'r', '5']], start_states=['1'], final_states=['4', '5'])) dit not pass precondition = IsFull() of the operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)).\n",
+        command.main,
+    )
+
+    append_to_tests(
         ['command.py', '--letters', 'qwer', '--operations', 're-to-eps-nfa', 'remove-eps'],
         'q*w+e*r',
         '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "5"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "4",\n        "5"\n    ]\n}\n',

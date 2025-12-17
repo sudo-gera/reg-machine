@@ -30,7 +30,6 @@ def fa_is_det(a: fa.FA) -> bool:
 
 def fa_is_full(a: fa.FA, labels: str) -> bool:
     if not fa_is_det(a):
-        assert False
         return False
     for node in a.start.bfs():
         for label in labels:
