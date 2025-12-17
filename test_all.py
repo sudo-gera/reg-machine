@@ -443,6 +443,15 @@ def get_io_tests() -> list[io_test]:
     )
 
     append_to_tests(
+        ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'remove-eps', 'make-deterministic', 'make-full', 'minimize', 'invert'],
+        'q*w+e*r',
+        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "1",\n            "w",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "2",\n            "q",\n            "3"\n        ],\n        [\n            "3",\n            "q",\n            "3"\n        ],\n        [\n            "3",\n            "w",\n            "3"\n        ],\n        [\n            "4",\n            "q",\n            "3"\n        ],\n        [\n            "4",\n            "w",\n            "3"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "1",\n        "2",\n        "3"\n    ]\n}\n',
+        0,
+        '',
+        command.main,
+    )
+
+    append_to_tests(
         ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'minimize'],
         'q*w+e*r',
         '',

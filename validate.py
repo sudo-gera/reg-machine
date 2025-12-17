@@ -2,6 +2,7 @@ import typing
 import ast
 from copy import deepcopy as cp
 from collections import defaultdict as dd
+from utils import *
 
 import fa
 
@@ -32,6 +33,6 @@ def fa_is_full(a: fa.FA, labels: str) -> bool:
         return False
     for node in a.start.bfs():
         for label in labels:
-            if len(node.next_nodes_by_label[label]) != 1:
+            if len(node.next_nodes_by_label[label]) > len(label):
                 return False
     return True

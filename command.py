@@ -207,7 +207,6 @@ def process_args(
         value = fa_or_re.from_private_str(
             func(value.as_private_str(), letters)[1:], letters)
         for postcondition in operation.postconditions:
-            # print(postcondition, value)
             assert postcondition(value)
 
     print(value.as_public_str())
