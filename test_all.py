@@ -434,6 +434,15 @@ def get_io_tests() -> list[io_test]:
     )
 
     append_to_tests(
+        ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'remove-eps'],
+        '0',
+        '{\n    "states": [\n        "1"\n    ],\n    "letters": [\n        "q",\n        "w"\n    ],\n    "transition_function": [],\n    "start_states": [\n        "1"\n    ],\n    "final_states": []\n}\n',
+        0,
+        '',
+        command.main,
+    )
+
+    append_to_tests(
         ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'minimize'],
         '0',
         '',
