@@ -417,8 +417,8 @@ def get_io_tests() -> list[io_test]:
 
     append_to_tests(
         ['command.py', '--letters', 'qw', '--operations'],
-        '0',
-        '0\n',
+        'q*w+e*r',
+        'q*w+e*r\n',
         0,
         '',
         command.main,
@@ -426,8 +426,8 @@ def get_io_tests() -> list[io_test]:
 
     append_to_tests(
         ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa'],
-        '0',
-        '{\n    "states": [\n        "1"\n    ],\n    "letters": [\n        "q",\n        "w"\n    ],\n    "transition_function": [],\n    "start_states": [\n        "1"\n    ],\n    "final_states": []\n}\n',
+        'q*w+e*r',
+        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5",\n        "6",\n        "7",\n        "8"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "",\n            "3"\n        ],\n        [\n            "2",\n            "",\n            "4"\n        ],\n        [\n            "3",\n            "e",\n            "5"\n        ],\n        [\n            "4",\n            "w",\n            "6"\n        ],\n        [\n            "5",\n            "",\n            "7"\n        ],\n        [\n            "7",\n            "r",\n            "8"\n        ],\n        [\n            "8",\n            "",\n            "6"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "6"\n    ]\n}\n',
         0,
         '',
         command.main,
@@ -435,8 +435,8 @@ def get_io_tests() -> list[io_test]:
 
     append_to_tests(
         ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'remove-eps'],
-        '0',
-        '{\n    "states": [\n        "1"\n    ],\n    "letters": [\n        "q",\n        "w"\n    ],\n    "transition_function": [],\n    "start_states": [\n        "1"\n    ],\n    "final_states": []\n}\n',
+        'q*w+e*r',
+        '{\n    "states": [\n        "1",\n        "2",\n        "3",\n        "4",\n        "5"\n    ],\n    "letters": [\n        "e",\n        "q",\n        "r",\n        "w"\n    ],\n    "transition_function": [\n        [\n            "1",\n            "q",\n            "2"\n        ],\n        [\n            "1",\n            "e",\n            "3"\n        ],\n        [\n            "2",\n            "w",\n            "4"\n        ],\n        [\n            "3",\n            "r",\n            "5"\n        ]\n    ],\n    "start_states": [\n        "1"\n    ],\n    "final_states": [\n        "4",\n        "5"\n    ]\n}\n',
         0,
         '',
         command.main,
@@ -444,7 +444,7 @@ def get_io_tests() -> list[io_test]:
 
     append_to_tests(
         ['command.py', '--letters', 'qw', '--operations', 're-to-eps-nfa', 'minimize'],
-        '0',
+        'q*w+e*r',
         '',
         1,
         "precondition = IsFull() of operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)) is not fulfilled by postconditions of operation = command_line_operation(name='re-to-eps-nfa', preconditions=(IsRE(),), postconditions=(IsFA(),)).\n",
@@ -453,10 +453,10 @@ def get_io_tests() -> list[io_test]:
 
     append_to_tests(
         ['command.py', '--letters', 'qw', '--operations', 'minimize'],
-        '0',
+        'q*w+e*r',
         '',
         1,
-        "Input fa_or_re(value_='0') dit not pass precondition = IsFull() of the operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)).\n",
+        "Input fa_or_re(value_='q*w+e*r') dit not pass precondition = IsFull() of the operation = command_line_operation(name='minimize', preconditions=(IsFull(),), postconditions=(IsFull(),)).\n",
         command.main,
     )
 
