@@ -250,6 +250,17 @@ def process_args(
             )
         )
 
+        if value.is_fa():
+            missing_letters = ''.join([
+                letter
+                for letter in value.letters()
+                if letter not in letters
+            ])
+            if missing_letters:
+                print(
+                    f'FA has letters {missing_letters!r} missing in command line arguments.', file=stderr)
+                return 1
+
         for postcondition in operation.postconditions:
             assert postcondition(value)
 

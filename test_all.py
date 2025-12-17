@@ -613,7 +613,7 @@ print(f'{seed = }', file=debug)
 rand = random.Random(seed)
 # print(f'{seed = }', file=open('/dev/tty', 'w'))
 
-arg_values = [*range(99)]
+arg_values = [*range(9)]
 arg_values = [*range(-len(arg_values), len(arg_values)+1)]
 rand.shuffle(arg_values)
 
@@ -756,113 +756,121 @@ def test_fa_to_re_1() -> None:
     assert new_re == '1'
 
 
-# def test_fa_stress_fa_to_re(arg: int) -> None:
-#     labels = 'qw'
-#     while True:
-#         try:
-#             try:
-#                 r = random_fa(rand, 2, labels)
-#             except RecursionError:
-#                 raise InternalTestError
-#             fa_or_none: fa.FA | None = None
-#             eps_nfa = nfa = dfa = full_dfa = min_full_dfa = same_min_dfa = inverted_full_dfa = inverted_min_dfa = inverted_same_min_dfa = fa_or_none
-#             try:
-#                 z = convert.regex_to_ast(r.regex_for_converting_to_fa)
-#                 eps_nfa = convert.ast_to_eps_nfa(z)
+def test_fa_stress_fa_to_re(arg: int) -> None:
+    labels = 'qw'
+    while True:
+        try:
+            try:
+                r = random_fa(rand, 1, labels)
+            except RecursionError:
+                raise InternalTestError
+            fa_or_none: fa.FA | None = None
+            eps_nfa = nfa = dfa = full_dfa = min_full_dfa = same_min_dfa = inverted_full_dfa = inverted_min_dfa = inverted_same_min_dfa = fa_or_none
+            try:
+                z = convert.regex_to_ast(r.regex_for_converting_to_fa)
+                eps_nfa = convert.ast_to_eps_nfa(z)
 
-#                 nfa = convert.remove_eps(eps_nfa)
-#                 assert not validate.fa_has_eps(nfa)
+                nfa = convert.remove_eps(eps_nfa)
+                assert not validate.fa_has_eps(nfa)
 
-#                 dfa = convert.make_deterministic(nfa)
-#                 assert validate.fa_is_det(dfa)
+                dfa = convert.make_deterministic(nfa)
+                assert validate.fa_is_det(dfa)
 
-#                 full_dfa = convert.make_full(dfa, labels)
-#                 assert validate.fa_is_full(full_dfa, labels)
+                full_dfa = convert.make_full(dfa, labels)
+                assert validate.fa_is_full(full_dfa, labels)
 
-#                 min_full_dfa = convert.make_min(full_dfa)
-#                 assert validate.fa_is_full(min_full_dfa, labels)
+                min_full_dfa = convert.make_min(full_dfa)
+                assert validate.fa_is_full(min_full_dfa, labels)
 
-#                 same_min_dfa = convert.make_min(min_full_dfa)
-#                 assert validate.fa_is_full(same_min_dfa, labels)
-#                 check_equal(min_full_dfa, same_min_dfa)
+                same_min_dfa = convert.make_min(min_full_dfa)
+                assert validate.fa_is_full(same_min_dfa, labels)
+                check_equal(min_full_dfa, same_min_dfa)
 
-#                 inverted_full_dfa = convert.invert_full_fa(full_dfa)
-#                 assert validate.fa_is_full(inverted_full_dfa, labels)
+                inverted_full_dfa = convert.invert_full_fa(full_dfa)
+                assert validate.fa_is_full(inverted_full_dfa, labels)
 
-#                 inverted_min_dfa = convert.invert_full_fa(min_full_dfa)
-#                 assert validate.fa_is_full(inverted_min_dfa, labels)
+                inverted_min_dfa = convert.invert_full_fa(min_full_dfa)
+                assert validate.fa_is_full(inverted_min_dfa, labels)
 
-#                 inverted_same_min_dfa = convert.invert_full_fa(same_min_dfa)
-#                 assert validate.fa_is_full(inverted_same_min_dfa, labels)
-#                 check_equal(inverted_min_dfa, inverted_same_min_dfa)
+                inverted_same_min_dfa = convert.invert_full_fa(same_min_dfa)
+                assert validate.fa_is_full(inverted_same_min_dfa, labels)
+                check_equal(inverted_min_dfa, inverted_same_min_dfa)
 
-#                 for old_fa in [
-#                         eps_nfa, nfa, dfa, full_dfa, min_full_dfa,
-#                         same_min_dfa, inverted_full_dfa,
-#                         inverted_min_dfa, inverted_same_min_dfa
-#                     ]:
-#                     print(command.fa_or_re.from_private_fa(old_fa, labels).as_public_str(), file=debug)
-#                     created_re = convert.fa_to_re(old_fa)
-#                     new_fa = convert.ast_to_eps_nfa(convert.regex_to_ast(created_re))
-#                     print(command.fa_or_re.from_private_fa(new_fa, labels).as_public_str(), file=debug)
-#                     assert command.fa_or_re.from_private_fa(old_fa, labels).as_public_str() == command.fa_or_re.from_private_fa(new_fa, labels).as_public_str()
+                print(file=debug)
+                print(file=debug)
+                print(file=debug)
+                print(file=debug)
+                fa = eps_nfa
+                print(command.fa_or_re.from_private_fa(fa, labels).as_public_str(), file=debug)
+                created_re = convert.fa_to_re(fa)
+                print(created_re, file=debug)
+                fa = convert.ast_to_eps_nfa(convert.regex_to_ast(created_re))
+                fa = convert.make_min(convert.make_full(convert.make_deterministic(convert.remove_eps(fa)), labels))
+                created_re1 = convert.fa_to_re(fa)
+                print(created_re1, file=debug)
+                assert created_re == created_re1
 
-#             except RecursionError:
-#                 for var in [
-#                         eps_nfa, nfa, dfa, full_dfa, min_full_dfa,
-#                         same_min_dfa, inverted_full_dfa,
-#                         inverted_min_dfa, inverted_same_min_dfa
-#                 ][::-1]:
-#                     if var is not None:
-#                         print(graphviz(var), file=debug)
-#                         break
-#                 raise
-#             if r.random_string_that_matches is None:
-#                 raise InternalTestError
-#             assert r.random_string_that_matches is not None
+                # old_fa = convert.make_min(convert.make_full(convert.make_deterministic(convert.remove_eps(old_fa)), labels))
+                # print(command.fa_or_re.from_private_fa(old_fa, labels).as_public_str(), file=debug)
+                # print(command.fa_or_re.from_private_fa(new_fa, labels).as_public_str(), file=debug)
+                # assert command.fa_or_re.from_private_fa(old_fa, labels).as_public_str() == command.fa_or_re.from_private_fa(new_fa, labels).as_public_str()
 
-#             if arg < 0:
-#                 assert can_fa_eval_string(r.fa, r.random_string_that_matches)
-#                 assert can_fa_eval_string(eps_nfa,
-#                                           r.random_string_that_matches)
-#                 assert can_fa_eval_string(nfa, r.random_string_that_matches)
-#                 assert can_fa_eval_string(dfa, r.random_string_that_matches)
-#                 assert can_fa_eval_string(full_dfa,
-#                                           r.random_string_that_matches)
-#                 assert can_fa_eval_string(min_full_dfa,
-#                                           r.random_string_that_matches)
-#             assert can_fa_eval_string(same_min_dfa,
-#                                       r.random_string_that_matches)
-#             if arg < 0:
-#                 assert not can_fa_eval_string(inverted_full_dfa,
-#                                               r.random_string_that_matches)
-#                 assert not can_fa_eval_string(inverted_min_dfa,
-#                                               r.random_string_that_matches)
-#                 assert not can_fa_eval_string(inverted_same_min_dfa,
-#                                               r.random_string_that_matches)
-#             assert re.fullmatch(r.compiled_regex_for_fullmatch,
-#                                 r.random_string_that_matches)
-#             for t in r.random_strings_that_maybe_match:
-#                 if t is not None:
-#                     u = can_fa_eval_string(same_min_dfa, t)
-#                     assert u == bool(re.fullmatch(
-#                         r.compiled_regex_for_fullmatch, t))
-#                     if arg < 0:
-#                         assert can_fa_eval_string(r.fa, t) == u
-#                         assert can_fa_eval_string(eps_nfa, t) == u
-#                         assert can_fa_eval_string(nfa, t) == u
-#                         assert can_fa_eval_string(dfa, t) == u
-#                         assert can_fa_eval_string(full_dfa, t) == u
-#                         assert can_fa_eval_string(min_full_dfa, t) == u
-#                         assert can_fa_eval_string(same_min_dfa, t) == u
-#                         assert can_fa_eval_string(inverted_full_dfa, t) != u
-#                         assert can_fa_eval_string(inverted_min_dfa,
-#                                                   t) != u
-#                         assert can_fa_eval_string(inverted_same_min_dfa,
-#                                                   t) != u
-#             break
-#         except InternalTestError:
-#             continue
+            except RecursionError:
+                for var in [
+                        eps_nfa, nfa, dfa, full_dfa, min_full_dfa,
+                        same_min_dfa, inverted_full_dfa,
+                        inverted_min_dfa, inverted_same_min_dfa
+                ][::-1]:
+                    if var is not None:
+                        print(graphviz(var), file=debug)
+                        break
+                raise
+            if r.random_string_that_matches is None:
+                raise InternalTestError
+            assert r.random_string_that_matches is not None
 
-# test_fa_stress_fa_to_re = pytest.mark.parametrize('arg', arg_values)(test_fa_stress_fa_to_re)
+            if arg < 0:
+                assert can_fa_eval_string(r.fa, r.random_string_that_matches)
+                assert can_fa_eval_string(eps_nfa,
+                                          r.random_string_that_matches)
+                assert can_fa_eval_string(nfa, r.random_string_that_matches)
+                assert can_fa_eval_string(dfa, r.random_string_that_matches)
+                assert can_fa_eval_string(full_dfa,
+                                          r.random_string_that_matches)
+                assert can_fa_eval_string(min_full_dfa,
+                                          r.random_string_that_matches)
+            assert can_fa_eval_string(same_min_dfa,
+                                      r.random_string_that_matches)
+            if arg < 0:
+                assert not can_fa_eval_string(inverted_full_dfa,
+                                              r.random_string_that_matches)
+                assert not can_fa_eval_string(inverted_min_dfa,
+                                              r.random_string_that_matches)
+                assert not can_fa_eval_string(inverted_same_min_dfa,
+                                              r.random_string_that_matches)
+            assert re.fullmatch(r.compiled_regex_for_fullmatch,
+                                r.random_string_that_matches)
+            for t in r.random_strings_that_maybe_match:
+                if t is not None:
+                    u = can_fa_eval_string(same_min_dfa, t)
+                    assert u == bool(re.fullmatch(
+                        r.compiled_regex_for_fullmatch, t))
+                    if arg < 0:
+                        assert can_fa_eval_string(r.fa, t) == u
+                        assert can_fa_eval_string(eps_nfa, t) == u
+                        assert can_fa_eval_string(nfa, t) == u
+                        assert can_fa_eval_string(dfa, t) == u
+                        assert can_fa_eval_string(full_dfa, t) == u
+                        assert can_fa_eval_string(min_full_dfa, t) == u
+                        assert can_fa_eval_string(same_min_dfa, t) == u
+                        assert can_fa_eval_string(inverted_full_dfa, t) != u
+                        assert can_fa_eval_string(inverted_min_dfa,
+                                                  t) != u
+                        assert can_fa_eval_string(inverted_same_min_dfa,
+                                                  t) != u
+            break
+        except InternalTestError:
+            continue
+
+test_fa_stress_fa_to_re = pytest.mark.parametrize('arg', arg_values)(test_fa_stress_fa_to_re)
 

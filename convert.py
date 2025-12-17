@@ -133,6 +133,8 @@ def invert_full_fa(a: fa.FA) -> fa.FA:
 def fa_to_re(a: fa.FA) -> str:
     a = cp(a)
 
+    a = fa.FA() + a
+
     a.the_only_final_if_exists_or_unrelated_node.is_final = True
 
     a.the_only_final_if_exists_or_unrelated_node = fa.Node()
@@ -189,8 +191,10 @@ def fa_to_re(a: fa.FA) -> str:
 
             if q.regex_by_next_node[q] == '0':
                 loop = '1'
+            elif q.regex_by_next_node[q] == '1':
+                loop = '1'
             else:
-                loop = f'({q.regex_by_next_node[q]} ** None)'
+                loop = f'({q.regex_by_next_node[q]}**None)'
 
             for i in nodes - {q}:
                 for j in nodes - {q}:
@@ -216,11 +220,26 @@ def fa_to_re(a: fa.FA) -> str:
                             res = f'({iq}*{loop}*{qj})'
                     else:
                         if iq == loop == '1':
-                            res = f'({ij}+{qj})'
+                            if ij < qj:
+                                res = f'({ij}+{qj})'
+                            elif ij > qj:
+                                res = f'({qj}+{ij})'
+                            else:
+                                res = f'{qj}'
                         elif iq == qj == '1':
-                            res = f'({ij}+{loop})'
+                            if ij < loop:
+                                res = f'({ij}+{loop})'
+                            elif ij > loop:
+                                res = f'({loop}+{ij})'
+                            else:
+                                res = f'{loop}'
                         elif loop == qj == '1':
-                            res = f'({ij}+{iq})'
+                            if ij < iq:
+                                res = f'({ij}+{iq})'
+                            elif ij > iq:
+                                res = f'({iq}+{ij})'
+                            else:
+                                res = f'{iq}'
                         elif iq == '1':
                             res = f'({ij}+{loop}*{qj})'
                         elif loop == '1':
