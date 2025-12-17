@@ -301,7 +301,9 @@ def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
         stdout_data = (
             old_main(
                 ['-', *new_commands_to_old_commands[operation], letters],
-                stdin_data
+                stdin_data,
+                operation,
+                letters,
             )
         )
     null.seek(0)
@@ -312,9 +314,14 @@ def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
 def old_main(
     argv: list[str],
     stdin: str,
+    operation: str,
+    letters: str,
 ) -> str:
 
     [*formats, labels] = [*argv[1:]]
+
+    assert labels == letters
+    assert new_commands_to_old_commands[operation] == tuple(formats)
 
     all_formats: dict[str, typing.Callable[[fa.FA], fa.FA]] = {
         'reg': lambda a: a,
