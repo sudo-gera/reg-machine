@@ -293,33 +293,23 @@ new_commands_to_old_commands = {
 
 
 def call_old_main(operation: str, stdin_data: str, letters: str) -> str:
-    stdin = io.StringIO()
-    stdin.write(stdin_data)
-    stdin.seek(0)
-    stdout = io.StringIO()
     null = io.StringIO()
     with (
             contextlib.redirect_stdout(null),
             contextlib.redirect_stderr(null),
     ):
-        stdout.write(old_main(
-            ['-', *new_commands_to_old_commands[operation], letters],
-            stdin.read()))
+        stdout_data = (
+            old_main(
+                ['-', *new_commands_to_old_commands[operation], letters],
+                stdin_data
+            )
+        )
     null.seek(0)
     assert not null.read()
-    stdout.seek(0)
-    stdout_data = stdout.read()
     return stdout_data
 
 
 def old_main(
-    argv: list[str],
-    stdin: str,
-) -> str:
-    return old_old_main(argv, stdin)
-
-
-def old_old_main(
     argv: list[str],
     stdin: str,
 ) -> str:
