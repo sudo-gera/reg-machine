@@ -67,77 +67,78 @@ def random_fa(
         labels: str,  # allowed letters
 ) -> created_random_fa:
     def _z0() -> created_random_fa:
-        arg = rand.choice([None, '', *list(labels)])
-        return created_random_fa(
-            fa.FA(arg),
-            arg,
-            arg,
-            [rand.choice([None, '', *list(labels)]) for q in range(9)],
-            (
-                '0'
-                if arg is None else
-                '1'
-                if arg == '' else
-                arg
-            ),
-        )
+            arg = rand.choice([None, '', *list(labels)])
+            return created_random_fa(
+                fa=fa.FA(arg),
+                random_string_that_matches=arg,
+                regex_for_fullmatch=arg,
+                random_strings_that_maybe_match=[rand.choice([None, '', *list(labels)]) for q in range(9)],
+                regex_for_converting_to_fa=(
+                    '0'
+                    if arg is None else
+                    '1'
+                    if arg == '' else
+                    arg
+                ),
+            )
     def _z12() -> created_random_fa:
         left = random_fa(rand, depth - 1, labels)
         right = random_fa(rand, depth - 1, labels)
         if left.random_string_that_matches is None:
             return created_random_fa(
-                left.fa + right.fa,
-                right.random_string_that_matches,
-                right.regex_for_fullmatch,
-                right.random_strings_that_maybe_match,
-                f'({left.regex_for_converting_to_fa} + {right.regex_for_converting_to_fa})',
+                fa=left.fa + right.fa,
+                random_string_that_matches=right.random_string_that_matches,
+                regex_for_fullmatch=right.regex_for_fullmatch,
+                random_strings_that_maybe_match=right.random_strings_that_maybe_match,
+                regex_for_converting_to_fa=f'({left.regex_for_converting_to_fa} + {right.regex_for_converting_to_fa})',
             )
-        if right.random_string_that_matches is None:
+        elif right.random_string_that_matches is None:
             return created_random_fa(
-                left.fa + right.fa,
-                left.random_string_that_matches,
-                left.regex_for_fullmatch,
-                left.random_strings_that_maybe_match,
-                f'({left.regex_for_converting_to_fa} + {right.regex_for_converting_to_fa})',
+                fa=left.fa + right.fa,
+                random_string_that_matches=left.random_string_that_matches,
+                regex_for_fullmatch=left.regex_for_fullmatch,
+                random_strings_that_maybe_match=left.random_strings_that_maybe_match,
+                regex_for_converting_to_fa=f'({left.regex_for_converting_to_fa} + {right.regex_for_converting_to_fa})',
             )
-        return created_random_fa(
-            left.fa + right.fa,
-            rand.choice([
-                left.random_string_that_matches,
-                right.random_string_that_matches
-            ]),
-            f'({left.regex_for_fullmatch}|{right.regex_for_fullmatch})',
-            [
-                rand.choice([
-                    left.random_strings_that_maybe_match[q],
-                    right.random_strings_that_maybe_match[q]
-                ]) for q in range(9)
-            ],
-            f'({left.regex_for_converting_to_fa} + {right.regex_for_converting_to_fa})',
-        )
-    def _z3456() -> created_random_fa:
-        left = random_fa(rand, depth - 1, labels)
-        right = random_fa(rand, depth - 1, labels)
-        if left.random_string_that_matches is None or left.regex_for_fullmatch is None or right.random_string_that_matches is None or right.regex_for_fullmatch is None:
+        else:
             return created_random_fa(
-                left.fa * right.fa,
-                None,
-                None,
-                [
+                fa=left.fa + right.fa,
+                random_string_that_matches=rand.choice([
+                    left.random_string_that_matches,
+                    right.random_string_that_matches
+                ]),
+                regex_for_fullmatch=f'({left.regex_for_fullmatch}|{right.regex_for_fullmatch})',
+                random_strings_that_maybe_match=[
                     rand.choice([
                         left.random_strings_that_maybe_match[q],
                         right.random_strings_that_maybe_match[q]
                     ]) for q in range(9)
                 ],
-                f'({left.regex_for_converting_to_fa} * {right.regex_for_converting_to_fa})',
+                regex_for_converting_to_fa=f'({left.regex_for_converting_to_fa} + {right.regex_for_converting_to_fa})',
+            )
+    def _z3456() -> created_random_fa:
+        left = random_fa(rand, depth - 1, labels)
+        right = random_fa(rand, depth - 1, labels)
+        if left.random_string_that_matches is None or left.regex_for_fullmatch is None or right.random_string_that_matches is None or right.regex_for_fullmatch is None:
+            return created_random_fa(
+                fa=left.fa * right.fa,
+                random_string_that_matches=None,
+                regex_for_fullmatch=None,
+                random_strings_that_maybe_match=[
+                    rand.choice([
+                        left.random_strings_that_maybe_match[q],
+                        right.random_strings_that_maybe_match[q]
+                    ]) for q in range(9)
+                ],
+                regex_for_converting_to_fa=f'({left.regex_for_converting_to_fa} * {right.regex_for_converting_to_fa})',
             )
         else:
             return created_random_fa(
-                left.fa * right.fa,
-                left.random_string_that_matches +
+                fa=left.fa * right.fa,
+                random_string_that_matches=left.random_string_that_matches +
                 right.random_string_that_matches,
-                left.regex_for_fullmatch + right.regex_for_fullmatch,
-                [
+                regex_for_fullmatch=left.regex_for_fullmatch + right.regex_for_fullmatch,
+                random_strings_that_maybe_match=[
                     rand.choice([
                         left.random_strings_that_maybe_match[q],
                         right.random_strings_that_maybe_match[q],
@@ -145,50 +146,50 @@ def random_fa(
                         right.random_string_that_matches
                     ]) for q in range(9)
                 ],
-                f'({left.regex_for_converting_to_fa} * {right.regex_for_converting_to_fa})',
+                regex_for_converting_to_fa=f'({left.regex_for_converting_to_fa} * {right.regex_for_converting_to_fa})',
             )
     def _z7() -> created_random_fa:
         right_n = rand.choice([*range(-2, 3)])
         left = random_fa(rand, depth - 1, labels)
         if right_n < 0:
             return created_random_fa(
-                ~left.fa,
-                left.random_string_that_matches * -right_n
+                fa=~left.fa,
+                random_string_that_matches=left.random_string_that_matches * -right_n
                 if left.random_string_that_matches is not None else '',
-                f'({left.regex_for_fullmatch})*'
+                regex_for_fullmatch=f'({left.regex_for_fullmatch})*'
                 if left.regex_for_fullmatch is not None else '',
-                [
+                random_strings_that_maybe_match=[
                     left.random_strings_that_maybe_match[q] * -right_n if
                     left.random_strings_that_maybe_match[q] is not None else ''
                     for q in range(9)
                 ],
-                f'({left.regex_for_converting_to_fa}) ** None',
+                regex_for_converting_to_fa=f'({left.regex_for_converting_to_fa}) ** None',
             )
         elif right_n > 0:
             return created_random_fa(
-                left.fa ** right_n,
-                left.random_string_that_matches * right_n
+                fa=left.fa ** right_n,
+                random_string_that_matches=left.random_string_that_matches * right_n
                 if left.random_string_that_matches is not None else None,
-                left.regex_for_fullmatch *
+                regex_for_fullmatch=left.regex_for_fullmatch *
                 right_n if left.regex_for_fullmatch is not None else None,
-                [
+                random_strings_that_maybe_match=[
                     left.random_strings_that_maybe_match[q] * -right_n if
                     left.random_strings_that_maybe_match[q] is not None else ''
                     for q in range(9)
                 ],
-                f'({left.regex_for_converting_to_fa}) ** {right_n}',
+                regex_for_converting_to_fa=f'({left.regex_for_converting_to_fa}) ** {right_n}',
             )
         else:
             return created_random_fa(
-                left.fa**right_n,
-                '',
-                '',
-                [
+                fa=left.fa**right_n,
+                random_string_that_matches='',
+                regex_for_fullmatch='',
+                random_strings_that_maybe_match=[
                     left.random_strings_that_maybe_match[q] * abs(right_n) if
                     left.random_strings_that_maybe_match[q] is not None else ''
                     for q in range(9)
                 ],
-                f'({left.regex_for_converting_to_fa}) ** {right_n}',
+                regex_for_converting_to_fa=f'({left.regex_for_converting_to_fa}) ** {right_n}',
             )
     n = rand.randint(0, 7)
     n *= bool(depth)
