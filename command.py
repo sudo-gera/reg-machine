@@ -254,22 +254,17 @@ def re_to_eps_nfa(value: str, letters: str) -> str:
     s = convert.regex_to_ast(text)
     a = convert.ast_to_eps_nfa(s)
 
-    a = {
-        're_to_eps_nfa': lambda a: a,
-    }[f0](a)
+    a = (lambda a: a)(a)
 
     return '\n' + fa.fsm_to_dimple(a)
 
 
 def remove_eps(value: str, letters: str) -> str:
-    f0='remove_eps'
 
     text = value
     a = fa.dimple_to_fsm(text)
 
-    a = {
-        'remove_eps': convert.remove_eps,
-    }[f0](a)
+    a=convert.remove_eps(a)
 
     return '\n' + fa.fsm_to_dimple(a)
 
@@ -280,9 +275,7 @@ def make_deterministic(value: str, letters: str) -> str:
     text = value
     a = fa.dimple_to_fsm(text)
 
-    a = {
-        'make_deterministic': convert.make_deterministic,
-    }[f0](a)
+    a = convert.make_deterministic(a)
 
     return '\n' + fa.fsm_to_dimple(a)
 
@@ -293,9 +286,7 @@ def make_full(value: str, letters: str) -> str:
     text = value
     a = fa.dimple_to_fsm(text)
 
-    a = {
-        'make_full': lambda a: convert.make_full(a, letters + letters[0][:0]),
-    }[f0](a)
+    a = (lambda a: convert.make_full(a, letters + letters[0][:0]))(a)
 
     return '\n' + fa.fsm_to_dimple(a)
 
@@ -306,9 +297,7 @@ def minimize(value: str, letters: str) -> str:
     text = value
     a = fa.dimple_to_fsm(text)
 
-    a = {
-        'minimize': convert.make_min,
-    }[f0](a)
+    a = convert.make_min(a)
 
     return '\n' + fa.fsm_to_dimple(a)
 
@@ -319,30 +308,14 @@ def invert(value: str, letters: str) -> str:
     text = value
     a = fa.dimple_to_fsm(text)
 
-    a = {
-        'invert': convert.invert_full_fa,
-    }[f0](a)
+    a = convert.invert_full_fa(a)
 
     return '\n' + fa.fsm_to_dimple(a)
 
 
 def full_dfa_to_re(value: str, letters: str) -> str:
-    f0='full_dfa_to_re'
-
-    text = value
-    a = fa.dimple_to_fsm(text)
-
-    a = {
-        're_to_eps_nfa': lambda a: a,
-        'remove_eps': convert.remove_eps,
-        'make_deterministic': convert.make_deterministic,
-        'make_full': lambda a: convert.make_full(a, letters + letters[0][:0]),
-        'minimize': convert.make_min,
-        'invert': convert.invert_full_fa,
-        'invert-full-det-fsm': lambda a: a,
-    }[f0](a)
-
-    return '\n' + fa.fsm_to_dimple(a)
+    ...
+    return ''
 
 
 
