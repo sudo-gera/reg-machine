@@ -344,8 +344,10 @@ def old_main(
         a = fa.dimple_to_fsm(text)
 
     assert len(range(*format_indexes)) == 1
+
     for num in range(*format_indexes):
         func = [*all_formats.values()][num]
+        assert func is all_formats[new_commands_to_old_commands[operation][0]]
         a = func(a)
 
     return '\n' + fa.fsm_to_dimple(a)
